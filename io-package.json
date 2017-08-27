@@ -25,9 +25,9 @@
         "mode": "daemon",
         "icon": "ip-webcam.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.template/master/admin/template.png",
+        "extIcon": "https://raw.githubusercontent.com/MeisterTR/ioBroker.ip-webcam/master/admin/ip-webcam.png",
         "keywords": ["template", "vis", "GUI", "graphical", "scada"],
-        "readme": "https://github.com/ioBroker/ioBroker.template/blob/master/README.md",
+        "readme": "https://github.com/ioBroker/MeisterTR.ip-webcam/blob/master/README.md",
         "loglevel": "info",
         "type": "general",
         "restartAdapters": ["vis"]

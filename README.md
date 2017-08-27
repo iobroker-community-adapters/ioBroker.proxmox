@@ -1,4 +1,4 @@
-![Logo](admin/template.png)
+![Logo](admin/ip-webcam.png)
 # ioBroker.template
 =================
 
