@@ -1,0 +1,42 @@
+{
+    "common": {
+        "name": "ip-webcam",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial adapter",
+                "de": "Initiale Version",
+                "ru": "Первоначальный адаптер",
+                "pt": "Versão inicial",
+                "fr": "Version initiale",
+                "nl": "Eerste release"
+            }
+        },
+        "title": "IP Webcam Adapter",
+        "desc": {
+            "en": "control and use IP Webcam sensordata",
+            "de": "Steuern und einbinden der IP Webcam Sensordaten",
+            "ru": "???",
+            "pt": "???",
+            "fr": "???",
+            "nl": "???"
+        },
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "ip-webcam.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.template/master/admin/template.png",
+        "keywords": ["template", "vis", "GUI", "graphical", "scada"],
+        "readme": "https://github.com/ioBroker/ioBroker.template/blob/master/README.md",
+        "loglevel": "info",
+        "type": "general",
+        "restartAdapters": ["vis"]
+    },
+    "native": {
+        "test1": true,
+        "test2": 42
+    },
+    "objects": [
+
+    ]
+}
