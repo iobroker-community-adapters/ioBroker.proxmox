@@ -1,4 +1,4 @@
-![Logo](admin/ip-webcam.png)
+![Logo](admin/template.png)
 # ioBroker.template
 =================
 
@@ -6,9 +6,9 @@ This adapter is a template for the creation of an ioBroker adapter. You do not n
 
 It includes both code running within iobroker and as vis widget. If you only plan to create a vis widget then you should use the [iobroker.vis-template](https://github.com/ioBroker/ioBroker.vis-template) instead.
 
-##Steps 
+## Steps 
 1. download and unpack this packet from github ```https://github.com/ioBroker/ioBroker.template/archive/master.zip```
-  or clone git repository ```git clone https://github.com/ioBroker/ioBroker.template.git```
+  or clone git repository ```git clone --depth=1 https://github.com/ioBroker/ioBroker.template.git```
 
 2. download required npm packets. Write in ioBroker.template directory:
 
@@ -16,13 +16,13 @@ It includes both code running within iobroker and as vis widget. If you only pla
   
 3. set name of this template. Call
   
-  ```grunt rename --name=mynewname --email=email@mail.com --author="Author Name"```
+  ```gulp rename --name mynewname --email email@mail.com --author "Author Name"```
   
   *mynewname* must be **lower** case and with no spaces.
 
-  If grunt is not available, install grunt globally:
+  If gulp is not available, install gulp globally:
   
-  ```npm install -g grunt-cli```
+  ```npm install -g gulp-cli```
  
 4. rename directory from *ioBroker.template* (can be *ioBroker.template-master*) to *iobroker.mynewname*
 
@@ -52,21 +52,29 @@ It includes both code running within iobroker and as vis widget. If you only pla
   
 8. share it with the community
 
+## Requirements
+* your github repository must have name "ioBroker.<adaptername>". **B** is capital in "ioBroker", but in the package.json the *name* must be low case, because npm does not allow upper case letters.
+* *title* in io-package.json (common) is simple short name of adapter in english. *titleLang* is object that consist short names in many languages. *Lang* ist not german Länge, but english LANGuages.
+* Do not use in the title the words "ioBroker" or "Adapter". It is clear anyway, that it is adapter for ioBroker.   
+
 ## Changelog
 
-### 0.5.0
-  (vegetto) include vis widget
+### 0.6.0 (2017.01.02)
+* (bluefox) Support of admin3
 
-#### 0.4.0
+### 0.5.0
+* (vegetto) include vis widget
+
+### 0.4.0
 * (bluefox) fix errors with grunt
 
-#### 0.2.0
+### 0.2.0
 * (bluefox) initial release
 
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2017 @@Author@@ <@@email@@>
+Copyright (c) 2018 @@Author@@ <@@email@@>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

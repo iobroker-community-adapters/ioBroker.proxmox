@@ -1,22 +1,22 @@
 {
-  "name": "ip-webcam",
-  "version": "0.0.1",
-  "description": "Control and use IP Webcam sensordata",
+  "name": "iobroker.template",
+  "version": "0.6.0",
+  "description": "ioBroker template Adapter",
   "author": {
     "name": "@@Author@@",
     "email": "@@email@@"
   },
   "contributors": [
     {
-      "name": "MeisterTR",
-      "email": "meistertr.smarthome@gmail.com"
+      "name": "@@Author@@",
+      "email": "@@email@@"
     }
   ],
-  "homepage": "https://github.com/MeisterTR/iobroker.ip-webcam",
+  "homepage": "https://github.com/ioBroker/ioBroker.template",
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "IP Webcam",
+    "template",
     "Smart Home",
     "home automation"
   ],
@@ -24,23 +24,18 @@
     "type": "git",
     "url": "https://github.com/ioBroker/ioBroker.template"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-replace": "^0.9.3",
-    "grunt-contrib-jshint": "^0.11.2",
-    "grunt-jscs": "^2.0.0",
-    "grunt-http": "^1.6.0",
-    "mocha": "^2.3.4",
-    "chai": "^3.4.1"
+    "gulp": "^3.9.1",
+    "mocha": "^4.1.0",
+    "chai": "^4.1.2"
   },
   "main": "main.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha"
+    "test": "node node_modules/mocha/bin/mocha --exit"
   },
   "bugs": {
-    "url": "https://github.com/MeisterTR/ioBroker.ip-webcam/issues"
+    "url": "https://github.com/ioBroker/ioBroker.template/issues"
   },
   "readmeFilename": "README.md"
 }
