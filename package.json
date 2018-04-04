@@ -1,5 +1,5 @@
 {
-  "name": "iobroker.template",
+  "name": "iobroker.proxmox",
   "version": "0.0.1",
   "description": "ioBroker Proxmox Adapter",
   "author": {
