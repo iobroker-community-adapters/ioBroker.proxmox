@@ -1,8 +1,19 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "news": {
+      "0.0.2": {
+        "en": "first running version",
+        "de": "erste laufende Version",
+        "ru": "первая версия",
+        "pt": "primeira versão em execução",
+        "nl": "eerste versie",
+        "fr": "première version en cours",
+        "it": "prima versione funzionante",
+        "es": "primera versión ejecutiva",
+        "pl": "pierwsza działająca wersja"
+      },
       "0.0.1": {
         "en": "initial adapter",
         "de": "Initiale Version",
