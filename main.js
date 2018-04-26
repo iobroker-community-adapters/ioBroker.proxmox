@@ -1,6 +1,6 @@
 
 'use strict';
- 
+
 // you have to require the utils module and call adapter function
 var utils = require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = new utils.Adapter('proxmox');
@@ -68,7 +68,28 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-    main();
+
+    proxmox = new ProxmoxGet(adapter);
+
+    //check Intervall 
+    adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
+
+    if (adapter.config.param_requestInterval < 5) {
+        adapter.log.info('Intervall <5, set to 5');
+        adapter.config.param_requestInterval = 5;
+    }
+
+    proxmox._getTicket(function (result) {
+        if (result === "200" || result === 200) {
+            main();
+            adapter.setState('info.connection', true, true);
+        }
+        else {
+            adapter.setState('info.connection', false, true);
+        }
+    });
+
+    
 });
 
 function main() {
@@ -99,7 +120,8 @@ function main() {
 
 
     sendRequest();
-    requestInterval = setInterval(sendRequest, adapter.config.param_requestInterval);
+    // *1000 convert sek in MS.
+    requestInterval = setInterval(sendRequest, adapter.config.param_requestInterval * 1000);
 
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');
@@ -236,14 +258,14 @@ function _setNodes(devices, callback) {
 
 
         adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
-        adapter.setState(sid + '.cpu_max', element.maxcpu,true);
+        adapter.setState(sid + '.cpu_max', element.maxcpu, true);
 
         proxmox.nodeStatus(element.node, function (data) {
 
             adapter.log.debug("Request states for node " + element.node);
 
             var node_vals = data.data;
-            adapter.setState('blaubeere', JSON.stringify(data),true);
+            adapter.setState('blaubeere', JSON.stringify(data), true);
 
             adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
@@ -282,12 +304,14 @@ function _setVM(node, callback) {
             for (var key in obj) {
                 var value = obj[key];
                 adapter.log.debug("new state: " + key + ": " + value);
-
+                if (key === "mem") {
+                    adapter.setState(sid + '.' + 'mem_lev', p(obj.mem, obj.maxmem), true);
+                }
                 if (key === "mem" || key === "netin" || key === "balloon_min" || key === "maxdisk" || key === "netout" || key === "maxmem") {
-                    adapter.setState(sid +'.'+ key, BtoMb(value),true);
+                    adapter.setState(sid + '.' + key, BtoMb(value), true);
                 }
                 else if (key === "uptime") {
-                    adapter.setState(sid + '.' +  key, value,true);
+                    adapter.setState(sid + '.' + key, value, true);
                 }
                 else if (key === "cpu") {
                     adapter.setState(sid + '.' + key, parseInt(value * 10000) / 100, true);
@@ -299,8 +323,8 @@ function _setVM(node, callback) {
             }
             if (i === qemus.length - 1) {
                 adapter.setState('info.connection', true, true);
-                
-            } 
+
+            }
         }
 
         //callback
@@ -339,6 +363,10 @@ function _createVM(node, callback) {
                 var value = obj[key];
                 adapter.log.debug("new state: " + key + ": " + value);
 
+                if (key === "mem") {
+                    _createState(sid, 'mem_lev', 'level', p(obj.mem, obj.maxmen));
+                }
+
                 if (key === "mem" || key === "netin" || key === "balloon_min" || key === "maxdisk" || key === "netout" || key === "maxmem") {
                     _createState(sid, key, 'size', BtoMb(value));
                 }
@@ -356,7 +384,7 @@ function _createVM(node, callback) {
             if (i === qemus.length - 1) {
                 adapter.setState('info.connection', true, true);
                 finish = true;
-            } 
+            }
         }
 
         //callback
@@ -450,7 +478,7 @@ function _createState(sid, name, type, val, callback) {
 
 function BtoMb(val) {
 
-    return Math.round(val / 1000000)
+    return Math.round(val / 1048576)
 }
 
 function p(vala, valb) {

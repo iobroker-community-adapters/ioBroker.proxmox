@@ -54,5 +54,16 @@ systemDictionary = {
         "it": "indirizzo IP",
         "es": "dirección IP",
         "pl": "adres IP"
+    },
+    "request Intervall in sec.": {
+        "en": "request Intervall in sec.",
+        "de": "Anfrage Intervall in Sek.",
+        "ru": "запрос Интервал в секундах.",
+        "pt": "solicitar intervalo em seg.",
+        "nl": "verzoek Interval in sec.",
+        "fr": "demande Intervalle en secondes",
+        "it": "richiesta Intervallo in sec.",
+        "es": "Intervalo de solicitud en sec.",
+        "pl": "zapytanie Odstęp w sek."
     }
 };
