@@ -69,28 +69,31 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
+    if (adapter.config.ip !== "192.000.000.000") {
 
-    proxmox = new ProxmoxGet(adapter);
+        proxmox = new ProxmoxGet(adapter);
 
-    //check Intervall 
-    adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
+        //check Intervall 
+        adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
 
-    if (adapter.config.param_requestInterval < 5) {
-        adapter.log.info('Intervall <5, set to 5');
-        adapter.config.param_requestInterval = 5;
+        if (adapter.config.param_requestInterval < 5) {
+            adapter.log.info('Intervall <5, set to 5');
+            adapter.config.param_requestInterval = 5;
+        }
+
+        proxmox._getTicket(function (result) {
+            if (result === "200" || result === 200) {
+                main();
+                adapter.setState('info.connection', true, true);
+            }
+            else {
+                adapter.setState('info.connection', false, true);
+            }
+        });
     }
 
-    proxmox._getTicket(function (result) {
-        if (result === "200" || result === 200) {
-            main();
-            adapter.setState('info.connection', true, true);
-        }
-        else {
-            adapter.setState('info.connection', false, true);
-        }
-    });
 
-    
+
 });
 
 function main() {
