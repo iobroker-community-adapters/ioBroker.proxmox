@@ -18,7 +18,7 @@ this adapter read out the data from your proxmox installation
 ## Requirements
 
 ## Changelog
-### 0.0.4 (29.04.2018)
+### 0.0.5 (29.04.2018)
 * (MeisterTR) Testing fixes, now ready for node4
 ### 0.0.3 (26.04.2018)
 * (MeisterTR) first running version

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.proxmox",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "ioBroker Proxmox Adapter",
   "author": {
     "name": "MeisterTR",
@@ -24,7 +24,9 @@
     "type": "git",
     "url": "https://github.com/MeisterTR/ioBroker.proxmox"
   },
-  "dependencies": {},
+  "dependencies": {
+    "request": "^2.85.0"
+  },
   "devDependencies": {
     "gulp": "^3.9.1",
     "mocha": "^4.1.0",
