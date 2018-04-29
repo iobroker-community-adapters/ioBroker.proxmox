@@ -1,10 +1,10 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "news": {
-      "0.0.3": {
-        "en": "bugfixes",
+      "0.0.4": {
+        "en": "bugfixes testing fixes",
         "de": "Fehlerbehebung",
         "ru": "исправление ошибок",
         "pt": "correções de bugs",
