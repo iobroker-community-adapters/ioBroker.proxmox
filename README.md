@@ -14,10 +14,13 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/Meister
 
 this adapter read out the data from your proxmox installation
 
+
 ## Steps 
 ## Requirements
 
 ## Changelog
+### 0.0.5 (02.05.2018)
+* (MeisterTR) fixed worong ram
 ### 0.0.5 (29.04.2018)
 * (MeisterTR) Testing fixes, now ready for node4
 ### 0.0.3 (26.04.2018)

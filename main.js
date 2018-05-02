@@ -9,6 +9,7 @@ var ProxmoxGet = require(__dirname + '/lib/proxmox');
 
 var proxmox;
 var devices = [];
+var devicesOv = [];
 var objects = {};
 var connected = false;
 var requestInterval;
@@ -245,6 +246,7 @@ function _createNodes(devices, callback) {
             if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
 
             _createVM(element.node, callback)
+
         });
 
 
@@ -297,36 +299,44 @@ function _setNodes(devices, callback) {
 
 
 function _setVM(node, callback) {
-    proxmox.qemuStatus(node, function (data) {
-        var qemus = data.data;
+    proxmox.all(function (data) {
+        var qemu = data.data;
 
-        for (var i = 0; i < qemus.length; i++) {
+        for (var i = 0; i < qemu.length; i++) {
 
-            var sid = adapter.namespace + '.' + "qemu" + '_' + qemus[i].name;
+            if (qemu[i].type === "qemu") {
+                proxmox.qemuStatus2(qemu[i].node, qemu[i].vmid, function (data) {
+                    var aktQemu = data.data;
+                    var sid = adapter.namespace + '.' + "qemu" + '_' + aktQemu.name;
 
-            var obj = qemus[i];
-            for (var key in obj) {
-                var value = obj[key];
-                adapter.log.debug("new state: " + key + ": " + value);
-                if (key === "mem") {
-                    adapter.setState(sid + '.' + 'mem_lev', p(obj.mem, obj.maxmem), true);
-                }
-                if (key === "mem" || key === "netin" || key === "balloon_min" || key === "maxdisk" || key === "netout" || key === "maxmem") {
-                    adapter.setState(sid + '.' + key, BtoMb(value), true);
-                }
-                else if (key === "uptime") {
-                    adapter.setState(sid + '.' + key, value, true);
-                }
-                else if (key === "cpu") {
-                    adapter.setState(sid + '.' + key, parseInt(value * 10000) / 100, true);
-                }
-                else {
+                    for (var key in aktQemu) {
+                        var value = aktQemu[key];
+                        adapter.log.debug("new state: " + key + ": " + value);
 
-                    adapter.setState(sid + '.' + key, value, true);
-                }
-            }
-            if (i === qemus.length - 1) {
-                adapter.setState('info.connection', true, true);
+                        if (key === "mem") {
+                            adapter.setState(sid + '.' + 'mem_lev', p(aktQemu.mem, aktQemu.maxmem), true);
+                        }
+
+                        if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite") {
+                            adapter.setState(sid + '.' + key, BtoMb(value), true);
+                        }
+                        else if (key === "uptime") {
+                            adapter.setState(sid + '.' + key, value, true);
+                        }
+                        else if (key === "netin" || key === "netout") {
+                            adapter.setState(sid + '.' + key, value, true);
+                        }
+
+                        else if (key === "cpu") {
+                            adapter.setState(sid + '.' + key, parseInt(value * 10000) / 100, true);
+                        }
+                        else if (key === "pid" || key === "status" || key === "cpus") {
+
+                            adapter.setState(sid + '.' + key, value, true);
+                        }
+                    }
+
+                });
 
             }
         }
@@ -339,53 +349,64 @@ function _setVM(node, callback) {
 
 
 function _createVM(node, callback) {
-    proxmox.qemuStatus(node, function (data) {
-        var qemus = data.data;
+    proxmox.all(function (data) {
+        var qemu = data.data;
 
-        for (var i = 0; i < qemus.length; i++) {
+        for (var i = 0; i < qemu.length; i++) {
 
-            adapter.log.debug("new quemu: " + qemus[i].name);
+            if (qemu[i].type === "qemu") {
+                proxmox.qemuStatus2(qemu[i].node, qemu[i].vmid, function (data) {
 
-            var sid = adapter.namespace + '.' + "qemu" + '_' + qemus[i].name;
-            if (!objects[sid]) {
-                adapter.setObjectNotExists(sid, {
-                    type: 'channel',
-                    common: {
-                        name: qemus[i].name,
+                    var aktQemu = data.data;
 
-                    },
-                    native: {
+                    adapter.log.debug("new quemu: " + aktQemu.name);
 
-                        type: "qemu"
+                    var sid = adapter.namespace + '.' + "qemu" + '_' + aktQemu.name;
+                    if (!objects[sid]) {
+                        adapter.setObjectNotExists(sid, {
+                            type: 'channel',
+                            common: {
+                                name: aktQemu.name,
+
+                            },
+                            native: {
+
+                                type: "qemu"
+                            }
+                        });
+
                     }
+                    for (var key in aktQemu) {
+                        var value = aktQemu[key];
+                        adapter.log.debug("new state: " + key + ": " + value);
+
+                        if (key === "mem") {
+                            _createState(sid, 'mem_lev', 'level', p(aktQemu.mem, aktQemu.maxmen));
+                        }
+
+                        if (key === "mem"  || key === "balloon_min" || key === "maxdisk"  || key === "maxmem" || key === "diskwrite") {
+                            _createState(sid, key, 'size', BtoMb(value));
+                        }
+                        else if (key === "uptime") {
+                            _createState(sid, key, 'time', value);
+                        }
+                        else if (  key === "netin"|| key === "netout") {
+                            _createState(sid, key, 'sizeb', value);
+                        }
+                        else if (key === "cpu") {
+                            _createState(sid, key, 'level', parseInt(value * 10000) / 100);
+                        }
+                        else if (key === "pid" || key === "status" || key === "cpus") {
+
+                            _createState(sid, key, 'default_num', value);
+                        }
+                    }
+
+
                 });
 
             }
-
-            var obj = qemus[i];
-            for (var key in obj) {
-                var value = obj[key];
-                adapter.log.debug("new state: " + key + ": " + value);
-
-                if (key === "mem") {
-                    _createState(sid, 'mem_lev', 'level', p(obj.mem, obj.maxmen));
-                }
-
-                if (key === "mem" || key === "netin" || key === "balloon_min" || key === "maxdisk" || key === "netout" || key === "maxmem") {
-                    _createState(sid, key, 'size', BtoMb(value));
-                }
-                else if (key === "uptime") {
-                    _createState(sid, key, 'time', value);
-                }
-                else if (key === "cpu") {
-                    _createState(sid, key, 'level', parseInt(value * 10000) / 100);
-                }
-                else {
-
-                    _createState(sid, key, 'default_num', value);
-                }
-            }
-            if (i === qemus.length - 1) {
+            if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
                 finish = true;
             }
@@ -396,6 +417,7 @@ function _createVM(node, callback) {
     });
 
 }
+
 function readObjects(callback) {
     adapter.getForeignObjects(adapter.namespace + ".*", 'channel', function (err, list) {
         if (err) {
@@ -439,6 +461,21 @@ function _createState(sid, name, type, val, callback) {
                     read: true,
                     type: 'number',
                     unit: 'Mb'
+                },
+                type: 'state',
+                native: {}
+            }, adapter.setState(sid + '.' + name, val, true));
+
+            break;
+        case 'sizeb':
+            adapter.setObjectNotExists(sid + '.' + name, {
+                common: {
+                    name: name,
+                    role: 'indicator.size',
+                    write: false,
+                    read: true,
+                    type: 'number',
+                    unit: 'byte'
                 },
                 type: 'state',
                 native: {}
