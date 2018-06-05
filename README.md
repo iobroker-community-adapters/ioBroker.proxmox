@@ -4,7 +4,7 @@
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
-[![bitHound Overall Score](https://www.bithound.io/github/MeisterTR/ioBroker.proxmox/badges/score.svg)](https://www.bithound.io/github/MeisterTR/iobroker.proxmox)
+
 
 [![NPM](https://nodei.co/npm/iobroker.proxmox.png?downloads=true)](https://nodei.co/npm/iobroker.proxmox/)
 
