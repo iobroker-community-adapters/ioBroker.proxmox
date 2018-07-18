@@ -82,7 +82,7 @@
     "keywords": [ "template", "vis", "GUI", "graphical", "scada" ],
     "readme": "https://github.com/MeiserTR/ioBroker.proxmox/blob/master/README.md",
     "loglevel": "info",
-    "type": "general",
+    "type": "infrastructure",
     "restartAdapters": [ "vis" ]
   },
   "native": {
