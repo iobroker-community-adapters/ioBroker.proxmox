@@ -50,7 +50,7 @@ adapter.on('stateChange', function (id, state) {
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
-        adapter.log.info('ack is not set!');
+        //adapter.log.info('ack is not set!');
     }
 });
 
@@ -113,15 +113,6 @@ function main() {
 
     readObjects(_getNodes());
 
-    adapter.setObject('blaubeere', {
-        type: 'state',
-        common: {
-            name: 'testVariable',
-            type: 'string',
-            role: 'indicator'
-        },
-        native: {}
-    });
 
 
     sendRequest();
@@ -228,7 +219,6 @@ function _createNodes(devices, callback) {
             adapter.log.debug("Request states for node " + element.node);
 
             var node_vals = data.data;
-            adapter.setState('blaubeere', JSON.stringify(data));
             if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
             if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
@@ -271,7 +261,6 @@ function _setNodes(devices, callback) {
             adapter.log.debug("Request states for node " + element.node);
 
             var node_vals = data.data;
-            adapter.setState('blaubeere', JSON.stringify(data), true);
 
             adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)

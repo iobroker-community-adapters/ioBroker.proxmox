@@ -19,6 +19,9 @@ this adapter read out the data from your proxmox installation
 ## Requirements
 
 ## Changelog
+### 0.0.5 (25.09.2018)
+* (MeisterTR) add encrypted password
+* (MeisterTR) cleaning up
 ### 0.0.5 (02.05.2018)
 * (MeisterTR) fixed worong ram
 ### 0.0.5 (29.04.2018)
