@@ -1,18 +1,18 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "news": {
-      "0.1.1": {
-        "en": "cleanup, added encrypted password",
-        "de": "Bereinigung, hinzugefügtes verschlüsseltes Passwort",
-        "ru": "очистка, добавленный зашифрованный пароль",
-        "pt": "limpeza, adicionado senha criptografada",
-        "nl": "opruimen, toegevoegd versleuteld wachtwoord",
-        "fr": "nettoyage, ajout d'un mot de passe crypté",
-        "it": "pulizia, aggiunta password crittografata",
-        "es": "limpieza, contraseña cifrada añadida",
-        "pl": "porządki, dodane zaszyfrowane hasło"
+      "0.2.0": {
+        "en": "added container",
+        "de": "Container hinzugefügt",
+        "ru": "добавленный контейнер",
+        "pt": "recipiente adicionado",
+        "nl": "container toegevoegd",
+        "fr": "conteneur ajouté",
+        "it": "contenitore aggiunto",
+        "es": "contenedor agregado",
+        "pl": "dodany pojemnik"
       },
       "0.0.2": {
         "en": "first running version",
