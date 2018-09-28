@@ -70,31 +70,45 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-    if (adapter.config.ip !== "192.000.000.000") {
-
-        proxmox = new ProxmoxGet(adapter);
-
-        //check Intervall 
-        adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
-
-        if (adapter.config.param_requestInterval < 5) {
-            adapter.log.info('Intervall <5, set to 5');
-            adapter.config.param_requestInterval = 5;
+    adapter.getForeignObject('system.config', (err, obj) => {
+        if (obj && obj.native && obj.native.secret) {
+            //noinspection JSUnresolvedVariable
+            adapter.config.pwd = decrypt(obj.native.secret, adapter.config.pwd);
+        } else {
+            //noinspection JSUnresolvedVariable
+            adapter.config.pwd = decrypt('Zgfr56gFe87jJOM', adapter.config.pwd);
         }
 
-        proxmox._getTicket(function (result) {
-            if (result === "200" || result === 200) {
-                main();
-                adapter.setState('info.connection', true, true);
-            } else {
-                adapter.setState('info.connection', false, true);
+        if (adapter.config.ip !== "192.000.000.000") {
+
+            proxmox = new ProxmoxGet(adapter);
+    
+            //check Intervall 
+            adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
+    
+            if (adapter.config.param_requestInterval < 5) {
+                adapter.log.info('Intervall <5, set to 5');
+                adapter.config.param_requestInterval = 5;
             }
-        });
-    }
-
-
-
+    
+            proxmox._getTicket(function (result) {
+                if (result === "200" || result === 200) {
+                    main();
+                    adapter.setState('info.connection', true, true);
+                } else {
+                    adapter.setState('info.connection', false, true);
+                }
+            });
+        }
+    });
 });
+function decrypt(key, value) {
+    let result = '';
+    for (let i = 0; i < value.length; ++i) {
+        result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+    }
+    return result;
+}
 
 function main() {
 
@@ -159,7 +173,7 @@ function _getNodes(callback) {
 
         devices = data.data;
         _createNodes(data.data, callback);
-        adapter.log.warn("Devices: " + JSON.stringify(data));
+        adapter.log.debug("Devices: " + JSON.stringify(data));
     });
 
 
@@ -277,6 +291,8 @@ function _setNodes(devices, callback) {
 
 
 function _setVM(node, callback) {
+    var sid='';
+
     proxmox.all(function (data) {
         var qemu = data.data;
 
@@ -287,32 +303,29 @@ function _setVM(node, callback) {
 
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
                     var aktQemu = data.data;
-                    var sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
+                    sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
-                    for (var key in aktQemu) {
-                        var value = aktQemu[key];
-                        adapter.log.debug("new state: " + key + ": " + value);
-
-                        if (key === "mem") {
-                            adapter.setState(sid + '.' + 'mem_lev', p(aktQemu.mem, aktQemu.maxmem), true);
-                        }
-
-                        if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite") {
-                            adapter.setState(sid + '.' + key, BtoMb(value), true);
-                        } else if (key === "uptime") {
-                            adapter.setState(sid + '.' + key, value, true);
-                        } else if (key === "netin" || key === "netout") {
-                            adapter.setState(sid + '.' + key, value, true);
-                        } else if (key === "cpu") {
-                            adapter.setState(sid + '.' + key, parseInt(value * 10000) / 100, true);
-                        } else if (key === "pid" || key === "status" || key === "cpus") {
-
-                            adapter.setState(sid + '.' + key, value, true);
-                        }
-                    }
+                    findState(sid, aktQemu, (path, name, type, value) => {
+                        adapter.setState(path + '.' + name, value, true);
+                    })
 
                 });
 
+            }
+            else if (qemu[i].type === "storage") {
+                let type = qemu[i].type;
+
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
+                    var aktQemu = data.data;
+
+                    sid = adapter.namespace + '.' + type + '_' + name;
+                    adapter.log.debug("storage reload: " + name);
+
+                    findState(sid, aktQemu, (path, name, type, value) => {
+                        //adapter.log.warn(path + name + value)
+                        adapter.setState(path + '.' + name, value, true);
+                    })
+                });
             }
         }
 
@@ -324,6 +337,8 @@ function _setVM(node, callback) {
 
 
 function _createVM(node, callback) {
+    let sid = '';
+
     proxmox.all(function (data) {
         var qemu = data.data;
 
@@ -335,15 +350,15 @@ function _createVM(node, callback) {
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
                     var aktQemu = data.data;
+                    sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
                     adapter.log.debug("new " + type + ": " + aktQemu.name);
 
-                    var sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
                     if (!objects[sid]) {
                         adapter.setObjectNotExists(sid, {
                             type: 'channel',
                             common: {
-                                name: aktQemu.name,
+                                name: aktQemu.name
 
                             },
                             native: {
@@ -353,32 +368,36 @@ function _createVM(node, callback) {
                         });
 
                     }
-                    for (var key in aktQemu) {
-                        var value = aktQemu[key];
-                        adapter.log.debug("new state: " + key + ": " + value);
-
-                        if (key === "mem") {
-                            _createState(sid, 'mem_lev', 'level', p(aktQemu.mem, aktQemu.maxmen));
-                        }
-
-                        if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite") {
-                            _createState(sid, key, 'size', BtoMb(value));
-                        } else if (key === "uptime") {
-                            _createState(sid, key, 'time', value);
-                        } else if (key === "netin" || key === "netout") {
-                            _createState(sid, key, 'sizeb', value);
-                        } else if (key === "cpu") {
-                            _createState(sid, key, 'level', parseInt(value * 10000) / 100);
-                        } else if (key === "pid" || key === "status" || key === "cpus") {
-
-                            _createState(sid, key, 'default_num', value);
-                        }
-                    }
-
-
+                    findState(sid, aktQemu, (path, name, type, value) => {
+                        _createState(path, name, type, value);
+                    })
                 });
 
+            } else if (qemu[i].type === "storage") {
+                let type = qemu[i].type;
+
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
+                    var aktQemu = data.data;
+                    sid = adapter.namespace + '.' + type + '_' + name;
+                    adapter.log.debug("new  storage: " + name);
+
+                    if (!objects[sid]) {
+                        adapter.setObjectNotExists(sid, {
+                            type: 'channel',
+                            common: {
+                                name: name
+                            },
+                            native: {
+                                type: type
+                            }
+                        });
+                    }
+                    findState(sid, aktQemu, (path, name, type, value) => {
+                        _createState(path, name, type, value);
+                    })
+                });
             }
+
             if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
                 finish = true;
@@ -388,6 +407,31 @@ function _createVM(node, callback) {
         //callback
 
     });
+}
+
+function findState(sid, states, cb) {
+    for (var key in states) {
+        var value = states[key];
+        adapter.log.debug("search state" + key + ": " + value);
+
+        if (key === "mem") {
+            cb(sid, key, 'level', p(states.mem, states.maxmen));
+        }
+
+        if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
+            cb(sid, key, 'size', BtoMb(value));
+        } else if (key === "uptime") {
+            cb(sid, key, 'time', value);
+        } else if (key === "netin" || key === "netout") {
+            cb(sid, key, 'sizeb', value);
+        } else if (key === "cpu") {
+            cb(sid, key, 'level', parseInt(value * 10000) / 100);
+        } else if (key === "pid" || key === "cpus" || key === "shared" || key === "enabled" || key === "active" || key === "shared") {
+            cb(sid, key, 'default_num', value);
+        } else if (key === "content" || key === "type" || key === "status") {
+            cb(sid, key, 'text', value);
+        }
+    }
 
 }
 
@@ -478,6 +522,20 @@ function _createState(sid, name, type, val, callback) {
                     write: false,
                     read: true,
                     type: 'number'
+                },
+                type: 'state',
+                native: {}
+            }, adapter.setState(sid + '.' + name, val, true));
+
+            break;
+        case 'text':
+            adapter.setObjectNotExists(sid + '.' + name, {
+                common: {
+                    name: name,
+                    role: 'value',
+                    write: false,
+                    read: true,
+                    type: 'string'
                 },
                 type: 'state',
                 native: {}

@@ -1,18 +1,18 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "news": {
-      "0.2.0": {
-        "en": "added container",
-        "de": "Container hinzugefügt",
-        "ru": "добавленный контейнер",
-        "pt": "recipiente adicionado",
-        "nl": "container toegevoegd",
-        "fr": "conteneur ajouté",
-        "it": "contenitore aggiunto",
-        "es": "contenedor agregado",
-        "pl": "dodany pojemnik"
+      "0.3.0": {
+        "en": "added  container, storage and password encryption",
+        "de": "Container, Speicher und Passwort-Verschlüsselung hinzugefügt",
+        "ru": "добавлен контейнер, хранилище и шифрование паролей",
+        "pt": "contêiner, armazenamento e criptografia de senhas adicionados",
+        "nl": "toegevoegde container-, opslag- en wachtwoordversleuteling",
+        "fr": "ajout du conteneur, du stockage et du cryptage du mot de passe",
+        "it": "aggiunto il contenitore, la memorizzazione e la crittografia della password",
+        "es": "Contenedor añadido, almacenamiento y cifrado de contraseña.",
+        "pl": "dodano szyfrowanie kontenera, pamięci masowej i hasła"
       },
       "0.0.2": {
         "en": "first running version",

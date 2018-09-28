@@ -19,6 +19,9 @@ this adapter read out the data from your proxmox installation
 ## Requirements
 
 ## Changelog
+### 0.3.0 (28.09.2018)
+* (MeisterTR) add storage
+* (MeisterTR) add password encryption
 ### 0.2.0 (27.09.2018)
 * (MeisterTR) add container
 ### 0.0.5 (25.09.2018)

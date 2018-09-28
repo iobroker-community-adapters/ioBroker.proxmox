@@ -1,70 +1,102 @@
 <html>
+
 <head>
-<!-- these 4 files always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
-<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+    <!-- these 4 files always have to be included -->
+    <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
 
-<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
 
-<!-- these files always have to be included -->
-<script type="text/javascript" src="../../js/translate.js"></script>
-<script type="text/javascript" src="../../lib/js/materialize.js"></script>
-<script type="text/javascript" src="../../js/adapter-settings.js"></script>
-<script type="text/javascript" src="words.js"></script>
- <style>
-  .m .col .select-wrapper+label {
+    <!-- these files always have to be included -->
+    <script type="text/javascript" src="../../js/translate.js"></script>
+    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
+    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+    <script type="text/javascript" src="words.js"></script>
+    <style>
+        .m .col .select-wrapper+label {
    top: -26px;  
   }
      .m span{
          font-size: 0.9em;
      }
  </style>
-<!-- you have to define 2 functions in the global scope: -->
-<script type="text/javascript">
+    <!-- you have to define 2 functions in the global scope: -->
+    <script type="text/javascript">
+        var secret;
 
-    // the function loadSettings has to exist ...
-    function load(settings, onChange) {
-        // example: select elements with id=key and class=value and insert value
-       if (!settings) return;
-        $('.value').each(function () {            
-            var $key = $(this);
-            var id = $key.attr('id');
-            if ($key.attr('type') === 'checkbox') {
-		        // do not call onChange direct, because onChange could expect some arguments
-                $key.prop('checked', settings[id]).change(function() {
-                    onChange();
-                });
-            } else {
-		        // do not call onChange direct, because onChange could expect some arguments
-                $key.val(settings[id]).change(function() {
-                    onChange();
-                }).keyup(function() {
-                    onChange();
-                });
+        function encrypt(key, value) {
+            var result = '';
+            for (var i = 0; i < value.length; ++i) {
+                result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
             }
-        });
-        onChange(false);
-        M.updateTextFields();  // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
-    }
+            return result;
+        }
 
-    // ... and the function save has to exist.
-    // you have to make sure the callback is called with the settings object as first param!
-    function save(callback) {
-        // example: select elements with class=value and build settings object
-        var obj = {};
-        $('.value').each(function () {
-            var $this = $(this);
-            if ($this.attr('type') === 'checkbox') {
-                obj[$this.attr('id')] = $this.prop('checked');
-            } else {
-                obj[$this.attr('id')] = $this.val();
+        function decrypt(key, value) {
+            var result = '';
+            for (var i = 0; i < value.length; ++i) {
+                result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
             }
-        });
-        callback(obj);
-    }
-</script>
+            return result;
+        }
+
+        // the function loadSettings has to exist ...
+        function load(settings, onChange) {
+            socket.emit('getObject', 'system.config', function (err, obj) {
+                secret = (obj.native ? obj.native.secret : '') || 'Zgfr56gFe87jJOM';
+                //loadHelper(settings, onChange);
+
+                // example: select elements with id=key and class=value and insert value
+                if (!settings) return;
+                $('.value').each(function () {
+                    var $key = $(this);
+                    var id = $key.attr('id');
+                    if ($key.attr('type') === 'checkbox') {
+                        // do not call onChange direct, because onChange could expect some arguments
+                        $key.prop('checked', settings[id]).change(function () {
+                            onChange();
+                        });
+                    } else {
+                        // do not call onChange direct, because onChange could expect some arguments
+                        $key.val(settings[id]).change(function () {
+                            onChange();
+                        }).keyup(function () {
+                            onChange();
+                        });
+                    }
+                });
+                onChange(false);
+                M.updateTextFields(); // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
+            });
+        }
+
+        // ... and the function save has to exist.
+        // you have to make sure the callback is called with the settings object as first param!
+        function save(callback) {
+            // example: select elements with class=value and build settings object
+            var obj = {};
+            $('.value').each(function () {
+                var $this = $(this);
+                switch ($this.attr('type')) {
+                    case 'checkbox':
+                        obj[$this.attr('id')] = $this.prop('checked');
+                        break;
+                    case 'number':
+                        obj[$this.attr('id')] = parseInt($this.val(), 10);
+                        break;
+                    default:
+                        obj[$this.attr('id')] =
+                            $this.data('crypt') && $this.val() ? encrypt(secret, $this.val()) : $this.val();
+                        break;
+                }
+
+            });
+            callback(obj);
+        }
+    </script>
 </head>
+
 <body>
     <!-- you have to put your config page in a div with id adapter-container -->
     <div class="m adapter-container">
@@ -76,7 +108,7 @@
                     <img src="logo.png" class="logo">
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="input-field col s12 m6 l4">
                     <input type="text" class="value" id="ip" />
@@ -89,13 +121,13 @@
                 </div>
 
                 <div class="input-field col s12 m4 l2">
-                    <input class="value" id="param_requestInterval" maxlength="6" type="number"/>
+                    <input class="value" id="param_requestInterval" maxlength="6" type="number" />
                     <label class="translate" for="param_requestInterval">Request Intervall</label>
                     <span class="translate">request Intervall in sec.</span>
                 </div>
 
             </div>
-               
+
             <div class="row">
                 <div class="input-field col s12 m6 l4">
                     <input class="value" id="name" type="text">
@@ -103,11 +135,11 @@
                     <span class="translate">pve login user</span>
                 </div>
                 <div class="input-field col s12 m6 l4">
-                    <input class="value" data-crypt="1" type="password" id="pwd"/>
+                    <input class="value" data-crypt="1" type="password" id="pwd" />
                     <label for="pwd" class="translate">password</label>
                     <span class="translate">pve login password</span>
                 </div>
-                
+
             </div>
         </div>
     </div>
