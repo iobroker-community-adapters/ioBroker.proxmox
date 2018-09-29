@@ -88,7 +88,8 @@
   "native": {
     "param_requestInterval": 30,
     "port": 8006,
-    "name": "root"
+    "name": "root",
+    "pwd": ""
   },
     "objects": [
 
