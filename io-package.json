@@ -1,8 +1,19 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "news": {
+      "0.3.1": {
+        "en": "fixed some bugs",
+        "de": "einige Fehler behoben",
+        "ru": "исправлены некоторые ошибки",
+        "pt": "consertou alguns bugs",
+        "nl": "een aantal bugs opgelost",
+        "fr": "correction de quelques bugs",
+        "it": "corretto alcuni bug",
+        "es": "arreglado algunos errores",
+        "pl": "naprawiono niektóre błędy"
+      },     
       "0.3.0": {
         "en": "added  container, storage and password encryption",
         "de": "Container, Speicher und Passwort-Verschlüsselung hinzugefügt",
@@ -60,7 +71,8 @@
     "authors": [
       {
         "name": "MeisterTR",
-        "email": "meistertr.smarthome@gmail.com"
+        "email": "meistertr.smarthome@gmail.com",
+        "pwd":""
       }
     ],
     "docs": {
@@ -80,7 +92,7 @@
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/MeisterTR/ioBroker.proxmox/master/admin/logo.png",
     "keywords": [ "template", "vis", "GUI", "graphical", "scada" ],
-    "readme": "https://github.com/MeiserTR/ioBroker.proxmox/blob/master/README.md",
+    "readme": "https://github.com/MeisterTR/ioBroker.proxmox/blob/master/README.md",
     "loglevel": "info",
     "type": "infrastructure",
     "restartAdapters": [ "vis" ]

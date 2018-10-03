@@ -19,6 +19,8 @@ this adapter read out the data from your proxmox installation
 ## Requirements
 
 ## Changelog
+### 0.3.1 (03.10.2018)
+* (MeisterTR) fixed mem_lev, error at install, catch error no node and vm
 ### 0.3.0 (28.09.2018)
 * (MeisterTR) add storage
 * (MeisterTR) add password encryption

@@ -82,15 +82,15 @@ adapter.on('ready', function () {
         if (adapter.config.ip !== "192.000.000.000") {
 
             proxmox = new ProxmoxGet(adapter);
-    
+
             //check Intervall 
             adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
-    
+
             if (adapter.config.param_requestInterval < 5) {
                 adapter.log.info('Intervall <5, set to 5');
                 adapter.config.param_requestInterval = 5;
             }
-    
+
             proxmox._getTicket(function (result) {
                 if (result === "200" || result === 200) {
                     main();
@@ -102,6 +102,7 @@ adapter.on('ready', function () {
         }
     });
 });
+
 function decrypt(key, value) {
     let result = '';
     for (let i = 0; i < value.length; ++i) {
@@ -158,10 +159,7 @@ function sendRequest() {
                 adapter.setState('info.connection', false, true);
             }
         }
-
     }
-
-
 }
 
 
@@ -175,8 +173,6 @@ function _getNodes(callback) {
         _createNodes(data.data, callback);
         adapter.log.debug("Devices: " + JSON.stringify(data));
     });
-
-
 };
 
 function _createNodes(devices, callback) {
@@ -199,7 +195,6 @@ function _createNodes(devices, callback) {
                     type: element.type
                 }
             });
-
             adapter.setObjectNotExists(sid + '.status', {
                 common: {
                     name: 'Status',
@@ -211,8 +206,6 @@ function _createNodes(devices, callback) {
                 type: 'state',
                 native: {}
             });
-
-
         }
         if (element.cpu) _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
         if (element.maxcpu) _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
@@ -239,22 +232,16 @@ function _createNodes(devices, callback) {
             if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
 
             _createVM(element.node, callback)
-
         });
-
-
     });
 }
 
 function _setNodes(devices, callback) {
 
-
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
-
         var sid = adapter.namespace + '.' + element.type + '_' + element.node;
-
 
         adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
         adapter.setState(sid + '.cpu_max', element.maxcpu, true);
@@ -264,6 +251,9 @@ function _setNodes(devices, callback) {
             adapter.log.debug("Request states for node " + element.node);
 
             var node_vals = data.data;
+
+            //check if node is empty
+            if (node_vals.uptime === undefined) return
 
             adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
@@ -284,14 +274,12 @@ function _setNodes(devices, callback) {
 
             _setVM(element.node);
         });
-
-
     });
 }
 
 
 function _setVM(node, callback) {
-    var sid='';
+    var sid = '';
 
     proxmox.all(function (data) {
         var qemu = data.data;
@@ -303,16 +291,21 @@ function _setVM(node, callback) {
 
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
                     var aktQemu = data.data;
+
+                    //check if vm is empty
+                    if (aktQemu.name === undefined) return
+
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
-                    findState(sid, aktQemu, (path, name, type, value) => {
-                        adapter.setState(path + '.' + name, value, true);
-                    })
+                    findState(sid, aktQemu, (states) => {
+                        states.forEach(function (element) {
+                            adapter.setState(element[0] + '.' + element[1], element[3], true);
+                        });
+                    });
 
                 });
 
-            }
-            else if (qemu[i].type === "storage") {
+            } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
@@ -321,18 +314,15 @@ function _setVM(node, callback) {
                     sid = adapter.namespace + '.' + type + '_' + name;
                     adapter.log.debug("storage reload: " + name);
 
-                    findState(sid, aktQemu, (path, name, type, value) => {
-                        //adapter.log.warn(path + name + value)
-                        adapter.setState(path + '.' + name, value, true);
-                    })
+                    findState(sid, aktQemu, (states) => {
+                        states.forEach(function (element) {
+                            adapter.setState(element[0] + '.' + element[1], element[3], true);
+                        });
+                    });
                 });
             }
         }
-
-        //callback
-
     });
-
 }
 
 
@@ -368,11 +358,12 @@ function _createVM(node, callback) {
                         });
 
                     }
-                    findState(sid, aktQemu, (path, name, type, value) => {
-                        _createState(path, name, type, value);
-                    })
+                    findState(sid, aktQemu, (states) => {
+                        states.forEach(function (element) {
+                            _createState(element[0], element[1], element[2], element[3]);
+                        });
+                    });
                 });
-
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
@@ -392,47 +383,55 @@ function _createVM(node, callback) {
                             }
                         });
                     }
-                    findState(sid, aktQemu, (path, name, type, value) => {
-                        _createState(path, name, type, value);
+                    findState(sid, aktQemu, (states) => {
+                        states.forEach(function (element) {
+                            _createState(element[0], element[1], element[2], element[3]);
+                        });
                     })
                 });
             }
-
             if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
                 finish = true;
             }
         }
-
-        //callback
-
     });
 }
 
 function findState(sid, states, cb) {
-    for (var key in states) {
-        var value = states[key];
+    let result = [];
+
+    for (let key in states) {
+        let value = states[key];
         adapter.log.debug("search state" + key + ": " + value);
 
         if (key === "mem") {
-            cb(sid, key, 'level', p(states.mem, states.maxmen));
+            //cb(sid, key, 'level', p(states.mem, states.maxmen));
+            result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)])
+            adapter.log.debug(states.mem, states.maxmem)
         }
-
         if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
-            cb(sid, key, 'size', BtoMb(value));
+            //cb(sid, key, 'size', BtoMb(value));
+            result.push([sid, key, 'size', BtoMb(value)])
         } else if (key === "uptime") {
-            cb(sid, key, 'time', value);
+            //cb(sid, key, 'time', value);
+            result.push([sid, key, 'time', value])
         } else if (key === "netin" || key === "netout") {
-            cb(sid, key, 'sizeb', value);
+            //cb(sid, key, 'sizeb', value);
+            result.push([sid, key, 'sizeb', value]);
         } else if (key === "cpu") {
-            cb(sid, key, 'level', parseInt(value * 10000) / 100);
+            //cb(sid, key, 'level', parseInt(value * 10000) / 100);
+            result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
         } else if (key === "pid" || key === "cpus" || key === "shared" || key === "enabled" || key === "active" || key === "shared") {
-            cb(sid, key, 'default_num', value);
+            //cb(sid, key, 'default_num', value);
+            result.push([sid, key, 'default_num', value]);
         } else if (key === "content" || key === "type" || key === "status") {
-            cb(sid, key, 'text', value);
+            //cb(sid, key, 'text', value);
+            result.push([sid, key, 'text', value]);
         }
     }
-
+    adapter.log.debug('found states:_' + JSON.stringify(result))
+    cb(result);
 }
 
 function readObjects(callback) {
