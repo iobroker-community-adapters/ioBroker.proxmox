@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "news": {
-      "0.3.1": {
+      "0.3.2": {
         "en": "fixed some bugs",
         "de": "einige Fehler behoben",
         "ru": "исправлены некоторые ошибки",
@@ -90,9 +90,9 @@
     "icon": "logo.png",
     "materialize": true,
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/MeisterTR/ioBroker.proxmox/master/admin/logo.png",
+    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
     "keywords": [ "template", "vis", "GUI", "graphical", "scada" ],
-    "readme": "https://github.com/MeisterTR/ioBroker.proxmox/blob/master/README.md",
+    "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
     "loglevel": "info",
     "type": "infrastructure",
     "restartAdapters": [ "vis" ]

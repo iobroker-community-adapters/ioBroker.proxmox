@@ -1,6 +1,6 @@
 {
   "name": "iobroker.proxmox",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "ioBroker Proxmox Adapter",
   "author": {
     "name": "MeisterTR",
@@ -12,7 +12,7 @@
       "email": "meistertr.smarthome@gmail.com"
     }
   ],
-  "homepage": "https://github.com/MeisterTR/ioBroker.proxmox",
+  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.proxmox",
   "license": "MIT",
   "keywords": [
     "ioBroker",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/MeisterTR/ioBroker.proxmox"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.proxmox"
   },
   "dependencies": {
     "request": "^2.85.0"
@@ -37,7 +37,7 @@
     "test": "node node_modules/mocha/bin/mocha --exit"
   },
   "bugs": {
-    "url": "https://github.com/MeisterTR/ioBroker.proxmox/issues"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/issues"
   },
   "readmeFilename": "README.md"
 }

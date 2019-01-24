@@ -8,8 +8,8 @@
 
 [![NPM](https://nodei.co/npm/iobroker.proxmox.png?downloads=true)](https://nodei.co/npm/iobroker.proxmox/)
 
-**Tests:** Linux/Mac: [![Travis-CI](https://api.travis-ci.org/MeisterTR/ioBroker.proxmox.svg?branch=master)](https://travis-ci.org/MeisterTR/ioBroker.proxmox)
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/MeisterTR/ioBroker.proxmox?branch=master&svg=true)](https://ci.appveyor.com/project/MeisterTR/ioBroker-proxmox/)
+**Tests:** Linux/Mac: [![Travis-CI](https://api.travis-ci.org/iobroker-community-adapters/ioBroker.proxmox.svg?branch=master)](https://travis-ci.org/iobroker-community-adapters/ioBroker.proxmox)
+Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/iobroker-community-adapters/ioBroker.proxmox?branch=master&svg=true)](https://ci.appveyor.com/project/iobroker-community-adapters/ioBroker-proxmox/)
 
 
 this adapter read out the data from your proxmox installation
