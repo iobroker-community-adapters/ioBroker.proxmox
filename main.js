@@ -293,7 +293,7 @@ function _setVM(node, callback) {
                     var aktQemu = data.data;
 
                     //check if vm is empty
-                    if (aktQemu.name === undefined) return
+                    if (!aktQemu) return
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
