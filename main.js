@@ -213,6 +213,7 @@ function _createNodes(devices, callback) {
         proxmox.nodeStatus(element.node, function (data) {
 
             adapter.log.debug("Request states for node " + element.node);
+            adapter.log.debug("data from node: " + data);
 
             var node_vals = data.data;
             if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
