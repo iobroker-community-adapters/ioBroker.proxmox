@@ -215,24 +215,28 @@ function _createNodes(devices, callback) {
             adapter.log.debug("Request states for node " + element.node);
             adapter.log.debug("data from node: " + data);
 
-            var node_vals = data.data;
-            if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
+                var node_vals = data.data;
 
-            if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
-            if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
-            if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
-            if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                //check if node is empty
+                if (!node_vals) return
+                
+                if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
-            if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
-            if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
-            if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
 
-            if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
-            if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
-            if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
-            if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
 
-            _createVM(element.node, callback)
+                if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+
+                _createVM(element.node, callback);
         });
     });
 }
@@ -251,29 +255,29 @@ function _setNodes(devices, callback) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-            var node_vals = data.data;
+                var node_vals = data.data;
 
-            //check if node is empty
-            if (node_vals.uptime === undefined) return
+                //check if node is empty
+                if (!node_vals) return
 
-            adapter.setState(sid + '.uptime', node_vals.uptime, true);
-            // adapter.setState(sid + '.' + name, val, true)
+                adapter.setState(sid + '.uptime', node_vals.uptime, true);
+                // adapter.setState(sid + '.' + name, val, true)
 
-            adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
-            adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+                adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+                adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+                adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+                adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
 
-            adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
-            adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
-            adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+                adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+                adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+                adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
 
-            adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
-            adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
-            adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
-            adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+                adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+                adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+                adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+                adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
 
-            _setVM(element.node);
+                _setVM(element.node);
         });
     });
 }
