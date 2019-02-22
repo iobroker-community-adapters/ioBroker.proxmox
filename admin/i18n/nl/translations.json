@@ -1,0 +1,14 @@
+{
+    "Auto": "Auto",
+    "Manual": "Met de hand",
+    "My select": "Mijn select",
+    "ip adress": "IP adres",
+    "on save adapter restarts with new config immediately": "on save-adapter wordt onmiddellijk opnieuw opgestart met nieuwe config",
+    "password": "wachtwoord",
+    "pve login password": "pve login wachtwoord",
+    "pve login user": "pve login gebruiker",
+    "request Intervall in sec.": "verzoek Interval in sec.",
+    "template adapter settings": "sjabloon-adapterinstellingen",
+    "test1": "Test 1",
+    "test2": "Test 2"
+}
