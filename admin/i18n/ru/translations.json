@@ -1,0 +1,14 @@
+{
+    "Auto": "Автоматически",
+    "Manual": "Вручную",
+    "My select": "Выбор",
+    "ip adress": "IP адрес",
+    "on save adapter restarts with new config immediately": "При сохранении настроек адаптера он сразу же перезапускается",
+    "password": "пароль",
+    "pve login password": "Пароль входа в систему",
+    "pve login user": "Пользователь",
+    "request Intervall in sec.": "запрос Интервал в секундах.",
+    "template adapter settings": "Пример",
+    "test1": "Тест 1",
+    "test2": "Тест 2"
+}

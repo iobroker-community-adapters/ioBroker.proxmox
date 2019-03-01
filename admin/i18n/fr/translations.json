@@ -1,0 +1,14 @@
+{
+    "Auto": "Auto",
+    "Manual": "Manuel",
+    "My select": "Mon choix",
+    "ip adress": "adresse IP",
+    "on save adapter restarts with new config immediately": "sur l'adaptateur de sauvegarde redémarre avec la nouvelle config immédiatement",
+    "password": "mot de passe",
+    "pve login password": "pve login mot de passe",
+    "pve login user": "pve utilisateur de connexion",
+    "request Intervall in sec.": "demande Intervalle en secondes",
+    "template adapter settings": "paramètres de l'adaptateur de modèle",
+    "test1": "Test 1",
+    "test2": "Test 2"
+}
