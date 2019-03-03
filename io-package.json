@@ -100,6 +100,7 @@
         "materialize": true,
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
+        "license": "MIT",
         "keywords": [
             "template",
             "vis",
