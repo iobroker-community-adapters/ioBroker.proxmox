@@ -2,7 +2,7 @@
 # ioBroker.proxmox
 =================
 
-[![NPM version](http://img.shields.io/npm/v/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
+![Number of Installations](http://iobroker.live/badges/proxmox-installed.svg) ![Number of Installations](http://iobroker.live/badges/proxmox-stable.svg) [![NPM version](http://img.shields.io/npm/v/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
 
 
