@@ -503,21 +503,6 @@ function _createVM(node, callback) {
                         },
                         native: {}
                     });
-                    /*
-                    adapter.setObjectNotExists(sid + '.reset', {
-                        type: 'state',
-                        common: {
-                            name: 'reset',
-                            type: 'boolean',
-                            role: 'button',
-                            read: true,
-                            write: true,
-                            desc: 'Reset VM'
-
-                        },
-                        native: {}
-                    });
-                    */
                     adapter.setObjectNotExists(sid + '.shutdown', {
                         type: 'state',
                         common: {
@@ -531,35 +516,7 @@ function _createVM(node, callback) {
                         },
                         native: {}
                     });
-                    /*
-                    adapter.setObjectNotExists(sid + '.suspend', {
-                        type: 'state',
-                        common: {
-                            name: 'suspend',
-                            type: 'boolean',
-                            role: 'button',
-                            read: true,
-                            write: true,
-                            desc: 'suspend VM'
 
-                        },
-                        native: {}
-                    });
-                    
-                    adapter.setObjectNotExists(sid + '.resume', {
-                        type: 'state',
-                        common: {
-                            name: 'resume',
-                            type: 'boolean',
-                            role: 'button',
-                            read: true,
-                            write: true,
-                            desc: 'resume VM'
-
-                        },
-                        native: {}
-                    });
-                    */
                     findState(sid, aktQemu, (states) => {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
@@ -608,27 +565,24 @@ function findState(sid, states, cb) {
         adapter.log.debug("search state" + key + ": " + value);
 
         if (key === "mem") {
-            //cb(sid, key, 'level', p(states.mem, states.maxmen));
             result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)])
             adapter.log.debug(states.mem, states.maxmem)
         }
+        if (key === "disk") {
+            result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)])
+            adapter.log.debug(states.mem, states.maxmem)
+        }
         if (key === "mem" || key === "disk" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
-            //cb(sid, key, 'size', BtoMb(value));
             result.push([sid, key, 'size', BtoMb(value)])
         } else if (key === "uptime") {
-            //cb(sid, key, 'time', value);
             result.push([sid, key, 'time', value])
         } else if (key === "netin" || key === "netout") {
-            //cb(sid, key, 'sizeb', value);
             result.push([sid, key, 'sizeb', value]);
         } else if (key === "cpu") {
-            //cb(sid, key, 'level', parseInt(value * 10000) / 100);
             result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
         } else if (key === "pid" || key === "cpus" || key === "shared" || key === "enabled" || key === "active" || key === "shared") {
-            //cb(sid, key, 'default_num', value);
             result.push([sid, key, 'default_num', value]);
         } else if (key === "content" || key === "type" || key === "status") {
-            //cb(sid, key, 'text', value);
             result.push([sid, key, 'text', value]);
         }
     }
@@ -659,7 +613,7 @@ function _createState(sid, name, type, val, callback) {
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
                     name: name,
-                    role: 'indicator.uptime',
+                    role: 'value',
                     write: false,
                     read: true,
                     type: 'number',
@@ -674,7 +628,7 @@ function _createState(sid, name, type, val, callback) {
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
                     name: name,
-                    role: 'indicator.size',
+                    role: 'value',
                     write: false,
                     read: true,
                     type: 'number',
@@ -689,7 +643,7 @@ function _createState(sid, name, type, val, callback) {
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
                     name: name,
-                    role: 'indicator.size',
+                    role: 'value',
                     write: false,
                     read: true,
                     type: 'number',
@@ -704,7 +658,7 @@ function _createState(sid, name, type, val, callback) {
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
                     name: name,
-                    role: 'indicator.level',
+                    role: 'value',
                     write: false,
                     read: true,
                     type: 'number',
@@ -719,7 +673,7 @@ function _createState(sid, name, type, val, callback) {
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
                     name: name,
-                    role: 'indicator.load',
+                    role: 'value',
                     write: false,
                     read: true,
                     type: 'number'
