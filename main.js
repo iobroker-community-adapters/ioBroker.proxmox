@@ -51,6 +51,98 @@ adapter.on('stateChange', function (id, state) {
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
         //adapter.log.info('ack is not set!');
+        let vmdata = id.split('.')[2];
+        let type = vmdata.split('_')[0];
+        let vmname = vmdata.split('_')[1];
+        let command = id.split('.')[3]
+        let vmid, node;
+
+        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname);
+        // get vm vid
+        proxmox.all(function (data) {
+            let vms = data.data;
+            let vm = vms.find(vm => vm.name === vmname);
+            if (vm) {
+                adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm))
+                vmid = vm.vmid;
+                node = vm.node;
+            } else {
+                adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data))
+                return
+            }
+            adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
+            if (type === 'lxc' || type === 'qemu') {
+                switch (command) {
+                    case 'start':
+                        proxmox.qemuStart(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'stop':
+                        proxmox.qemuStop(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'reset':
+                        proxmox.qemuReset(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'resume':
+                        proxmox.qemuResume(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'shutdown':
+                        proxmox.qemuShutdown(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'suspend':
+                        proxmox.qemuSuspend(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+
+                    default:
+                        break;
+                }
+            } else if (type === 'node') {
+                switch (command) {
+                    case 'shutdowm':
+                        proxmox.nodeShutdown(node, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                    case 'reboot':
+                        proxmox.nodeReboot(node, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
+                }
+            }
+        });
+
+
+        //proxmox.qemuStart("home","qemu","103",function (data) {
+        //    adapter.log.info(JSON.stringify(data  ))
+        //})
     }
 });
 
@@ -206,37 +298,59 @@ function _createNodes(devices, callback) {
                 type: 'state',
                 native: {}
             });
+            adapter.setObjectNotExists(sid + '.shutdown', {
+                type: 'state',
+                common: {
+                    name: 'shutdown',
+                    type: 'boolean',
+                    role: 'button',
+                    read: true,
+                    write: true,
+                    desc: 'shutdown node'
+
+                },
+                native: {}
+            });
+            adapter.setObjectNotExists(sid + '.reboot', {
+                type: 'state',
+                common: {
+                    name: 'reboot',
+                    type: 'boolean',
+                    role: 'button',
+                    read: true,
+                    write: true,
+                    desc: 'reboot node'
+
+                },
+                native: {}
+            });
         }
+
         if (element.cpu) _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
         if (element.maxcpu) _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
 
         proxmox.nodeStatus(element.node, function (data) {
 
             adapter.log.debug("Request states for node " + element.node);
-            adapter.log.debug("data from node: " + data);
 
-                var node_vals = data.data;
+            var node_vals = data.data;
+            if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
-                //check if node is empty
-                if (!node_vals) return
-                
-                if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
+            if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+            if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+            if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+            if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
 
-                if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
-                if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
-                if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
-                if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+            if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+            if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+            if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
 
-                if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
-                if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
-                if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+            if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+            if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+            if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+            if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
 
-                if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
-                if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
-                if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
-                if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
-
-                _createVM(element.node, callback);
+            _createVM(element.node, callback)
         });
     });
 }
@@ -255,29 +369,29 @@ function _setNodes(devices, callback) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-                var node_vals = data.data;
+            var node_vals = data.data;
 
-                //check if node is empty
-                if (!node_vals) return
+            //check if node is empty
+            if (node_vals.uptime === undefined) return
 
-                adapter.setState(sid + '.uptime', node_vals.uptime, true);
-                // adapter.setState(sid + '.' + name, val, true)
+            adapter.setState(sid + '.uptime', node_vals.uptime, true);
+            // adapter.setState(sid + '.' + name, val, true)
 
-                adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
-                adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
-                adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
-                adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+            adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+            adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+            adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+            adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
 
-                adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
-                adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
-                adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+            adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+            adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+            adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
 
-                adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
-                adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
-                adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
-                adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+            adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+            adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+            adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+            adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
 
-                _setVM(element.node);
+            _setVM(element.node);
         });
     });
 }
@@ -298,7 +412,7 @@ function _setVM(node, callback) {
                     var aktQemu = data.data;
 
                     //check if vm is empty
-                    if (!aktQemu) return
+                    if (aktQemu.name === undefined) return
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
@@ -363,6 +477,89 @@ function _createVM(node, callback) {
                         });
 
                     }
+                    adapter.setObjectNotExists(sid + '.start', {
+                        type: 'state',
+                        common: {
+                            name: 'start',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'Start VM'
+
+                        },
+                        native: {}
+                    });
+                    adapter.setObjectNotExists(sid + '.stop', {
+                        type: 'state',
+                        common: {
+                            name: 'stop',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'stop VM'
+
+                        },
+                        native: {}
+                    });
+                    /*
+                    adapter.setObjectNotExists(sid + '.reset', {
+                        type: 'state',
+                        common: {
+                            name: 'reset',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'Reset VM'
+
+                        },
+                        native: {}
+                    });
+                    */
+                    adapter.setObjectNotExists(sid + '.shutdown', {
+                        type: 'state',
+                        common: {
+                            name: 'shutdown',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'shutdown VM'
+
+                        },
+                        native: {}
+                    });
+                    /*
+                    adapter.setObjectNotExists(sid + '.suspend', {
+                        type: 'state',
+                        common: {
+                            name: 'suspend',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'suspend VM'
+
+                        },
+                        native: {}
+                    });
+                    
+                    adapter.setObjectNotExists(sid + '.resume', {
+                        type: 'state',
+                        common: {
+                            name: 'resume',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'resume VM'
+
+                        },
+                        native: {}
+                    });
+                    */
                     findState(sid, aktQemu, (states) => {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
@@ -415,7 +612,7 @@ function findState(sid, states, cb) {
             result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)])
             adapter.log.debug(states.mem, states.maxmem)
         }
-        if (key === "mem" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
+        if (key === "mem" || key === "disk" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
             //cb(sid, key, 'size', BtoMb(value));
             result.push([sid, key, 'size', BtoMb(value)])
         } else if (key === "uptime") {

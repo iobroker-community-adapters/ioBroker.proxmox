@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "0.3.2",
+        "version": "0.5.0",
         "news": {
+            "0.5.0": {
+                "en": "add start/stop Button, add actual disk size",
+                "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
+                "ru": "Добавить кнопку Пуск / Стоп, добавить фактический размер диска",
+                "pt": "adicionar botão iniciar / parar, adicionar tamanho real do disco",
+                "nl": "start / stop-knop toevoegen, werkelijke schijfgrootte toevoegen",
+                "fr": "Ajouter un bouton start / stop, ajouter la taille réelle du disque",
+                "it": "Aggiungi pulsante start / stop, aggiungi la dimensione effettiva del disco",
+                "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
+                "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
+                "zh-cn": "添加开始/停止按钮，添加实际磁盘大小"
+              },
             "0.3.2": {
                 "en": "fixed some bugs",
                 "de": "einige Fehler behoben",
