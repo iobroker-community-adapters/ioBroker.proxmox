@@ -1,9 +1,21 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "0.5.1",
+        "version": "0.5.2",
         "news": {
-            "0.5.0": {
+            "0.5.2": {
+                "en": "Fix issue with special characters in password.",
+                "de": "Problem mit Sonderzeichen im Passwort behoben.",
+                "ru": "Исправлена проблема со специальными символами в пароле.",
+                "pt": "Corrija o problema com caracteres especiais na senha.",
+                "nl": "Probleem met speciale tekens in wachtwoord oplossen.",
+                "fr": "Correction d'un problème avec des caractères spéciaux dans le mot de passe.",
+                "it": "Risolvi il problema con caratteri speciali nella password.",
+                "es": "Soluciona el problema con caracteres especiales en la contraseña.",
+                "pl": "Napraw problem ze znakami specjalnymi w haśle.",
+                "zh-cn": "解决密码中特殊字符的问题。"
+              },
+            "0.5.1": {
                 "en": "add start/stop Button, add actual disk size",
                 "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
                 "ru": "Добавить кнопку Пуск / Стоп, добавить фактический размер диска",
