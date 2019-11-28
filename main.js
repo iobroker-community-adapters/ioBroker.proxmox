@@ -262,6 +262,10 @@ function _getNodes(callback) {
     proxmox.status(function (data) {
 
         devices = data.data;
+        if(typeof(data.data) === 'undefined'){
+            adapter.log.error('Can not get Proxmox nodes! please restart adapter');
+            return
+        }
         _createNodes(data.data, callback);
         adapter.log.debug("Devices: " + JSON.stringify(data));
     });
@@ -372,7 +376,7 @@ function _setNodes(devices, callback) {
             var node_vals = data.data;
 
             //check if node is empty
-            if (node_vals.uptime === undefined) return
+            if (typeof(node_vals.uptime) === 'undefined') return
 
             adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
@@ -412,7 +416,7 @@ function _setVM(node, callback) {
                     var aktQemu = data.data;
 
                     //check if vm is empty
-                    if (aktQemu.name === undefined) return
+                    if (typeof(aktQemu.name) === 'undefined') return
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
