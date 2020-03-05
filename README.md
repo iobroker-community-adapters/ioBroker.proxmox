@@ -55,7 +55,7 @@ At least Node 8.X.X is needed
 
 The MIT License (MIT)
 
-Copyright (c) 2018 - 2019 MeisterTR <meistertr.smarthome@gmail.com>
+Copyright (c) 2018 - 2020 MeisterTR <meistertr.smarthome@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

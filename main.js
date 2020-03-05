@@ -30,6 +30,7 @@ function devices(name, status, type, id) {
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
+        clearInterval(requestInterval);
         adapter.log.info('cleaned everything up...');
         callback();
     } catch (e) {
