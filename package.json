@@ -1,6 +1,6 @@
 {
   "name": "iobroker.proxmox",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "description": "ioBroker Proxmox Adapter",
   "author": {
     "name": "MeisterTR",

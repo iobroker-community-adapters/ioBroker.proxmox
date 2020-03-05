@@ -24,6 +24,8 @@ this adapter read out the data from your proxmox installation
 At least Node 8.X.X is needed
 
 ## Changelog
+### 1.0.0 (05.03.2020)
+* (MeisterTR) bump version to stable
 ### 0.5.2 (27.11.2019)
 * (DutchmanNL) Fix issue with special character in password, now you can use $/&/* etc
 ### 0.5.1 (17.09.2019)
