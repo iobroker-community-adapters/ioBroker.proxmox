@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "news": {
-            "1.0.0": {
+            "1.0.1": {
                 "en": "Fix issue with special characters in password.",
                 "de": "Problem mit Sonderzeichen im Passwort behoben.",
                 "ru": "Исправлена проблема со специальными символами в пароле.",
