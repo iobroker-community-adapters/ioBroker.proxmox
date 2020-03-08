@@ -577,6 +577,9 @@ function findState(sid, states, cb) {
             result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)])
             adapter.log.debug(states.mem, states.maxmem)
         }
+        if (key === "used") {
+            result.push([sid, key + '_lev', 'level', p(states.used, states.total)])
+        }
         if (key === "mem" || key === "disk" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
             result.push([sid, key, 'size', BtoMb(value)])
         } else if (key === "uptime") {
