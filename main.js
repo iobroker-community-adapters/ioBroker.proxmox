@@ -637,7 +637,7 @@ function _createState(sid, name, type, val, callback) {
                     write: false,
                     read: true,
                     type: 'number',
-                    unit: 'Mb'
+                    unit: 'MiB'
                 },
                 type: 'state',
                 native: {}
