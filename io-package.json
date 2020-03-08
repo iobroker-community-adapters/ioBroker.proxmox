@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "news": {
+            "1.0.2":{
+                "en": "remove hardcoded pam, fix error",
+                "de": "Hardcodierte Pam entfernen, Fehler beheben",
+                "ru": "удалить жестко запрограммированный pam, исправить ошибку",
+                "pt": "remover pam codificado, corrigir erro",
+                "nl": "verwijder hardcoded pam, herstel fout",
+                "fr": "supprimer le pam codé en dur, corriger l'erreur",
+                "it": "rimuovere pam hardcoded, correggere l'errore",
+                "es": "eliminar la codificación rígida de pam, corregir el error",
+                "pl": "usuń na stałe pam, napraw błąd",
+                "zh-cn": "删除硬编码的pam，修复错误"
+              },
             "1.0.1": {
                 "en": "Fix issue with special characters in password.",
                 "de": "Problem mit Sonderzeichen im Passwort behoben.",
@@ -133,6 +145,7 @@
         "param_requestInterval": 30,
         "port": 8006,
         "name": "root",
+        "server":"pam",
         "pwd": ""
     },
     "objects": []
