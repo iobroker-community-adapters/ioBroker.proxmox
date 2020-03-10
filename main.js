@@ -456,6 +456,8 @@ function _createVM(node, callback) {
     proxmox.all(function (data) {
         var qemu = data.data;
 
+        if(!qemu || !Array.isArray(qemu)) return
+
         for (var i = 0; i < qemu.length; i++) {
 
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
@@ -464,6 +466,9 @@ function _createVM(node, callback) {
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
                     var aktQemu = data.data;
+                    
+                    if(!aktQemu) return
+
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
                     adapter.log.debug("new " + type + ": " + aktQemu.name);
@@ -533,6 +538,9 @@ function _createVM(node, callback) {
 
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
                     var aktQemu = data.data;
+
+                    if(!aktQemu) return
+
                     sid = adapter.namespace + '.' + type + '_' + name;
                     adapter.log.debug("new  storage: " + name);
 
