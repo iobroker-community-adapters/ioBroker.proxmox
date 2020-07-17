@@ -5,3 +5,5 @@ node_modules
 nbproject
 admin/i18n/flat.txt
 admin/i18n/*/flat.txt
+iobroker.proxmox.code-workspace
+package-lock.json
