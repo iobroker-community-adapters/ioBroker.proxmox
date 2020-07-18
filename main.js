@@ -116,6 +116,13 @@ adapter.on('stateChange', function (id, state) {
                             setTimeout(sendRequest, 10000);
                         });
                         break;
+                    case 'reboot':
+                        proxmox.qemuReboot(node, type, vmid, function (data) {
+                            adapter.log.info(data)
+                            sendRequest();
+                            setTimeout(sendRequest, 10000);
+                        });
+                        break;
 
                     default:
                         break;
@@ -263,7 +270,7 @@ function _getNodes(callback) {
     proxmox.status(function (data) {
 
         devices = data.data;
-        if(typeof(data.data) === 'undefined'){
+        if (typeof (data.data) === 'undefined') {
             adapter.log.error('Can not get Proxmox nodes! please restart adapter');
             return
         }
@@ -377,7 +384,7 @@ function _setNodes(devices, callback) {
             var node_vals = data.data;
 
             //check if node is empty
-            if (typeof(node_vals.uptime) === 'undefined') return
+            if (typeof (node_vals.uptime) === 'undefined') return
 
             adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
@@ -456,7 +463,7 @@ function _createVM(node, callback) {
     proxmox.all(function (data) {
         var qemu = data.data;
 
-        if(!qemu || !Array.isArray(qemu)) return
+        if (!qemu || !Array.isArray(qemu)) return
 
         for (var i = 0; i < qemu.length; i++) {
 
@@ -466,8 +473,8 @@ function _createVM(node, callback) {
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
                     var aktQemu = data.data;
-                    
-                    if(!aktQemu) return
+
+                    if (!aktQemu) return
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
@@ -526,6 +533,19 @@ function _createVM(node, callback) {
                         },
                         native: {}
                     });
+                    adapter.setObjectNotExists(sid + '.reboot', {
+                        type: 'state',
+                        common: {
+                            name: 'reboot',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'reboot VM'
+
+                        },
+                        native: {}
+                    });
 
                     findState(sid, aktQemu, (states) => {
                         states.forEach(function (element) {
@@ -539,7 +559,7 @@ function _createVM(node, callback) {
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
                     var aktQemu = data.data;
 
-                    if(!aktQemu) return
+                    if (!aktQemu) return
 
                     sid = adapter.namespace + '.' + type + '_' + name;
                     adapter.log.debug("new  storage: " + name);
