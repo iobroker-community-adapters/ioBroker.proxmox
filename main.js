@@ -5,7 +5,7 @@
 // you have to require the utils module and call adapter function
 var utils = require('@iobroker/adapter-core'); // Get common adapter utils
 var adapter = new utils.Adapter('proxmox');
-var ProxmoxGet = require(__dirname + '/lib/proxmox');
+var ProxmoxGet = require('./lib/proxmox');
 
 var proxmox;
 var devices = [];
@@ -30,7 +30,7 @@ function devices(name, status, type, id) {
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
-        clearInterval(requestInterval);
+        clearTimeout(requestInterval);
         adapter.log.info('cleaned everything up...');
         callback();
     } catch (e) {
@@ -77,50 +77,43 @@ adapter.on('stateChange', function (id, state) {
                     case 'start':
                         proxmox.qemuStart(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'stop':
                         proxmox.qemuStop(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reset':
                         proxmox.qemuReset(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'resume':
                         proxmox.qemuResume(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'shutdown':
                         proxmox.qemuShutdown(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'suspend':
                         proxmox.qemuSuspend(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.qemuReboot(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
 
@@ -132,15 +125,13 @@ adapter.on('stateChange', function (id, state) {
                     case 'shutdowm':
                         proxmox.nodeShutdown(node, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.nodeReboot(node, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                 }
@@ -187,7 +178,7 @@ adapter.on('ready', function () {
             adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
 
             if (adapter.config.param_requestInterval < 5) {
-                adapter.log.info('Intervall <5, set to 5');
+                adapter.log.info('Intervall <5s, set to 5s');
                 adapter.config.param_requestInterval = 5;
             }
 
@@ -217,11 +208,7 @@ function main() {
 
     readObjects(_getNodes());
 
-
-
     sendRequest();
-    // *1000 convert sek in MS.
-    requestInterval = setInterval(sendRequest, adapter.config.param_requestInterval * 1000);
 
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');
@@ -229,8 +216,11 @@ function main() {
 
 var requestTimeout = null;
 
-function sendRequest() {
+function sendRequest(nextRunTimeout) {
+    requestInterval && clearTimeout(requestInterval);
+    requestInterval = setTimeout(sendRequest, nextRunTimeout || adapter.config.param_requestInterval * 1000);
 
+    proxmox.resetResponseCache(); // Clear cache to start fresh
     requestTimeout = setTimeout(function () {
         requestTimeout = null;
         if (connected) {
@@ -242,7 +232,6 @@ function sendRequest() {
     if (finish) {
         try {
             proxmox.status(function (data) {
-
                 devices = data.data;
                 _setNodes(data.data);
                 adapter.log.debug("Devices: " + JSON.stringify(data));
@@ -263,14 +252,11 @@ function sendRequest() {
 }
 
 
-
-
 function _getNodes(callback) {
-    var n = 0;
     proxmox.status(function (data) {
 
         devices = data.data;
-        if (typeof (data.data) === 'undefined') {
+        if (!devices) {
             adapter.log.error('Can not get Proxmox nodes! please restart adapter');
             return
         }
@@ -280,11 +266,8 @@ function _getNodes(callback) {
 };
 
 function _createNodes(devices, callback) {
-
-
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
-
 
         var sid = adapter.namespace + '.' + element.type + '_' + element.node;
         if (!objects[sid]) {
@@ -295,7 +278,6 @@ function _createNodes(devices, callback) {
 
                 },
                 native: {
-
                     type: element.type
                 }
             });
@@ -346,21 +328,25 @@ function _createNodes(devices, callback) {
             adapter.log.debug("Request states for node " + element.node);
 
             var node_vals = data.data;
-            if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
+            if (node_vals) {
+                if (node_vals.uptime !== undefined) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
-            if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
-            if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
-            if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
-            if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                if (node_vals.wait !== undefined) _createState(sid, 'iowait', 'level', node_vals.uptime);
 
-            if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
-            if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
-            if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                if (node_vals.memory.total !== undefined) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                if (node_vals.memory.free !== undefined) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
 
-            if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
-            if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
-            if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
-            if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                if (node_vals.loadavg[0] !== undefined) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                if (node_vals.loadavg[1] !== undefined) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                if (node_vals.loadavg[2] !== undefined) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+
+                if (node_vals.swap.used !== undefined) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                if (node_vals.swap.total !== undefined) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+            }
 
             _createVM(element.node, callback)
         });
@@ -384,24 +370,26 @@ function _setNodes(devices, callback) {
             var node_vals = data.data;
 
             //check if node is empty
-            if (typeof (node_vals.uptime) === 'undefined') return
+            if (!node_vals || typeof node_vals.uptime === 'undefined') return;
 
-            adapter.setState(sid + '.uptime', node_vals.uptime, true);
+            if (node_vals.uptime !== undefined) adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
 
-            adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
-            adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+            if (node_vals.wait !== undefined) adapter.setState(sid + '.iowait', node_vals.wait, true);
 
-            adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
-            adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
-            adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+            if (node_vals.memory.total !== undefined) adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+            if (node_vals.memory.free !== undefined) adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
 
-            adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
-            adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
-            adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
-            adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+            if (node_vals.loadavg[0] !== undefined) adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+            if (node_vals.loadavg[1] !== undefined) adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+            if (node_vals.loadavg[2] !== undefined) adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+
+            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+            if (node_vals.swap.free !== undefined) adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+            if (node_vals.swap.total !== undefined) adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
 
             _setVM(element.node);
         });
@@ -439,11 +427,11 @@ function _setVM(node, callback) {
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
                     var aktQemu = data.data;
 
                     sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug("storage reload: " + name);
+                    adapter.log.debug("storage reload: " + name + ' for node ' + qemu[i].node);
 
                     findState(sid, aktQemu, (states) => {
                         states.forEach(function (element) {
@@ -556,7 +544,7 @@ function _createVM(node, callback) {
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
                     var aktQemu = data.data;
 
                     if (!aktQemu) return
