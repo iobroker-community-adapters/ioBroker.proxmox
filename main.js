@@ -222,6 +222,7 @@ function _getNodes(callback) {
 };
 
 function _createNodes(devices, callback) {
+    let callbackCnt = 0;
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
@@ -279,6 +280,7 @@ function _createNodes(devices, callback) {
         if (element.cpu) _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
         if (element.maxcpu) _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
 
+        callbackCnt++;
         proxmox.nodeStatus(element.node, function (data) {
 
             adapter.log.debug("Request states for node " + element.node);
@@ -304,7 +306,9 @@ function _createNodes(devices, callback) {
                 if (node_vals.swap.free !== undefined) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
             }
 
-            _createVM(element.node, callback)
+            if (!--callbackCnt) {
+                _createVM(callback)
+            }
         });
     });
 }
@@ -347,13 +351,13 @@ function _setNodes(devices, callback) {
             if (node_vals.swap.total !== undefined) adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
             if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
 
-            _setVM(element.node);
         });
     });
+    _setVM();
 }
 
 
-function _setVM(node, callback) {
+function _setVM(callback) {
     let sid = '';
 
     proxmox.all(function (data) {
@@ -401,10 +405,21 @@ function _setVM(node, callback) {
 }
 
 
-function _createVM(node, callback) {
+function _createVM(callback) {
     let sid = '';
 
+    const createDone = () => {
+        adapter.setState('info.connection', true, true);
+        if (!finish) {
+            requestInterval && clearTimeout(requestInterval);
+            requestInterval = setTimeout(sendRequest, 5000);
+        }
+        finish = true;
+    };
+
     proxmox.all(function (data) {
+        let callbackCnt = 0;
+
         const qemu = data.data;
 
         if (!qemu || !Array.isArray(qemu)) return
@@ -414,6 +429,7 @@ function _createVM(node, callback) {
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
                 let type = qemu[i].type;
 
+                callbackCnt++;
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
                     const aktQemu = data.data;
@@ -495,11 +511,13 @@ function _createVM(node, callback) {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
                         });
+                        if (!--callbackCnt) createDone();
                     });
                 });
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
+                callbackCnt++;
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
                     const aktQemu = data.data;
 
@@ -523,16 +541,9 @@ function _createVM(node, callback) {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
                         });
-                    })
+                        if (!--callbackCnt) createDone();
+                    });
                 });
-            }
-            if (i === qemu.length - 1) {
-                adapter.setState('info.connection', true, true);
-                if (!finish) {
-                    requestInterval && clearTimeout(requestInterval);
-                    requestInterval = setTimeout(sendRequest, 5000);
-                }
-                finish = true;
             }
         }
     });
@@ -581,7 +592,7 @@ function readObjects(callback) {
         } else {
             adapter.subscribeStates('*');
             objects = list;
-            adapter.log.debug("readin objects: " + JSON.stringify(list));
+            adapter.log.debug("reading objects: " + JSON.stringify(list));
             //updateConnect();
             callback && callback();
         }
