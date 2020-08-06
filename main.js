@@ -38,12 +38,6 @@ adapter.on('unload', function (callback) {
     }
 });
 
-// is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
-});
-
 // is called if a subscribed state changes
 adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
@@ -142,19 +136,6 @@ adapter.on('stateChange', function (id, state) {
         //proxmox.qemuStart("home","qemu","103",function (data) {
         //    adapter.log.info(JSON.stringify(data  ))
         //})
-    }
-});
-
-// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', function (obj) {
-    if (typeof obj === 'object' && obj.message) {
-        if (obj.command === 'send') {
-            // e.g. send email or pushover or whatever
-            console.log('send command');
-
-            // Send response in callback if required
-            if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-        }
     }
 });
 
@@ -563,8 +544,8 @@ function _createVM(node, callback) {
             }
             if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
+                if (!finish) sendRequest();
                 finish = true;
-                sendRequest();
             }
         }
     });
