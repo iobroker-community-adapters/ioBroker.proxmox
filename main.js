@@ -204,6 +204,7 @@ function decrypt(key, value) {
 
 function main() {
 
+    adapter.config.ip = adapter.config.ip | '';
     proxmox = new ProxmoxGet(adapter);
 
     readObjects(_getNodes());
