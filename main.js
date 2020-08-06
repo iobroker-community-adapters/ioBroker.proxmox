@@ -170,27 +170,33 @@ adapter.on('ready', function () {
             adapter.config.pwd = decrypt('Zgfr56gFe87jJOM', adapter.config.pwd);
         }
 
-        if (adapter.config.ip !== "192.000.000.000") {
-
-            proxmox = new ProxmoxGet(adapter);
-
-            //check Intervall 
-            adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
-
-            if (adapter.config.param_requestInterval < 5) {
-                adapter.log.info('Intervall <5s, set to 5s');
-                adapter.config.param_requestInterval = 5;
-            }
-
-            proxmox._getTicket(function (result) {
-                if (result === "200" || result === 200) {
-                    main();
-                    adapter.setState('info.connection', true, true);
-                } else {
-                    adapter.setState('info.connection', false, true);
-                }
-            });
+        if (adapter.config.ip === "192.000.000.000") {
+            adapter.log.error('Please set the IP of your Proxmox host.');
+            typeof adapter.terminate === 'function' ? adapter.terminate(11): process.exit(11);
+            return;
         }
+
+        adapter.config.ip = adapter.config.ip || '';
+        proxmox = new ProxmoxGet(adapter);
+
+        //check Interval
+        adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
+
+        if (adapter.config.param_requestInterval < 5) {
+            adapter.log.info('Intervall <5s, set to 5s');
+            adapter.config.param_requestInterval = 5;
+        }
+
+        proxmox._getTicket(function (result) {
+            if (result === "200" || result === 200) {
+                main();
+                adapter.setState('info.connection', true, true);
+            } else {
+                adapter.setState('info.connection', false, true);
+                adapter.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
+                typeof adapter.terminate === 'function' ? adapter.terminate(11): process.exit(11);
+            }
+        });
     });
 });
 
@@ -204,9 +210,6 @@ function decrypt(key, value) {
 
 function main() {
 
-    adapter.config.ip = adapter.config.ip || '';
-    proxmox = new ProxmoxGet(adapter);
-
     readObjects(_getNodes());
 
     sendRequest();
@@ -215,22 +218,13 @@ function main() {
     adapter.subscribeStates('*');
 }
 
-var requestTimeout = null;
-
 function sendRequest(nextRunTimeout) {
     requestInterval && clearTimeout(requestInterval);
     requestInterval = setTimeout(sendRequest, nextRunTimeout || adapter.config.param_requestInterval * 1000);
 
-    proxmox.resetResponseCache(); // Clear cache to start fresh
-    requestTimeout = setTimeout(function () {
-        requestTimeout = null;
-        if (connected) {
-            connected = false;
-            adapter.log.debug('Disconnect');
-            adapter.setState('info.connection', false, true);
-        }
-    }, 3000);
     if (finish) {
+        proxmox.resetResponseCache(); // Clear cache to start fresh
+
         try {
             proxmox.status(function (data) {
                 devices = data.data;
