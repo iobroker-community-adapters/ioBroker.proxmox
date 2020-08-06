@@ -16,6 +16,7 @@ let finish = false;
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
+        proxmox.stop();
         clearTimeout(requestInterval);
         adapter.log.info('cleaned everything up...');
         callback();
