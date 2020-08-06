@@ -3,23 +3,22 @@
 "use strict";
 
 // you have to require the utils module and call adapter function
-var utils = require('@iobroker/adapter-core'); // Get common adapter utils
-var adapter = new utils.Adapter('proxmox');
-var ProxmoxGet = require('./lib/proxmox');
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const adapter = new utils.Adapter('proxmox');
+const ProxmoxGet = require('./lib/proxmox');
 
-var proxmox;
-var devices = [];
-var devicesOv = [];
-var objects = {};
-var connected = false;
-var requestInterval;
-var finish = false;
+let proxmox;
+const devices = [];
+const devicesOv = [];
+let objects = {};
+let connected = false;
+let requestInterval;
+let finish = false;
 
-var deviceparam = ['uptime', ""]
+const deviceparam = ['uptime', ""]
 
 //device constructor
 function devices(name, status, type, id) {
-
     this.name = name;
     this.type = type;
     this.id = id;
@@ -241,7 +240,7 @@ function _createNodes(devices, callback) {
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
-        var sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
         if (!objects[sid]) {
             adapter.setObjectNotExists(sid, {
                 type: 'channel',
@@ -299,7 +298,7 @@ function _createNodes(devices, callback) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-            var node_vals = data.data;
+            const node_vals = data.data;
             if (node_vals) {
                 if (node_vals.uptime !== undefined) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
@@ -330,7 +329,7 @@ function _setNodes(devices, callback) {
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
-        var sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
 
         adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
         adapter.setState(sid + '.cpu_max', element.maxcpu, true);
@@ -339,7 +338,7 @@ function _setNodes(devices, callback) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-            var node_vals = data.data;
+            const node_vals = data.data;
 
             //check if node is empty
             if (!node_vals || typeof node_vals.uptime === 'undefined') return;
@@ -370,18 +369,18 @@ function _setNodes(devices, callback) {
 
 
 function _setVM(node, callback) {
-    var sid = '';
+    let sid = '';
 
     proxmox.all(function (data) {
-        var qemu = data.data;
+        const qemu = data.data;
 
-        for (var i = 0; i < qemu.length; i++) {
+        for (let i = 0; i < qemu.length; i++) {
 
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
                 let type = qemu[i].type;
 
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     //check if vm is empty
                     if (!aktQemu || !aktQemu.name) return
@@ -400,7 +399,7 @@ function _setVM(node, callback) {
                 let type = qemu[i].type;
 
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     sid = adapter.namespace + '.' + type + '_' + name;
                     adapter.log.debug("storage reload: " + name + ' for node ' + qemu[i].node);
@@ -421,18 +420,18 @@ function _createVM(node, callback) {
     let sid = '';
 
     proxmox.all(function (data) {
-        var qemu = data.data;
+        const qemu = data.data;
 
         if (!qemu || !Array.isArray(qemu)) return
 
-        for (var i = 0; i < qemu.length; i++) {
+        for (let i = 0; i < qemu.length; i++) {
 
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
                 let type = qemu[i].type;
 
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     if (!aktQemu) return
 
@@ -517,7 +516,7 @@ function _createVM(node, callback) {
                 let type = qemu[i].type;
 
                 proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     if (!aktQemu) return
 
@@ -544,7 +543,10 @@ function _createVM(node, callback) {
             }
             if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
-                if (!finish) sendRequest();
+                if (!finish) {
+                    requestInterval && clearTimeout(requestInterval);
+                    requestInterval = setTimeout(sendRequest, 5000);
+                }
                 finish = true;
             }
         }
@@ -599,13 +601,12 @@ function readObjects(callback) {
             callback && callback();
         }
     });
-};
+}
 
 
 function _createState(sid, name, type, val, callback) {
     adapter.log.debug('create state: ' + name);
-    var state = type;
-    switch (state) {
+    switch (type) {
         case 'time':
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
@@ -694,14 +695,10 @@ function _createState(sid, name, type, val, callback) {
             }, adapter.setState(sid + '.' + name, val, true));
 
             break;
-        default:
-
     }
-
-};
+}
 
 function BtoMb(val) {
-
     return Math.round(val / 1048576)
 }
 
