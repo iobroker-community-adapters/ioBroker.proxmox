@@ -335,7 +335,7 @@ function _setNodes(devices, callback) {
             if (node_vals.uptime !== undefined) adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
 
-            if (node_vals.wait !== undefined) adapter.setState(sid + '.iowait', node_vals.wait, true);
+            if (node_vals.wait !== undefined) adapter.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
 
             if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
             if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
