@@ -289,7 +289,7 @@ function _createNodes(devices, callback) {
             if (node_vals) {
                 if (node_vals.uptime !== undefined) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
-                if (node_vals.wait !== undefined) _createState(sid, 'iowait', 'level', node_vals.uptime);
+                if (node_vals.wait !== undefined) _createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
 
                 if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
                 if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
