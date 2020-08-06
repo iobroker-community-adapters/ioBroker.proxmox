@@ -212,8 +212,6 @@ function main() {
 
     readObjects(_getNodes());
 
-    sendRequest();
-
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');
 }
@@ -235,8 +233,6 @@ function sendRequest(nextRunTimeout) {
 
         } catch (e) {
             adapter.log.warn('Cannot send request: ' + e);
-            clearTimeout(requestTimeout);
-            requestTimeout = null;
             if (connected) {
                 connected = false;
                 adapter.log.debug('Disconnect');
@@ -568,6 +564,7 @@ function _createVM(node, callback) {
             if (i === qemu.length - 1) {
                 adapter.setState('info.connection', true, true);
                 finish = true;
+                sendRequest();
             }
         }
     });
