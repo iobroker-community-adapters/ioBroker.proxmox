@@ -64,7 +64,7 @@ adapter.on('stateChange', function (id, state) {
         //let vmid, node;
         let vmid;
 
-        adapter.log.info('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname)
+        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname)
         proxmox.all(function (data) {
             
             adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
