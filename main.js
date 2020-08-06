@@ -54,25 +54,33 @@ adapter.on('stateChange', function (id, state) {
         //adapter.log.info('ack is not set!');
         let vmdata = id.split('.')[2];
         let type = vmdata.split('_')[0];
-        let vmname = vmdata.split('_')[1];
-        let command = id.split('.')[3]
-        let vmid, node;
+        // "if" is not working, could not find out why -> dirty workaround
+        //if (type === 'lxc' || type === 'qemu') {
+            let vmname = vmdata.split('_')[1];
+        //} else if (type === 'node') {
+            let node = vmdata.split('_')[1];
+        //}  
+        let command = id.split('.')[3];
+        //let vmid, node;
+        let vmid;
 
-        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname);
-        // get vm vid
+        adapter.log.info('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname)
         proxmox.all(function (data) {
-            let vms = data.data;
-            let vm = vms.find(vm => vm.name === vmname);
-            if (vm) {
-                adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm))
-                vmid = vm.vmid;
-                node = vm.node;
-            } else {
-                adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data))
-                return
-            }
+            
             adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
             if (type === 'lxc' || type === 'qemu') {
+                // get vm vid
+                let vms = data.data;
+                let vm = vms.find(vm => vm.name === vmname);
+                if (vm) {
+                    adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm))
+                    vmid = vm.vmid;
+                    node = vm.node;
+                } else {
+                    adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data))
+                    return
+                }
+                adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
                 switch (command) {
                     case 'start':
                         proxmox.qemuStart(node, type, vmid, function (data) {
@@ -128,8 +136,9 @@ adapter.on('stateChange', function (id, state) {
                         break;
                 }
             } else if (type === 'node') {
+                adapter.log.debug('sending shutdown/reboot command')
                 switch (command) {
-                    case 'shutdowm':
+                    case 'shutdown':
                         proxmox.nodeShutdown(node, function (data) {
                             adapter.log.info(data)
                             sendRequest();
