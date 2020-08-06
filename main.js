@@ -8,23 +8,10 @@ const adapter = new utils.Adapter('proxmox');
 const ProxmoxGet = require('./lib/proxmox');
 
 let proxmox;
-const devices = [];
-const devicesOv = [];
 let objects = {};
 let connected = false;
 let requestInterval;
 let finish = false;
-
-const deviceparam = ['uptime', ""]
-
-//device constructor
-function devices(name, status, type, id) {
-    this.name = name;
-    this.type = type;
-    this.id = id;
-    this.status = status;
-}
-
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -205,7 +192,6 @@ function sendRequest(nextRunTimeout) {
 
         try {
             proxmox.status(function (data) {
-                devices = data.data;
                 _setNodes(data.data);
                 adapter.log.debug("Devices: " + JSON.stringify(data));
             });
@@ -225,9 +211,7 @@ function sendRequest(nextRunTimeout) {
 
 function _getNodes(callback) {
     proxmox.status(function (data) {
-
-        devices = data.data;
-        if (!devices) {
+        if (!data.data) {
             adapter.log.error('Can not get Proxmox nodes! please restart adapter');
             return
         }
