@@ -47,21 +47,20 @@ adapter.on('objectChange', function (id, obj) {
 // is called if a subscribed state changes
 adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
-    //adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
         //adapter.log.info('ack is not set!');
         let vmdata = id.split('.')[2];
         let type = vmdata.split('_')[0];
-        // "if" is not working, could not find out why -> dirty workaround
-        //if (type === 'lxc' || type === 'qemu') {
-            let vmname = vmdata.split('_')[1];
-        //} else if (type === 'node') {
-            let node = vmdata.split('_')[1];
-        //}  
+        let vmname, node;
+        if (type === 'lxc' || type === 'qemu') {
+            vmname = vmdata.split('_')[1];
+        } else if (type === 'node') {
+            node = vmdata.split('_')[1];
+        }  
         let command = id.split('.')[3];
-        //let vmid, node;
         let vmid;
 
         adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname)
