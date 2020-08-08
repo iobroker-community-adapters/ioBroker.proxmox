@@ -3,45 +3,26 @@
 "use strict";
 
 // you have to require the utils module and call adapter function
-var utils = require('@iobroker/adapter-core'); // Get common adapter utils
-var adapter = new utils.Adapter('proxmox');
-var ProxmoxGet = require(__dirname + '/lib/proxmox');
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const adapter = new utils.Adapter('proxmox');
+const ProxmoxGet = require('./lib/proxmox');
 
-var proxmox;
-var devices = [];
-var devicesOv = [];
-var objects = {};
-var connected = false;
-var requestInterval;
-var finish = false;
-
-var deviceparam = ['uptime', ""]
-
-//device constructor
-function devices(name, status, type, id) {
-
-    this.name = name;
-    this.type = type;
-    this.id = id;
-    this.status = status;
-}
-
+let proxmox;
+let objects = {};
+let connected = false;
+let requestInterval;
+let finish = false;
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
-        clearInterval(requestInterval);
+        proxmox.stop();
+        clearTimeout(requestInterval);
         adapter.log.info('cleaned everything up...');
         callback();
     } catch (e) {
         callback();
     }
-});
-
-// is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
 });
 
 // is called if a subscribed state changes
@@ -77,50 +58,43 @@ adapter.on('stateChange', function (id, state) {
                     case 'start':
                         proxmox.qemuStart(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'stop':
                         proxmox.qemuStop(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reset':
                         proxmox.qemuReset(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'resume':
                         proxmox.qemuResume(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'shutdown':
                         proxmox.qemuShutdown(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'suspend':
                         proxmox.qemuSuspend(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.qemuReboot(node, type, vmid, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
 
@@ -132,15 +106,13 @@ adapter.on('stateChange', function (id, state) {
                     case 'shutdowm':
                         proxmox.nodeShutdown(node, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.nodeReboot(node, function (data) {
                             adapter.log.info(data)
-                            sendRequest();
-                            setTimeout(sendRequest, 10000);
+                            sendRequest(10000);
                         });
                         break;
                 }
@@ -151,19 +123,6 @@ adapter.on('stateChange', function (id, state) {
         //proxmox.qemuStart("home","qemu","103",function (data) {
         //    adapter.log.info(JSON.stringify(data  ))
         //})
-    }
-});
-
-// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', function (obj) {
-    if (typeof obj === 'object' && obj.message) {
-        if (obj.command === 'send') {
-            // e.g. send email or pushover or whatever
-            console.log('send command');
-
-            // Send response in callback if required
-            if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-        }
     }
 });
 
@@ -179,27 +138,33 @@ adapter.on('ready', function () {
             adapter.config.pwd = decrypt('Zgfr56gFe87jJOM', adapter.config.pwd);
         }
 
-        if (adapter.config.ip !== "192.000.000.000") {
-
-            proxmox = new ProxmoxGet(adapter);
-
-            //check Intervall 
-            adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
-
-            if (adapter.config.param_requestInterval < 5) {
-                adapter.log.info('Intervall <5, set to 5');
-                adapter.config.param_requestInterval = 5;
-            }
-
-            proxmox._getTicket(function (result) {
-                if (result === "200" || result === 200) {
-                    main();
-                    adapter.setState('info.connection', true, true);
-                } else {
-                    adapter.setState('info.connection', false, true);
-                }
-            });
+        if (adapter.config.ip === "192.000.000.000") {
+            adapter.log.error('Please set the IP of your Proxmox host.');
+            typeof adapter.terminate === 'function' ? adapter.terminate(11): process.exit(11);
+            return;
         }
+
+        adapter.config.ip = adapter.config.ip || '';
+        proxmox = new ProxmoxGet(adapter);
+
+        //check Interval
+        adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
+
+        if (adapter.config.param_requestInterval < 5) {
+            adapter.log.info('Intervall <5s, set to 5s');
+            adapter.config.param_requestInterval = 5;
+        }
+
+        proxmox._getTicket(function (result) {
+            if (result === "200" || result === 200) {
+                main();
+                adapter.setState('info.connection', true, true);
+            } else {
+                adapter.setState('info.connection', false, true);
+                adapter.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
+                typeof adapter.terminate === 'function' ? adapter.terminate(11): process.exit(11);
+            }
+        });
     });
 });
 
@@ -213,37 +178,21 @@ function decrypt(key, value) {
 
 function main() {
 
-    proxmox = new ProxmoxGet(adapter);
-
     readObjects(_getNodes());
-
-
-
-    sendRequest();
-    // *1000 convert sek in MS.
-    requestInterval = setInterval(sendRequest, adapter.config.param_requestInterval * 1000);
 
     // in this template all states changes inside the adapters namespace are subscribed
     adapter.subscribeStates('*');
 }
 
-var requestTimeout = null;
+function sendRequest(nextRunTimeout) {
+    requestInterval && clearTimeout(requestInterval);
+    requestInterval = setTimeout(sendRequest, nextRunTimeout || adapter.config.param_requestInterval * 1000);
 
-function sendRequest() {
-
-    requestTimeout = setTimeout(function () {
-        requestTimeout = null;
-        if (connected) {
-            connected = false;
-            adapter.log.debug('Disconnect');
-            adapter.setState('info.connection', false, true);
-        }
-    }, 3000);
     if (finish) {
+        proxmox.resetResponseCache(); // Clear cache to start fresh
+
         try {
             proxmox.status(function (data) {
-
-                devices = data.data;
                 _setNodes(data.data);
                 adapter.log.debug("Devices: " + JSON.stringify(data));
             });
@@ -251,8 +200,6 @@ function sendRequest() {
 
         } catch (e) {
             adapter.log.warn('Cannot send request: ' + e);
-            clearTimeout(requestTimeout);
-            requestTimeout = null;
             if (connected) {
                 connected = false;
                 adapter.log.debug('Disconnect');
@@ -263,14 +210,9 @@ function sendRequest() {
 }
 
 
-
-
 function _getNodes(callback) {
-    var n = 0;
     proxmox.status(function (data) {
-
-        devices = data.data;
-        if (typeof (data.data) === 'undefined') {
+        if (!data.data) {
             adapter.log.error('Can not get Proxmox nodes! please restart adapter');
             return
         }
@@ -280,13 +222,11 @@ function _getNodes(callback) {
 };
 
 function _createNodes(devices, callback) {
-
-
+    let callbackCnt = 0;
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
-
-        var sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
         if (!objects[sid]) {
             adapter.setObjectNotExists(sid, {
                 type: 'channel',
@@ -295,7 +235,6 @@ function _createNodes(devices, callback) {
 
                 },
                 native: {
-
                     type: element.type
                 }
             });
@@ -341,28 +280,35 @@ function _createNodes(devices, callback) {
         if (element.cpu) _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
         if (element.maxcpu) _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
 
+        callbackCnt++;
         proxmox.nodeStatus(element.node, function (data) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-            var node_vals = data.data;
-            if (node_vals.uptime) _createState(sid, 'uptime', 'time', node_vals.uptime);
+            const node_vals = data.data;
+            if (node_vals) {
+                if (node_vals.uptime !== undefined) _createState(sid, 'uptime', 'time', node_vals.uptime);
 
-            if (node_vals.memory.used) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
-            if (node_vals.memory.used) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
-            if (node_vals.memory.total) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
-            if (node_vals.memory.free) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                if (node_vals.wait !== undefined) _createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
 
-            if (node_vals.loadavg[0]) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
-            if (node_vals.loadavg[1]) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
-            if (node_vals.loadavg[2]) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                if (node_vals.memory.total !== undefined) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                if (node_vals.memory.free !== undefined) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
 
-            if (node_vals.swap.used) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
-            if (node_vals.swap.free) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
-            if (node_vals.swap.total) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
-            if (node_vals.swap.free) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                if (node_vals.loadavg[0] !== undefined) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                if (node_vals.loadavg[1] !== undefined) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                if (node_vals.loadavg[2] !== undefined) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
 
-            _createVM(element.node, callback)
+                if (node_vals.swap.used !== undefined) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                if (node_vals.swap.total !== undefined) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+            }
+
+            if (!--callbackCnt) {
+                _createVM(callback)
+            }
         });
     });
 }
@@ -372,7 +318,7 @@ function _setNodes(devices, callback) {
     devices.forEach(function (element) {
         adapter.log.debug("Node :  " + JSON.stringify(element));
 
-        var sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
 
         adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
         adapter.setState(sid + '.cpu_max', element.maxcpu, true);
@@ -381,47 +327,49 @@ function _setNodes(devices, callback) {
 
             adapter.log.debug("Request states for node " + element.node);
 
-            var node_vals = data.data;
+            const node_vals = data.data;
 
             //check if node is empty
-            if (typeof (node_vals.uptime) === 'undefined') return
+            if (!node_vals || typeof node_vals.uptime === 'undefined') return;
 
-            adapter.setState(sid + '.uptime', node_vals.uptime, true);
+            if (node_vals.uptime !== undefined) adapter.setState(sid + '.uptime', node_vals.uptime, true);
             // adapter.setState(sid + '.' + name, val, true)
 
-            adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
-            adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
-            adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+            if (node_vals.wait !== undefined) adapter.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
 
-            adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
-            adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
-            adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+            if (node_vals.memory.total !== undefined) adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+            if (node_vals.memory.free !== undefined) adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
 
-            adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
-            adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
-            adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
-            adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+            if (node_vals.loadavg[0] !== undefined) adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+            if (node_vals.loadavg[1] !== undefined) adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+            if (node_vals.loadavg[2] !== undefined) adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
 
-            _setVM(element.node);
+            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+            if (node_vals.swap.free !== undefined) adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+            if (node_vals.swap.total !== undefined) adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+
         });
     });
+    _setVM();
 }
 
 
-function _setVM(node, callback) {
-    var sid = '';
+function _setVM(callback) {
+    let sid = '';
 
     proxmox.all(function (data) {
-        var qemu = data.data;
+        const qemu = data.data;
 
-        for (var i = 0; i < qemu.length; i++) {
+        for (let i = 0; i < qemu.length; i++) {
 
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
                 let type = qemu[i].type;
 
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     //check if vm is empty
                     if (!aktQemu || !aktQemu.name) return
@@ -439,11 +387,11 @@ function _setVM(node, callback) {
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
-                    var aktQemu = data.data;
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                    const aktQemu = data.data;
 
                     sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug("storage reload: " + name);
+                    adapter.log.debug("storage reload: " + name + ' for node ' + qemu[i].node);
 
                     findState(sid, aktQemu, (states) => {
                         states.forEach(function (element) {
@@ -457,22 +405,34 @@ function _setVM(node, callback) {
 }
 
 
-function _createVM(node, callback) {
+function _createVM(callback) {
     let sid = '';
 
+    const createDone = () => {
+        adapter.setState('info.connection', true, true);
+        if (!finish) {
+            requestInterval && clearTimeout(requestInterval);
+            requestInterval = setTimeout(sendRequest, 5000);
+        }
+        finish = true;
+    };
+
     proxmox.all(function (data) {
-        var qemu = data.data;
+        let callbackCnt = 0;
+
+        const qemu = data.data;
 
         if (!qemu || !Array.isArray(qemu)) return
 
-        for (var i = 0; i < qemu.length; i++) {
+        for (let i = 0; i < qemu.length; i++) {
 
             if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
                 let type = qemu[i].type;
 
+                callbackCnt++;
                 proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
 
-                    var aktQemu = data.data;
+                    const aktQemu = data.data;
 
                     if (!aktQemu) return
 
@@ -551,13 +511,15 @@ function _createVM(node, callback) {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
                         });
+                        if (!--callbackCnt) createDone();
                     });
                 });
             } else if (qemu[i].type === "storage") {
                 let type = qemu[i].type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, function (data, name) {
-                    var aktQemu = data.data;
+                callbackCnt++;
+                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                    const aktQemu = data.data;
 
                     if (!aktQemu) return
 
@@ -579,12 +541,9 @@ function _createVM(node, callback) {
                         states.forEach(function (element) {
                             _createState(element[0], element[1], element[2], element[3]);
                         });
-                    })
+                        if (!--callbackCnt) createDone();
+                    });
                 });
-            }
-            if (i === qemu.length - 1) {
-                adapter.setState('info.connection', true, true);
-                finish = true;
             }
         }
     });
@@ -633,18 +592,17 @@ function readObjects(callback) {
         } else {
             adapter.subscribeStates('*');
             objects = list;
-            adapter.log.debug("readin objects: " + JSON.stringify(list));
+            adapter.log.debug("reading objects: " + JSON.stringify(list));
             //updateConnect();
             callback && callback();
         }
     });
-};
+}
 
 
 function _createState(sid, name, type, val, callback) {
     adapter.log.debug('create state: ' + name);
-    var state = type;
-    switch (state) {
+    switch (type) {
         case 'time':
             adapter.setObjectNotExists(sid + '.' + name, {
                 common: {
@@ -733,14 +691,10 @@ function _createState(sid, name, type, val, callback) {
             }, adapter.setState(sid + '.' + name, val, true));
 
             break;
-        default:
-
     }
-
-};
+}
 
 function BtoMb(val) {
-
     return Math.round(val / 1048576)
 }
 

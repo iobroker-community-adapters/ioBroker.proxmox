@@ -116,8 +116,7 @@
         "authors": [
             {
                 "name": "MeisterTR",
-                "email": "meistertr.smarthome@gmail.com",
-                "pwd": ""
+                "email": "meistertr.smarthome@gmail.com"
             }
         ],
         "platform": "Javascript/Node.js",
@@ -137,9 +136,7 @@
         "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
         "loglevel": "info",
         "type": "infrastructure",
-        "restartAdapters": [
-            "vis"
-        ]
+        "restartAdapters": []
     },
     "native": {
         "param_requestInterval": 30,
