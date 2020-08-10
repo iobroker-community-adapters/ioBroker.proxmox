@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.0.2",
+        "version": "1.1.0",
         "news": {
+            "1.1.0":{
+                "en": "better performance and bugfixes",
+                "de": "bessere Leistung und Bugfixes",
+                "ru": "лучшая производительность и исправления",
+                "pt": "melhor desempenho e correções de bugs",
+                "nl": "betere prestaties en bugfixes",
+                "fr": "meilleures performances et corrections de bugs",
+                "it": "migliori prestazioni e correzioni di bug",
+                "es": "mejor rendimiento y corrección de errores",
+                "pl": "lepsza wydajność i poprawki błędów",
+                "zh-cn": "更好的性能和错误修正"
+              },
             "1.0.2":{
                 "en": "remove hardcoded pam, fix error",
                 "de": "Hardcodierte Pam entfernen, Fehler beheben",
