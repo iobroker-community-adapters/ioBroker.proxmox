@@ -330,6 +330,7 @@ function _setNodes(devices, callback) {
 
         adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
         adapter.setState(sid + '.cpu_max', element.maxcpu, true);
+        adapter.setState(sid + '.status', element.status, true);
 
         proxmox.nodeStatus(element.node, function (data) {
 
@@ -579,6 +580,8 @@ function findState(sid, states, cb) {
             result.push([sid, key, 'size', BtoMb(value)])
         } else if (key === "uptime") {
             result.push([sid, key, 'time', value])
+        } else if (key === "status") {
+            result.push([sid, key, 'status', value])            
         } else if (key === "netin" || key === "netout") {
             result.push([sid, key, 'sizeb', value]);
         } else if (key === "cpu") {
