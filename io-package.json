@@ -4,16 +4,16 @@
     "version": "1.1.1",
     "news": {
       "1.1.1": {
-         "en": "js-controller fix",
-          "de": "js-controller fix",
-          "ru": "исправление js-контроллера",
-          "pt": "correção de js-controlador",
-          "nl": "js-controller opgelost",
-          "fr": "correctif du contrôleur js",
-          "it": "correzione js-controller",
-          "es": "corrección del controlador js",
-          "pl": "Poprawka kontrolera js",
-          "zh-cn": "js-controller修复"
+         "en": "js-controller 3.2.x fix",
+          "de": "js-controller 3.2.xfix",
+          "ru": "исправление js-контроллера 3.2.x",
+          "pt": "correção de js-controlador 3.2.x",
+          "nl": "js-controller 3.2.x opgelost",
+          "fr": "correctif du contrôleur js 3.2.x",
+          "it": "correzione js-controller 3.2.x",
+          "es": "corrección del controlador js 3.2.x",
+          "pl": "Poprawka kontrolera js 3.2.x",
+          "zh-cn": "js-controller 3.2.x 修复"
       },
       "1.1.0": {
         "en": "better performance and bugfixes",
