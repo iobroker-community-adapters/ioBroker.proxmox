@@ -1,180 +1,180 @@
 {
-    "common": {
-        "name": "proxmox",
-        "version": "1.1.1",
-        "news": {
-            "1.1.1":{
-                "en": "js-controller fix",
-                "de": "bessere Leistung und Bugfixes",
-                "ru": "лучшая производительность и исправления",
-                "pt": "melhor desempenho e correções de bugs",
-                "nl": "betere prestaties en bugfixes",
-                "fr": "meilleures performances et corrections de bugs",
-                "it": "migliori prestazioni e correzioni di bug",
-                "es": "mejor rendimiento y corrección de errores",
-                "pl": "lepsza wydajność i poprawki błędów",
-                "zh-cn": "更好的性能和错误修正"
-              },
-            "1.1.0":{
-                "en": "better performance and bugfixes",
-                "de": "bessere Leistung und Bugfixes",
-                "ru": "лучшая производительность и исправления",
-                "pt": "melhor desempenho e correções de bugs",
-                "nl": "betere prestaties en bugfixes",
-                "fr": "meilleures performances et corrections de bugs",
-                "it": "migliori prestazioni e correzioni di bug",
-                "es": "mejor rendimiento y corrección de errores",
-                "pl": "lepsza wydajność i poprawki błędów",
-                "zh-cn": "更好的性能和错误修正"
-              },
-            "1.0.2":{
-                "en": "remove hardcoded pam, fix error",
-                "de": "Hardcodierte Pam entfernen, Fehler beheben",
-                "ru": "удалить жестко запрограммированный pam, исправить ошибку",
-                "pt": "remover pam codificado, corrigir erro",
-                "nl": "verwijder hardcoded pam, herstel fout",
-                "fr": "supprimer le pam codé en dur, corriger l'erreur",
-                "it": "rimuovere pam hardcoded, correggere l'errore",
-                "es": "eliminar la codificación rígida de pam, corregir el error",
-                "pl": "usuń na stałe pam, napraw błąd",
-                "zh-cn": "删除硬编码的pam，修复错误"
-              },
-            "1.0.1": {
-                "en": "Fix issue with special characters in password.",
-                "de": "Problem mit Sonderzeichen im Passwort behoben.",
-                "ru": "Исправлена проблема со специальными символами в пароле.",
-                "pt": "Corrija o problema com caracteres especiais na senha.",
-                "nl": "Probleem met speciale tekens in wachtwoord oplossen.",
-                "fr": "Correction d'un problème avec des caractères spéciaux dans le mot de passe.",
-                "it": "Risolvi il problema con caratteri speciali nella password.",
-                "es": "Soluciona el problema con caracteres especiales en la contraseña.",
-                "pl": "Napraw problem ze znakami specjalnymi w haśle.",
-                "zh-cn": "解决密码中特殊字符的问题。"
-              },
-            "0.5.1": {
-                "en": "add start/stop Button, add actual disk size",
-                "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
-                "ru": "Добавить кнопку Пуск / Стоп, добавить фактический размер диска",
-                "pt": "adicionar botão iniciar / parar, adicionar tamanho real do disco",
-                "nl": "start / stop-knop toevoegen, werkelijke schijfgrootte toevoegen",
-                "fr": "Ajouter un bouton start / stop, ajouter la taille réelle du disque",
-                "it": "Aggiungi pulsante start / stop, aggiungi la dimensione effettiva del disco",
-                "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
-                "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
-                "zh-cn": "添加开始/停止按钮，添加实际磁盘大小"
-              },
-            "0.3.2": {
-                "en": "fixed some bugs",
-                "de": "einige Fehler behoben",
-                "ru": "исправлены некоторые ошибки",
-                "pt": "consertou alguns bugs",
-                "nl": "een aantal bugs opgelost",
-                "fr": "correction de quelques bugs",
-                "it": "corretto alcuni bug",
-                "es": "arreglado algunos errores",
-                "pl": "naprawiono niektóre błędy",
-                "zh-cn": "修复了一些错误"
-            },
-            "0.3.0": {
-                "en": "added  container, storage and password encryption",
-                "de": "Container, Speicher und Passwort-Verschlüsselung hinzugefügt",
-                "ru": "добавлен контейнер, хранилище и шифрование паролей",
-                "pt": "contêiner, armazenamento e criptografia de senhas adicionados",
-                "nl": "toegevoegde container-, opslag- en wachtwoordversleuteling",
-                "fr": "ajout du conteneur, du stockage et du cryptage du mot de passe",
-                "it": "aggiunto il contenitore, la memorizzazione e la crittografia della password",
-                "es": "Contenedor añadido, almacenamiento y cifrado de contraseña.",
-                "pl": "dodano szyfrowanie kontenera, pamięci masowej i hasła",
-                "zh-cn": "添加了容器，存储和密码加密"
-            },
-            "0.0.2": {
-                "en": "first running version",
-                "de": "erste laufende Version",
-                "ru": "первая версия",
-                "pt": "primeira versão em execução",
-                "nl": "eerste versie",
-                "fr": "première version en cours",
-                "it": "prima versione funzionante",
-                "es": "primera versión ejecutiva",
-                "pl": "pierwsza działająca wersja",
-                "zh-cn": "第一个运行版本"
-            },
-            "0.0.1": {
-                "en": "initial adapter",
-                "de": "Initiale Version",
-                "ru": "Первоначальный адаптер",
-                "pt": "Versão inicial",
-                "fr": "Version initiale",
-                "nl": "Eerste release",
-                "it": "adattatore iniziale",
-                "es": "adaptador inicial",
-                "pl": "początkowy adapter",
-                "zh-cn": "初始适配器"
-            }
-        },
-        "title": "Proxmox VM",
-        "titleLang": {
-            "en": "get your Proxmox vm`s to iobroker",
-            "de": "Holen Sie sich Ihre Proxmox VMs zu iobroker",
-            "ru": "получите Proxmox vm `s iobroker",
-            "pt": "obter o seu Proxmox vm`s para iobroker",
-            "nl": "haal je Proxmox vm`s naar iobroker",
-            "fr": "Obtenez votre Proxmox vm`s à iobroker",
-            "it": "prendi il tuo Proxmox vm su iobroker",
-            "es": "obtener su Proxmox vm`s a iobroker",
-            "pl": "zdobądź swoje Proxmox vm`s do iobroker",
-            "zh-cn": "让你的Proxmox vm成为iobroker"
-        },
-        "desc": {
-            "en": "iobroker proxmox adapter",
-            "de": "iobroker Proxmox Adapter",
-            "ru": "iobroker proxmox adapter",
-            "pt": "adaptador proxmox iobroker",
-            "nl": "iobroker proxmox-adapter",
-            "fr": "adaptateur iobroker proxmox",
-            "it": "adattatore iobroker proxmox",
-            "es": "adaptador iobroker proxmox",
-            "pl": "Adapter iobroker proxmox",
-            "zh-cn": "iobroker proxmox适配器"
-        },
-        "authors": [
-            {
-                "name": "MeisterTR",
-                "email": "meistertr.smarthome@gmail.com"
-            }
-        ],
-        "connectionType": "local",
-        "dataSource": "push",
-	    "dependencies": [
-	      {
-		    "js-controller": ">=3.0.0"
-	      }
-	    ],
-        "platform": "Javascript/Node.js",
-        "mode": "daemon",
-        "icon": "logo.png",
-        "materialize": true,
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
-        "license": "MIT",
-        "keywords": [
-            "template",
-            "vis",
-            "GUI",
-            "graphical",
-            "scada"
-        ],
-        "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
-        "loglevel": "info",
-        "type": "infrastructure",
-        "restartAdapters": []
+  "common": {
+    "name": "proxmox",
+    "version": "1.1.1",
+    "news": {
+      "1.1.1": {
+        "en": "js-controller fix",
+        "de": "bessere Leistung und Bugfixes",
+        "ru": "лучшая производительность и исправления",
+        "pt": "melhor desempenho e correções de bugs",
+        "nl": "betere prestaties en bugfixes",
+        "fr": "meilleures performances et corrections de bugs",
+        "it": "migliori prestazioni e correzioni di bug",
+        "es": "mejor rendimiento y corrección de errores",
+        "pl": "lepsza wydajność i poprawki błędów",
+        "zh-cn": "更好的性能和错误修正"
+      },
+      "1.1.0": {
+        "en": "better performance and bugfixes",
+        "de": "bessere Leistung und Bugfixes",
+        "ru": "лучшая производительность и исправления",
+        "pt": "melhor desempenho e correções de bugs",
+        "nl": "betere prestaties en bugfixes",
+        "fr": "meilleures performances et corrections de bugs",
+        "it": "migliori prestazioni e correzioni di bug",
+        "es": "mejor rendimiento y corrección de errores",
+        "pl": "lepsza wydajność i poprawki błędów",
+        "zh-cn": "更好的性能和错误修正"
+      },
+      "1.0.2": {
+        "en": "remove hardcoded pam, fix error",
+        "de": "Hardcodierte Pam entfernen, Fehler beheben",
+        "ru": "удалить жестко запрограммированный pam, исправить ошибку",
+        "pt": "remover pam codificado, corrigir erro",
+        "nl": "verwijder hardcoded pam, herstel fout",
+        "fr": "supprimer le pam codé en dur, corriger l'erreur",
+        "it": "rimuovere pam hardcoded, correggere l'errore",
+        "es": "eliminar la codificación rígida de pam, corregir el error",
+        "pl": "usuń na stałe pam, napraw błąd",
+        "zh-cn": "删除硬编码的pam，修复错误"
+      },
+      "1.0.1": {
+        "en": "Fix issue with special characters in password.",
+        "de": "Problem mit Sonderzeichen im Passwort behoben.",
+        "ru": "Исправлена проблема со специальными символами в пароле.",
+        "pt": "Corrija o problema com caracteres especiais na senha.",
+        "nl": "Probleem met speciale tekens in wachtwoord oplossen.",
+        "fr": "Correction d'un problème avec des caractères spéciaux dans le mot de passe.",
+        "it": "Risolvi il problema con caratteri speciali nella password.",
+        "es": "Soluciona el problema con caracteres especiales en la contraseña.",
+        "pl": "Napraw problem ze znakami specjalnymi w haśle.",
+        "zh-cn": "解决密码中特殊字符的问题。"
+      },
+      "0.5.1": {
+        "en": "add start/stop Button, add actual disk size",
+        "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
+        "ru": "Добавить кнопку Пуск / Стоп, добавить фактический размер диска",
+        "pt": "adicionar botão iniciar / parar, adicionar tamanho real do disco",
+        "nl": "start / stop-knop toevoegen, werkelijke schijfgrootte toevoegen",
+        "fr": "Ajouter un bouton start / stop, ajouter la taille réelle du disque",
+        "it": "Aggiungi pulsante start / stop, aggiungi la dimensione effettiva del disco",
+        "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
+        "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
+        "zh-cn": "添加开始/停止按钮，添加实际磁盘大小"
+      },
+      "0.3.2": {
+        "en": "fixed some bugs",
+        "de": "einige Fehler behoben",
+        "ru": "исправлены некоторые ошибки",
+        "pt": "consertou alguns bugs",
+        "nl": "een aantal bugs opgelost",
+        "fr": "correction de quelques bugs",
+        "it": "corretto alcuni bug",
+        "es": "arreglado algunos errores",
+        "pl": "naprawiono niektóre błędy",
+        "zh-cn": "修复了一些错误"
+      },
+      "0.3.0": {
+        "en": "added  container, storage and password encryption",
+        "de": "Container, Speicher und Passwort-Verschlüsselung hinzugefügt",
+        "ru": "добавлен контейнер, хранилище и шифрование паролей",
+        "pt": "contêiner, armazenamento e criptografia de senhas adicionados",
+        "nl": "toegevoegde container-, opslag- en wachtwoordversleuteling",
+        "fr": "ajout du conteneur, du stockage et du cryptage du mot de passe",
+        "it": "aggiunto il contenitore, la memorizzazione e la crittografia della password",
+        "es": "Contenedor añadido, almacenamiento y cifrado de contraseña.",
+        "pl": "dodano szyfrowanie kontenera, pamięci masowej i hasła",
+        "zh-cn": "添加了容器，存储和密码加密"
+      },
+      "0.0.2": {
+        "en": "first running version",
+        "de": "erste laufende Version",
+        "ru": "первая версия",
+        "pt": "primeira versão em execução",
+        "nl": "eerste versie",
+        "fr": "première version en cours",
+        "it": "prima versione funzionante",
+        "es": "primera versión ejecutiva",
+        "pl": "pierwsza działająca wersja",
+        "zh-cn": "第一个运行版本"
+      },
+      "0.0.1": {
+        "en": "initial adapter",
+        "de": "Initiale Version",
+        "ru": "Первоначальный адаптер",
+        "pt": "Versão inicial",
+        "fr": "Version initiale",
+        "nl": "Eerste release",
+        "it": "adattatore iniziale",
+        "es": "adaptador inicial",
+        "pl": "początkowy adapter",
+        "zh-cn": "初始适配器"
+      }
     },
-    "native": {
-        "param_requestInterval": 30,
-        "port": 8006,
-        "name": "root",
-        "server":"pam",
-        "pwd": ""
+    "title": "Proxmox VM",
+    "titleLang": {
+      "en": "get your Proxmox vm`s to iobroker",
+      "de": "Holen Sie sich Ihre Proxmox VMs zu iobroker",
+      "ru": "получите Proxmox vm `s iobroker",
+      "pt": "obter o seu Proxmox vm`s para iobroker",
+      "nl": "haal je Proxmox vm`s naar iobroker",
+      "fr": "Obtenez votre Proxmox vm`s à iobroker",
+      "it": "prendi il tuo Proxmox vm su iobroker",
+      "es": "obtener su Proxmox vm`s a iobroker",
+      "pl": "zdobądź swoje Proxmox vm`s do iobroker",
+      "zh-cn": "让你的Proxmox vm成为iobroker"
     },
-    "objects": []
+    "desc": {
+      "en": "iobroker proxmox adapter",
+      "de": "iobroker Proxmox Adapter",
+      "ru": "iobroker proxmox adapter",
+      "pt": "adaptador proxmox iobroker",
+      "nl": "iobroker proxmox-adapter",
+      "fr": "adaptateur iobroker proxmox",
+      "it": "adattatore iobroker proxmox",
+      "es": "adaptador iobroker proxmox",
+      "pl": "Adapter iobroker proxmox",
+      "zh-cn": "iobroker proxmox适配器"
+    },
+    "authors": [
+      {
+        "name": "MeisterTR",
+        "email": "meistertr.smarthome@gmail.com"
+      }
+    ],
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "icon": "logo.png",
+    "materialize": true,
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
+    "license": "MIT",
+    "keywords": [
+      "template",
+      "vis",
+      "GUI",
+      "graphical",
+      "scada"
+    ],
+    "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
+    "loglevel": "info",
+    "type": "infrastructure",
+    "restartAdapters": [],
+    "connectionType": "local",
+    "dataSource": "push",
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
+    ]
+  },
+  "native": {
+    "param_requestInterval": 30,
+    "port": 8006,
+    "name": "root",
+    "server": "pam",
+    "pwd": ""
+  },
+  "objects": []
 }
