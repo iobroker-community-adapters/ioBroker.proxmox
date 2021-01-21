@@ -236,7 +236,7 @@ function _createNodes(devices, callback) {
 
         const sid = adapter.namespace + '.' + element.type + '_' + element.node;
         if (!objects[sid]) {
-            adapter.setObjectNotExists(sid, {
+            adapter.extendObjectAsync(sid, {
                 type: 'channel',
                 common: {
                     name: element.node,
@@ -246,7 +246,7 @@ function _createNodes(devices, callback) {
                     type: element.type
                 }
             });
-            adapter.setObjectNotExists(sid + '.status', {
+            adapter.extendObjectAsync(sid + '.status', {
                 common: {
                     name: 'Status',
                     role: 'indicator.status',
@@ -257,7 +257,7 @@ function _createNodes(devices, callback) {
                 type: 'state',
                 native: {}
             });
-            adapter.setObjectNotExists(sid + '.shutdown', {
+            adapter.extendObjectAsync(sid + '.shutdown', {
                 type: 'state',
                 common: {
                     name: 'shutdown',
@@ -270,7 +270,7 @@ function _createNodes(devices, callback) {
                 },
                 native: {}
             });
-            adapter.setObjectNotExists(sid + '.reboot', {
+            adapter.extendObjectAsync(sid + '.reboot', {
                 type: 'state',
                 common: {
                     name: 'reboot',
