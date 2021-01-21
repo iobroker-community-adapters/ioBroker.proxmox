@@ -136,6 +136,13 @@
         "icon": "logo.png",
         "materialize": true,
         "enabled": true,
+        "connectionType": "local",
+        "dataSource": "push",
+        "dependencies": [
+            {
+                "js-controller": ">=3.1.0"
+            }
+        ],
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
         "license": "MIT",
         "keywords": [
