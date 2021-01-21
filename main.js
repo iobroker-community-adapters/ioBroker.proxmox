@@ -236,7 +236,7 @@ function _createNodes(devices, callback) {
 
         const sid = adapter.namespace + '.' + element.type + '_' + element.node;
         if (!objects[sid]) {
-            adapter.extendObjectAsync(sid, {
+            adapter.setObjectNotExistsAsync(sid, {
                 type: 'channel',
                 common: {
                     name: element.node,
@@ -246,7 +246,7 @@ function _createNodes(devices, callback) {
                     type: element.type
                 }
             });
-            adapter.extendObjectAsync(sid + '.status', {
+            adapter.setObjectNotExistsAsync(sid + '.status', {
                 common: {
                     name: 'Status',
                     role: 'indicator.status',
@@ -257,7 +257,7 @@ function _createNodes(devices, callback) {
                 type: 'state',
                 native: {}
             });
-            adapter.extendObjectAsync(sid + '.shutdown', {
+            adapter.setObjectNotExistsAsync(sid + '.shutdown', {
                 type: 'state',
                 common: {
                     name: 'shutdown',
@@ -270,7 +270,7 @@ function _createNodes(devices, callback) {
                 },
                 native: {}
             });
-            adapter.extendObjectAsync(sid + '.reboot', {
+            adapter.setObjectNotExistsAsync(sid + '.reboot', {
                 type: 'state',
                 common: {
                     name: 'reboot',
@@ -450,7 +450,7 @@ function _createVM(callback) {
                     adapter.log.debug("new " + type + ": " + aktQemu.name);
 
                     if (!objects[sid]) {
-                        adapter.extendObjectAsync(sid, {
+                        adapter.setObjectNotExistsAsync(sid, {
                             type: 'channel',
                             common: {
                                 name: aktQemu.name
@@ -463,7 +463,7 @@ function _createVM(callback) {
                         });
 
                     }
-                    adapter.extendObjectAsync(sid + '.start', {
+                    adapter.setObjectNotExistsAsync(sid + '.start', {
                         type: 'state',
                         common: {
                             name: 'start',
@@ -476,7 +476,7 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.extendObjectAsync(sid + '.stop', {
+                    adapter.setObjectNotExistsAsync(sid + '.stop', {
                         type: 'state',
                         common: {
                             name: 'stop',
@@ -489,7 +489,7 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.extendObjectAsync(sid + '.shutdown', {
+                    adapter.setObjectNotExistsAsync(sid + '.shutdown', {
                         type: 'state',
                         common: {
                             name: 'shutdown',
@@ -502,7 +502,7 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.extendObjectAsync(sid + '.reboot', {
+                    adapter.setObjectNotExistsAsync(sid + '.reboot', {
                         type: 'state',
                         common: {
                             name: 'reboot',
@@ -536,7 +536,7 @@ function _createVM(callback) {
                     adapter.log.debug("new  storage: " + name);
 
                     if (!objects[sid]) {
-                        adapter.extendObjectAsync(sid, {
+                        adapter.setObjectNotExistsAsync(sid, {
                             type: 'channel',
                             common: {
                                 name: name
@@ -615,7 +615,7 @@ function _createState(sid, name, type, val, callback) {
     adapter.log.debug('create state: ' + name);
     switch (type) {
         case 'time':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
@@ -630,7 +630,7 @@ function _createState(sid, name, type, val, callback) {
 
             break;
         case 'size':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
@@ -645,7 +645,7 @@ function _createState(sid, name, type, val, callback) {
 
             break;
         case 'sizeb':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
@@ -660,7 +660,7 @@ function _createState(sid, name, type, val, callback) {
 
             break;
         case 'level':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
@@ -675,7 +675,7 @@ function _createState(sid, name, type, val, callback) {
 
             break;
         case 'default_num':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
@@ -689,7 +689,7 @@ function _createState(sid, name, type, val, callback) {
 
             break;
         case 'text':
-            adapter.extendObjectAsync(sid + '.' + name, {
+            adapter.setObjectNotExistsAsync(sid + '.' + name, {
                 common: {
                     name: name,
                     role: 'value',
