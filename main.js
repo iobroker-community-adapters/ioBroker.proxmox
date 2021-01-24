@@ -1,6 +1,6 @@
 /* jshint -W097 */ // jshint strict:false
 /*jslint node: true */
-"use strict";
+'use strict';
 
 // you have to require the utils module and call adapter function
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
@@ -20,7 +20,7 @@ adapter.on('unload', function (callback) {
         clearTimeout(requestInterval);
         adapter.log.info('cleaned everything up...');
         callback();
-    } catch (e) {
+    } catch {
         callback();
     }
 });
@@ -33,74 +33,74 @@ adapter.on('stateChange', function (id, state) {
     // you can use the ack flag to detect if it is status (true) or command (false)
     if (state && !state.ack) {
         //adapter.log.info('ack is not set!');
-        let vmdata = id.split('.')[2];
-        let type = vmdata.split('_')[0];
+        const vmdata = id.split('.')[2];
+        const type = vmdata.split('_')[0];
         let vmname, node;
         if (type === 'lxc' || type === 'qemu') {
             vmname = vmdata.split('_')[1];
         } else if (type === 'node') {
             node = vmdata.split('_')[1];
-        }  
-        let command = id.split('.')[3];
+        }
+        const command = id.split('.')[3];
         let vmid;
 
-        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname)
+        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname);
         proxmox.all(function (data) {
-            
-            adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
+
+            adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid);
             if (type === 'lxc' || type === 'qemu') {
                 // get vm vid
-                let vms = data.data;
-                let vm = vms.find(vm => vm.name === vmname);
+                const vms = data.data;
+                const vm = vms.find(vm => vm.name === vmname);
                 if (vm) {
-                    adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm))
+                    adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm));
                     vmid = vm.vmid;
                     node = vm.node;
                 } else {
-                    adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data))
-                    return
+                    adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data));
+                    return;
                 }
-                adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid)
+                adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid);
                 switch (command) {
                     case 'start':
                         proxmox.qemuStart(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'stop':
                         proxmox.qemuStop(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'reset':
                         proxmox.qemuReset(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'resume':
                         proxmox.qemuResume(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'shutdown':
                         proxmox.qemuShutdown(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'suspend':
                         proxmox.qemuSuspend(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.qemuReboot(node, type, vmid, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
@@ -109,24 +109,23 @@ adapter.on('stateChange', function (id, state) {
                         break;
                 }
             } else if (type === 'node') {
-                adapter.log.debug('sending shutdown/reboot command')
+                adapter.log.debug('sending shutdown/reboot command');
                 switch (command) {
                     case 'shutdown':
                         proxmox.nodeShutdown(node, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                     case 'reboot':
                         proxmox.nodeReboot(node, function (data) {
-                            adapter.log.info(data)
+                            adapter.log.info(data);
                             sendRequest(10000);
                         });
                         break;
                 }
             }
         });
-
 
         //proxmox.qemuStart("home","qemu","103",function (data) {
         //    adapter.log.info(JSON.stringify(data  ))
@@ -146,7 +145,7 @@ adapter.on('ready', function () {
             adapter.config.pwd = decrypt('Zgfr56gFe87jJOM', adapter.config.pwd);
         }
 
-        if (adapter.config.ip === "192.000.000.000") {
+        if (adapter.config.ip === '192.000.000.000') {
             adapter.log.error('Please set the IP of your Proxmox host.');
             typeof adapter.terminate === 'function' ? adapter.terminate(11): process.exit(11);
             return;
@@ -164,7 +163,7 @@ adapter.on('ready', function () {
         }
 
         proxmox._getTicket(function (result) {
-            if (result === "200" || result === 200) {
+            if (result === '200' || result === 200) {
                 main();
                 adapter.setState('info.connection', true, true);
             } else {
@@ -202,9 +201,8 @@ function sendRequest(nextRunTimeout) {
         try {
             proxmox.status(function (data) {
                 _setNodes(data.data);
-                adapter.log.debug("Devices: " + JSON.stringify(data));
+                adapter.log.debug('Devices: ' + JSON.stringify(data));
             });
-
 
         } catch (e) {
             adapter.log.warn('Cannot send request: ' + e);
@@ -217,47 +215,58 @@ function sendRequest(nextRunTimeout) {
     }
 }
 
-
-function _getNodes(callback) {
-    proxmox.status(function (data) {
+function _getNodes() {
+    proxmox.status(async data => {
         if (!data.data) {
             adapter.log.error('Can not get Proxmox nodes! please restart adapter');
-            return
+            return;
         }
-        _createNodes(data.data, callback);
-        adapter.log.debug("Devices: " + JSON.stringify(data));
+
+        try {
+            await _createNodes(data.data);
+        } catch (e) {
+            adapter.log.error(`Could not create nodes, please restart adapter: ${e.message}`);
+        }
+        adapter.log.debug(`Devices: ${JSON.stringify(data)}`);
     });
-};
+}
 
-function _createNodes(devices, callback) {
-    let callbackCnt = 0;
-    devices.forEach(function (element) {
-        adapter.log.debug("Node :  " + JSON.stringify(element));
+/**
+ * Create all node channels
+ * @param {any[]} devices - array of devices
+ * @return {Promise<void>}
+ * @private
+ */
+async function _createNodes(devices) {
+    for (const element of devices) {
+        adapter.log.debug(`Node:  ${JSON.stringify(element)}`);
 
-        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = `${adapter.namespace}.${element.type}_${element.node}`;
         if (!objects[sid]) {
-            adapter.setObjectNotExists(sid, {
+            await adapter.setObjectNotExistsAsync(sid, {
                 type: 'channel',
                 common: {
-                    name: element.node,
+                    name: element.node
 
                 },
                 native: {
                     type: element.type
                 }
             });
-            adapter.setObjectNotExists(sid + '.status', {
+
+            await adapter.setObjectNotExistsAsync(`${sid}.status`, {
                 common: {
                     name: 'Status',
                     role: 'indicator.status',
                     write: false,
                     read: true,
-                    type: 'boolean'
+                    type: 'string'
                 },
                 type: 'state',
                 native: {}
             });
-            adapter.setObjectNotExists(sid + '.shutdown', {
+
+            await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
                 type: 'state',
                 common: {
                     name: 'shutdown',
@@ -270,7 +279,8 @@ function _createNodes(devices, callback) {
                 },
                 native: {}
             });
-            adapter.setObjectNotExists(sid + '.reboot', {
+
+            await adapter.setObjectNotExistsAsync(`${sid}.reboot`, {
                 type: 'state',
                 common: {
                     name: 'reboot',
@@ -285,46 +295,73 @@ function _createNodes(devices, callback) {
             });
         }
 
-        if (element.cpu) _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
-        if (element.maxcpu) _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
+        if (element.cpu) {
+            await _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
+        }
+        if (element.maxcpu) {
+            await _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
+        }
 
-        callbackCnt++;
-        proxmox.nodeStatus(element.node, function (data) {
+        proxmox.nodeStatus(element.node, async data => {
 
-            adapter.log.debug("Request states for node " + element.node);
+            adapter.log.debug('Request states for node ' + element.node);
 
             const node_vals = data.data;
             if (node_vals) {
-                if (node_vals.uptime !== undefined) _createState(sid, 'uptime', 'time', node_vals.uptime);
+                if (node_vals.uptime !== undefined) {
+                    await _createState(sid, 'uptime', 'time', node_vals.uptime);
+                }
 
-                if (node_vals.wait !== undefined) _createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
+                if (node_vals.wait !== undefined) {
+                    await _createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
+                }
 
-                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
-                if (node_vals.memory.used !== undefined) _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
-                if (node_vals.memory.total !== undefined) _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
-                if (node_vals.memory.free !== undefined) _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                if (node_vals.memory.used !== undefined) {
+                    await _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                }
+                if (node_vals.memory.used !== undefined) {
+                    await _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                }
+                if (node_vals.memory.total !== undefined) {
+                    await _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                }
+                if (node_vals.memory.free !== undefined) {
+                    await _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                }
 
-                if (node_vals.loadavg[0] !== undefined) _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
-                if (node_vals.loadavg[1] !== undefined) _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
-                if (node_vals.loadavg[2] !== undefined) _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                if (node_vals.loadavg[0] !== undefined) {
+                    await _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                }
+                if (node_vals.loadavg[1] !== undefined) {
+                    await _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                }
+                if (node_vals.loadavg[2] !== undefined) {
+                    await _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                }
 
-                if (node_vals.swap.used !== undefined) _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
-                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
-                if (node_vals.swap.total !== undefined) _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
-                if (node_vals.swap.free !== undefined) _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                if (node_vals.swap.used !== undefined) {
+                    await _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                }
+                if (node_vals.swap.free !== undefined) {
+                    await _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                }
+                if (node_vals.swap.total !== undefined) {
+                    await _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                }
+                if (node_vals.swap.free !== undefined) {
+                    await _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                }
             }
 
-            if (!--callbackCnt) {
-                _createVM(callback)
-            }
+            _createVM();
         });
-    });
+    }
 }
 
-function _setNodes(devices, callback) {
+function _setNodes(devices) {
 
-    devices.forEach(function (element) {
-        adapter.log.debug("Node :  " + JSON.stringify(element));
+    for (const element of devices) {
+        adapter.log.debug('Node :  ' + JSON.stringify(element));
 
         const sid = adapter.namespace + '.' + element.type + '_' + element.node;
 
@@ -334,78 +371,106 @@ function _setNodes(devices, callback) {
 
         proxmox.nodeStatus(element.node, function (data) {
 
-            adapter.log.debug("Request states for node " + element.node);
+            adapter.log.debug('Request states for node ' + element.node);
 
             const node_vals = data.data;
 
             //check if node is empty
-            if (!node_vals || typeof node_vals.uptime === 'undefined') return;
+            if (!node_vals || typeof node_vals.uptime === 'undefined') {
+                return;
+            }
 
-            if (node_vals.uptime !== undefined) adapter.setState(sid + '.uptime', node_vals.uptime, true);
+            if (node_vals.uptime !== undefined) {
+                adapter.setState(sid + '.uptime', node_vals.uptime, true);
+            }
             // adapter.setState(sid + '.' + name, val, true)
 
-            if (node_vals.wait !== undefined) adapter.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
+            if (node_vals.wait !== undefined) {
+                adapter.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
+            }
 
-            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
-            if (node_vals.memory.used !== undefined) adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
-            if (node_vals.memory.total !== undefined) adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
-            if (node_vals.memory.free !== undefined) adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+            if (node_vals.memory.used !== undefined) {
+                adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+            }
+            if (node_vals.memory.used !== undefined) {
+                adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+            }
+            if (node_vals.memory.total !== undefined) {
+                adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+            }
+            if (node_vals.memory.free !== undefined) {
+                adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+            }
 
-            if (node_vals.loadavg[0] !== undefined) adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
-            if (node_vals.loadavg[1] !== undefined) adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
-            if (node_vals.loadavg[2] !== undefined) adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+            if (node_vals.loadavg[0] !== undefined) {
+                adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+            }
+            if (node_vals.loadavg[1] !== undefined) {
+                adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+            }
+            if (node_vals.loadavg[2] !== undefined) {
+                adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+            }
 
-            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
-            if (node_vals.swap.free !== undefined) adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
-            if (node_vals.swap.total !== undefined) adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
-            if (node_vals.swap.used !== undefined) adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+            if (node_vals.swap.used !== undefined) {
+                adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+            }
+            if (node_vals.swap.free !== undefined) {
+                adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+            }
+            if (node_vals.swap.total !== undefined) {
+                adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+            }
+            if (node_vals.swap.used !== undefined) {
+                adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+            }
 
         });
-    });
+    }
     _setVM();
 }
 
-
-function _setVM(callback) {
-    let sid = '';
-
+function _setVM() {
     proxmox.all(function (data) {
-        const qemu = data.data;
+        const qemuArr = data.data;
 
-        for (let i = 0; i < qemu.length; i++) {
+        for (const qemu of qemuArr) {
+            let sid = '';
 
-            if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
-                let type = qemu[i].type;
+            if (qemu.type === 'qemu' || qemu.type === 'lxc') {
+                const type = qemu.type;
 
-                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
+                proxmox.qemuStatus(qemu.node, type, qemu.vmid, function (data) {
                     const aktQemu = data.data;
 
                     //check if vm is empty
-                    if (!aktQemu || !aktQemu.name) return
+                    if (!aktQemu || !aktQemu.name) {
+                        return;
+                    }
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
-                    findState(sid, aktQemu, (states) => {
-                        states.forEach(function (element) {
+                    findState(sid, aktQemu, states => {
+                        for (const element of states) {
                             adapter.setState(element[0] + '.' + element[1], element[3], true);
-                        });
+                        }
                     });
 
                 });
 
-            } else if (qemu[i].type === "storage") {
-                let type = qemu[i].type;
+            } else if (qemu.type === 'storage') {
+                const type = qemu.type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                     const aktQemu = data.data;
 
                     sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug("storage reload: " + name + ' for node ' + qemu[i].node);
+                    adapter.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
 
-                    findState(sid, aktQemu, (states) => {
-                        states.forEach(function (element) {
+                    findState(sid, aktQemu, states => {
+                        for (const element of states) {
                             adapter.setState(element[0] + '.' + element[1], element[3], true);
-                        });
+                        }
                     });
                 });
             }
@@ -413,10 +478,7 @@ function _setVM(callback) {
     });
 }
 
-
-function _createVM(callback) {
-    let sid = '';
-
+function _createVM() {
     const createDone = () => {
         adapter.setState('info.connection', true, true);
         if (!finish) {
@@ -426,31 +488,34 @@ function _createVM(callback) {
         finish = true;
     };
 
-    proxmox.all(function (data) {
+    proxmox.all(data => {
         let callbackCnt = 0;
 
-        const qemu = data.data;
+        const qemuArr = data.data;
 
-        if (!qemu || !Array.isArray(qemu)) return
+        if (!qemuArr || !Array.isArray(qemuArr)) {
+            return;
+        }
 
-        for (let i = 0; i < qemu.length; i++) {
-
-            if (qemu[i].type === "qemu" || qemu[i].type === "lxc") {
-                let type = qemu[i].type;
+        for (const qemu of qemuArr) {
+            let sid = '';
+            if (qemu.type === 'qemu' || qemu.type === 'lxc') {
+                const type = qemu.type;
 
                 callbackCnt++;
-                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
-
+                proxmox.qemuStatus(qemu.node, type, qemu.vmid, async data => {
                     const aktQemu = data.data;
 
-                    if (!aktQemu) return
+                    if (!aktQemu) {
+                        return;
+                    }
 
-                    sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
+                    sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
 
-                    adapter.log.debug("new " + type + ": " + aktQemu.name);
+                    adapter.log.debug(`new ${type}: ${aktQemu.name}`);
 
                     if (!objects[sid]) {
-                        adapter.setObjectNotExists(sid, {
+                        await adapter.setObjectNotExistsAsync(sid, {
                             type: 'channel',
                             common: {
                                 name: aktQemu.name
@@ -463,7 +528,8 @@ function _createVM(callback) {
                         });
 
                     }
-                    adapter.setObjectNotExists(sid + '.start', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.start`, {
                         type: 'state',
                         common: {
                             name: 'start',
@@ -476,7 +542,8 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.stop', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.stop`, {
                         type: 'state',
                         common: {
                             name: 'stop',
@@ -489,7 +556,8 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.shutdown', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
                         type: 'state',
                         common: {
                             name: 'shutdown',
@@ -502,7 +570,8 @@ function _createVM(callback) {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.reboot', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.reboot`, {
                         type: 'state',
                         common: {
                             name: 'reboot',
@@ -516,24 +585,46 @@ function _createVM(callback) {
                         native: {}
                     });
 
-                    findState(sid, aktQemu, (states) => {
-                        states.forEach(function (element) {
-                            _createState(element[0], element[1], element[2], element[3]);
-                        });
-                        if (!--callbackCnt) createDone();
+                    await adapter.setObjectNotExistsAsync(`${sid}.status`, {
+                        type: 'state',
+                        common: {
+                            name: 'status',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'Status of VM'
+
+                        },
+                        native: {}
+                    });
+
+                    findState(sid, aktQemu, async states => {
+                        for (const element of states) {
+                            try {
+                                await _createState(element[0], element[1], element[2], element[3]);
+                            } catch (e) {
+                                adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                            }
+                        }
+                        if (!--callbackCnt) {
+                            createDone();
+                        }
                     });
                 });
-            } else if (qemu[i].type === "storage") {
-                let type = qemu[i].type;
+            } else if (qemu.type === 'storage') {
+                const type = qemu.type;
 
                 callbackCnt++;
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                     const aktQemu = data.data;
 
-                    if (!aktQemu) return
+                    if (!aktQemu) {
+                        return;
+                    }
 
                     sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug("new  storage: " + name);
+                    adapter.log.debug('new  storage: ' + name);
 
                     if (!objects[sid]) {
                         adapter.setObjectNotExists(sid, {
@@ -546,11 +637,17 @@ function _createVM(callback) {
                             }
                         });
                     }
-                    findState(sid, aktQemu, (states) => {
-                        states.forEach(function (element) {
-                            _createState(element[0], element[1], element[2], element[3]);
-                        });
-                        if (!--callbackCnt) createDone();
+                    findState(sid, aktQemu, async states => {
+                        for (const element of states) {
+                            try {
+                                await _createState(element[0], element[1], element[2], element[3]);
+                            } catch (e) {
+                                adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                            }
+                        }
+                        if (!--callbackCnt) {
+                            createDone();
+                        }
                     });
                 });
             }
@@ -559,63 +656,72 @@ function _createVM(callback) {
 }
 
 function findState(sid, states, cb) {
-    let result = [];
+    const result = [];
 
-    for (let key in states) {
-        let value = states[key];
-        adapter.log.debug("search state" + key + ": " + value);
+    for (const key of Object.keys(states)) {
+        const value = states[key];
+        adapter.log.debug('search state' + key + ': ' + value);
 
-        if (key === "mem") {
-            result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)])
-            adapter.log.debug(states.mem, states.maxmem)
+        if (key === 'mem') {
+            result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)]);
+            adapter.log.debug(states.mem, states.maxmem);
         }
-        if (key === "disk") {
-            result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)])
-            adapter.log.debug(states.mem, states.maxmem)
+        if (key === 'disk') {
+            result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)]);
+            adapter.log.debug(states.mem, states.maxmem);
         }
-        if (key === "used") {
-            result.push([sid, key + '_lev', 'level', p(states.used, states.total)])
+        if (key === 'used') {
+            result.push([sid, key + '_lev', 'level', p(states.used, states.total)]);
         }
-        if (key === "mem" || key === "disk" || key === "balloon_min" || key === "maxdisk" || key === "maxmem" || key === "diskwrite" || key === "used" || key === "total" || key === "avail") {
-            result.push([sid, key, 'size', BtoMb(value)])
-        } else if (key === "uptime") {
-            result.push([sid, key, 'time', value])
-        } else if (key === "status") {
-            result.push([sid, key, 'status', value])            
-        } else if (key === "netin" || key === "netout") {
+        if (key === 'mem' || key === 'disk' || key === 'balloon_min' || key === 'maxdisk' || key === 'maxmem' || key === 'diskwrite' || key === 'used' || key === 'total' || key === 'avail') {
+            result.push([sid, key, 'size', BtoMb(value)]);
+        } else if (key === 'uptime') {
+            result.push([sid, key, 'time', value]);
+        } else if (key === 'status') {
+            result.push([sid, key, 'status', value]);
+        } else if (key === 'netin' || key === 'netout') {
             result.push([sid, key, 'sizeb', value]);
-        } else if (key === "cpu") {
+        } else if (key === 'cpu') {
             result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
-        } else if (key === "pid" || key === "cpus" || key === "shared" || key === "enabled" || key === "active" || key === "shared") {
+        } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
             result.push([sid, key, 'default_num', value]);
-        } else if (key === "content" || key === "type" || key === "status") {
+        } else if (key === 'content' || key === 'type' || key === 'status') {
             result.push([sid, key, 'text', value]);
         }
     }
-    adapter.log.debug('found states:_' + JSON.stringify(result))
+    adapter.log.debug('found states:_' + JSON.stringify(result));
     cb(result);
 }
 
 function readObjects(callback) {
-    adapter.getForeignObjects(adapter.namespace + ".*", 'channel', function (err, list) {
+    adapter.getForeignObjects(adapter.namespace + '.*', 'channel', function (err, list) {
         if (err) {
-            adapter.log.error(err);
+            adapter.log.error(err.message);
         } else {
             adapter.subscribeStates('*');
             objects = list;
-            adapter.log.debug("reading objects: " + JSON.stringify(list));
+            adapter.log.debug('reading objects: ' + JSON.stringify(list));
             //updateConnect();
             callback && callback();
         }
     });
 }
 
-
-function _createState(sid, name, type, val, callback) {
-    adapter.log.debug('create state: ' + name);
+/**
+ * Create state object if non existing and set states
+ *
+ * @param {string} sid - state id w/o name
+ * @param {string} name - name of the state
+ * @param {string} type - e.g. time
+ * @param {any} val - state val
+ * @return {Promise<void>}
+ * @private
+ */
+async function _createState(sid, name, type, val) {
+    adapter.log.debug(`create state: ${name}`);
     switch (type) {
         case 'time':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -626,11 +732,12 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
         case 'size':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -641,11 +748,12 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
         case 'sizeb':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -656,11 +764,12 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
         case 'level':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -671,11 +780,12 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
         case 'default_num':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -685,11 +795,12 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
         case 'text':
-            adapter.setObjectNotExists(sid + '.' + name, {
+            await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
                 common: {
                     name: name,
                     role: 'value',
@@ -699,16 +810,17 @@ function _createState(sid, name, type, val, callback) {
                 },
                 type: 'state',
                 native: {}
-            }, adapter.setState(sid + '.' + name, val, true));
+            });
 
+            await adapter.setStateAsync(`${sid}.${name}`, val, true);
             break;
     }
 }
 
 function BtoMb(val) {
-    return Math.round(val / 1048576)
+    return Math.round(val / 1048576);
 }
 
 function p(vala, valb) {
-    return Math.round(vala / valb * 10000) / 100
+    return Math.round(vala / valb * 10000) / 100;
 }
