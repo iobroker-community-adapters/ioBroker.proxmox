@@ -260,7 +260,7 @@ async function _createNodes(devices) {
                     role: 'indicator.status',
                     write: false,
                     read: true,
-                    type: 'boolean'
+                    type: 'string'
                 },
                 type: 'state',
                 native: {}
@@ -360,7 +360,7 @@ async function _createNodes(devices) {
 
 function _setNodes(devices) {
 
-    devices.forEach(function (element) {
+    for (const element of devices) {
         adapter.log.debug('Node :  ' + JSON.stringify(element));
 
         const sid = adapter.namespace + '.' + element.type + '_' + element.node;
@@ -426,22 +426,21 @@ function _setNodes(devices) {
             }
 
         });
-    });
+    }
     _setVM();
 }
 
 function _setVM() {
-    let sid = '';
-
     proxmox.all(function (data) {
-        const qemu = data.data;
+        const qemuArr = data.data;
 
-        for (let i = 0; i < qemu.length; i++) {
+        for (const qemu of qemuArr) {
+            let sid = '';
 
-            if (qemu[i].type === 'qemu' || qemu[i].type === 'lxc') {
-                const type = qemu[i].type;
+            if (qemu.type === 'qemu' || qemu.type === 'lxc') {
+                const type = qemu.type;
 
-                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
+                proxmox.qemuStatus(qemu.node, type, qemu.vmid, function (data) {
                     const aktQemu = data.data;
 
                     //check if vm is empty
@@ -452,26 +451,26 @@ function _setVM() {
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
                     findState(sid, aktQemu, states => {
-                        states.forEach(function (element) {
+                        for (const element of states) {
                             adapter.setState(element[0] + '.' + element[1], element[3], true);
-                        });
+                        }
                     });
 
                 });
 
-            } else if (qemu[i].type === 'storage') {
-                const type = qemu[i].type;
+            } else if (qemu.type === 'storage') {
+                const type = qemu.type;
 
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                     const aktQemu = data.data;
 
                     sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug('storage reload: ' + name + ' for node ' + qemu[i].node);
+                    adapter.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
 
                     findState(sid, aktQemu, states => {
-                        states.forEach(function (element) {
+                        for (const element of states) {
                             adapter.setState(element[0] + '.' + element[1], element[3], true);
-                        });
+                        }
                     });
                 });
             }
@@ -480,8 +479,6 @@ function _setVM() {
 }
 
 function _createVM() {
-    let sid = '';
-
     const createDone = () => {
         adapter.setState('info.connection', true, true);
         if (!finish) {
@@ -494,27 +491,26 @@ function _createVM() {
     proxmox.all(data => {
         let callbackCnt = 0;
 
-        const qemu = data.data;
+        const qemuArr = data.data;
 
-        if (!qemu || !Array.isArray(qemu)) {
+        if (!qemuArr || !Array.isArray(qemuArr)) {
             return;
         }
 
-        for (let i = 0; i < qemu.length; i++) {
-
-            if (qemu[i].type === 'qemu' || qemu[i].type === 'lxc') {
-                const type = qemu[i].type;
+        for (const qemu of qemuArr) {
+            let sid = '';
+            if (qemu.type === 'qemu' || qemu.type === 'lxc') {
+                const type = qemu.type;
 
                 callbackCnt++;
-                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, async data => {
-
+                proxmox.qemuStatus(qemu.node, type, qemu.vmid, async data => {
                     const aktQemu = data.data;
 
                     if (!aktQemu) {
                         return;
                     }
 
-                    sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
+                    sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
 
                     adapter.log.debug(`new ${type}: ${aktQemu.name}`);
 
@@ -616,11 +612,11 @@ function _createVM() {
                         }
                     });
                 });
-            } else if (qemu[i].type === 'storage') {
-                const type = qemu[i].type;
+            } else if (qemu.type === 'storage') {
+                const type = qemu.type;
 
                 callbackCnt++;
-                proxmox.storageStatus(qemu[i].node, qemu[i].storage, !!qemu[i].shared, function (data, name) {
+                proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                     const aktQemu = data.data;
 
                     if (!aktQemu) {
