@@ -491,7 +491,7 @@ function _createVM() {
         finish = true;
     };
 
-    proxmox.all(function (data) {
+    proxmox.all(data => {
         let callbackCnt = 0;
 
         const qemu = data.data;
@@ -506,7 +506,7 @@ function _createVM() {
                 const type = qemu[i].type;
 
                 callbackCnt++;
-                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, function (data) {
+                proxmox.qemuStatus(qemu[i].node, type, qemu[i].vmid, async data => {
 
                     const aktQemu = data.data;
 
@@ -516,10 +516,10 @@ function _createVM() {
 
                     sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
 
-                    adapter.log.debug('new ' + type + ': ' + aktQemu.name);
+                    adapter.log.debug(`new ${type}: ${aktQemu.name}`);
 
                     if (!objects[sid]) {
-                        adapter.setObjectNotExists(sid, {
+                        await adapter.setObjectNotExistsAsync(sid, {
                             type: 'channel',
                             common: {
                                 name: aktQemu.name
@@ -532,7 +532,8 @@ function _createVM() {
                         });
 
                     }
-                    adapter.setObjectNotExists(sid + '.start', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.start`, {
                         type: 'state',
                         common: {
                             name: 'start',
@@ -545,7 +546,8 @@ function _createVM() {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.stop', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.stop`, {
                         type: 'state',
                         common: {
                             name: 'stop',
@@ -558,7 +560,8 @@ function _createVM() {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.shutdown', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
                         type: 'state',
                         common: {
                             name: 'shutdown',
@@ -571,7 +574,8 @@ function _createVM() {
                         },
                         native: {}
                     });
-                    adapter.setObjectNotExists(sid + '.reboot', {
+
+                    await adapter.setObjectNotExistsAsync(`${sid}.reboot`, {
                         type: 'state',
                         common: {
                             name: 'reboot',
@@ -585,10 +589,28 @@ function _createVM() {
                         native: {}
                     });
 
-                    findState(sid, aktQemu, states => {
-                        states.forEach(function (element) {
-                            _createState(element[0], element[1], element[2], element[3]);
-                        });
+                    await adapter.setObjectNotExistsAsync(`${sid}.status`, {
+                        type: 'state',
+                        common: {
+                            name: 'status',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                            desc: 'Status of VM'
+
+                        },
+                        native: {}
+                    });
+
+                    findState(sid, aktQemu, async states => {
+                        for (const element of states) {
+                            try {
+                                await _createState(element[0], element[1], element[2], element[3]);
+                            } catch (e) {
+                                adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                            }
+                        }
                         if (!--callbackCnt) {
                             createDone();
                         }
@@ -619,10 +641,14 @@ function _createVM() {
                             }
                         });
                     }
-                    findState(sid, aktQemu, states => {
-                        states.forEach(function (element) {
-                            _createState(element[0], element[1], element[2], element[3]);
-                        });
+                    findState(sid, aktQemu, async states => {
+                        for (const element of states) {
+                            try {
+                                await _createState(element[0], element[1], element[2], element[3]);
+                            } catch (e) {
+                                adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                            }
+                        }
                         if (!--callbackCnt) {
                             createDone();
                         }
