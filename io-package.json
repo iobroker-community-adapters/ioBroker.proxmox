@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "news": {
+            "1.2.0": {
+                "en": "fix errors for js-controller 3.2 and ensure all objects are created at first run",
+                "de": "Beheben Sie Fehler für js-controller 3.2 und stellen Sie sicher, dass alle Objekte beim ersten Start erstellt werden",
+                "ru": "исправить ошибки для js-controller 3.2 и убедиться, что все объекты создаются при первом запуске",
+                "pt": "corrigir erros para js-controller 3.2 e garantir que todos os objetos sejam criados na primeira execução",
+                "nl": "repareer fouten voor js-controller 3.2 en zorg ervoor dat alle objecten bij de eerste keer worden gemaakt",
+                "fr": "corriger les erreurs de js-controller 3.2 et s'assurer que tous les objets sont créés lors de la première exécution",
+                "it": "correggere gli errori per js-controller 3.2 e assicurarsi che tutti gli oggetti vengano creati alla prima esecuzione",
+                "es": "corrija los errores de js-controller 3.2 y asegúrese de que todos los objetos se creen en la primera ejecución",
+                "pl": "napraw błędy dla js-controller 3.2 i upewnij się, że wszystkie obiekty są tworzone przy pierwszym uruchomieniu",
+                "zh-cn": "修复js-controller 3.2的错误，并确保在第一次运行时创建了所有对象"
+            },
             "1.1.0":{
                 "en": "better performance and bugfixes",
                 "de": "bessere Leistung und Bugfixes",
@@ -148,7 +160,12 @@
         "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
         "loglevel": "info",
         "type": "infrastructure",
-        "restartAdapters": []
+        "restartAdapters": [],
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ]
     },
     "native": {
         "param_requestInterval": 30,
