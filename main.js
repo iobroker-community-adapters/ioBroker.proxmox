@@ -183,12 +183,13 @@ function decrypt(key, value) {
     return result;
 }
 
-function main() {
+async function main() {
+    await readObjects();
 
-    readObjects(_getNodes());
-
-    // in this template all states changes inside the adapters namespace are subscribed
+    // subscribe on all state changes
     adapter.subscribeStates('*');
+
+    _getNodes();
 }
 
 function sendRequest(nextRunTimeout) {
@@ -693,18 +694,14 @@ function findState(sid, states, cb) {
     cb(result);
 }
 
-function readObjects(callback) {
-    adapter.getForeignObjects(adapter.namespace + '.*', 'channel', function (err, list) {
-        if (err) {
-            adapter.log.error(err.message);
-        } else {
-            adapter.subscribeStates('*');
-            objects = list;
-            adapter.log.debug('reading objects: ' + JSON.stringify(list));
-            //updateConnect();
-            callback && callback();
-        }
-    });
+async function readObjects() {
+    try {
+        objects = await adapter.getForeignObjectsAsync(`${adapter.namespace}.*`, 'channel');
+        adapter.log.debug(`reading objects: ${JSON.stringify(objects)}`);
+        //updateConnect();
+    } catch (e) {
+        adapter.log.error(e.message);
+    }
 }
 
 /**
