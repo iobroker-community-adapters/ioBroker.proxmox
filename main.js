@@ -14,7 +14,7 @@ let requestInterval;
 let finish = false;
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
-adapter.on('unload', function (callback) {
+adapter.on('unload', callback => {
     try {
         proxmox.stop();
         clearTimeout(requestInterval);
@@ -26,7 +26,7 @@ adapter.on('unload', function (callback) {
 });
 
 // is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
+adapter.on('stateChange', (id, state) => {
     // Warning, state can be null if it was deleted
     //adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 
@@ -45,7 +45,7 @@ adapter.on('stateChange', function (id, state) {
         let vmid;
 
         adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname);
-        proxmox.all(function (data) {
+        proxmox.all(data => {
 
             adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid);
             if (type === 'lxc' || type === 'qemu') {
@@ -239,8 +239,24 @@ function _getNodes() {
  * @private
  */
 async function _createNodes(devices) {
+    // get all known hosts to check if we have nodes in RAM which no longer exist
+    const nodesToDelete = [];
+
+    for (const objId of Object.keys(objects)) {
+        const channel = objId.split('.')[2];
+        if (channel.startsWith('node_')) {
+            nodesToDelete.push(channel.substr(5));
+        }
+    }
+
     for (const element of devices) {
-        adapter.log.debug(`Node:  ${JSON.stringify(element)}`);
+        adapter.log.debug(`Node: ${JSON.stringify(element)}`);
+
+        // remove from nodesToDelete if still exists
+        const idx = nodesToDelete.indexOf(element.node);
+        if (idx !== -1) {
+            nodesToDelete.splice(idx, 1);
+        }
 
         const sid = `${adapter.namespace}.${element.type}_${element.node}`;
         if (!objects[sid]) {
@@ -356,6 +372,16 @@ async function _createNodes(devices) {
 
             _createVM();
         });
+    }
+
+    // remove nodes
+    for (const node of nodesToDelete) {
+        try {
+            await adapter.delObjectAsync(`node_${node}`, {recursive: true});
+            adapter.log.info(`Deleted old node "${node}"`);
+        } catch (e) {
+            adapter.log.warn(`Could not delete old node "${node}": ${e.message}`);
+        }
     }
 }
 
@@ -480,16 +506,36 @@ function _setVM() {
 }
 
 function _createVM() {
-    const createDone = () => {
+    const vmsToDelete = [];
+
+    const createDone = async () => {
         adapter.setState('info.connection', true, true);
         if (!finish) {
+            finish = true;
+
+            // remove old vms/storage
+            for (const vm of vmsToDelete) {
+                try {
+                    await adapter.delObjectAsync(vm, {recursive: true});
+                    adapter.log.info(`Deleted old vm/storage "${vm}"`);
+                } catch (e) {
+                    adapter.log.warn(`Could not delete old vm/storage "${vm}": ${e.message}`);
+                }
+            }
+
             requestInterval && clearTimeout(requestInterval);
             requestInterval = setTimeout(sendRequest, 5000);
         }
-        finish = true;
     };
 
-    proxmox.all(data => {
+    for (const objId of Object.keys(objects)) {
+        const channel = objId.split('.')[2];
+        if (channel.startsWith('lxc_') || channel.startsWith('qemu_') || channel.startsWith('storage_')) {
+            vmsToDelete.push(channel);
+        }
+    }
+
+    proxmox.all(async data => {
         let callbackCnt = 0;
 
         const qemuArr = data.data;
@@ -509,6 +555,12 @@ function _createVM() {
 
                     if (!aktQemu) {
                         return;
+                    }
+
+                    // remove from vmsToDelete if still exists
+                    const idx = vmsToDelete.indexOf(`${type}_${aktQemu.name}`);
+                    if (idx !== -1) {
+                        vmsToDelete.splice(idx, 1);
                     }
 
                     sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
@@ -624,6 +676,12 @@ function _createVM() {
                         return;
                     }
 
+                    // remove from vmsToDelete if still exists
+                    const idx = vmsToDelete.indexOf(`${type}_${name}`);
+                    if (idx !== -1) {
+                        vmsToDelete.splice(idx, 1);
+                    }
+
                     sid = adapter.namespace + '.' + type + '_' + name;
                     adapter.log.debug('new  storage: ' + name);
 
@@ -694,6 +752,10 @@ function findState(sid, states, cb) {
     cb(result);
 }
 
+/**
+ * Reads all channel objects and saves them in RAM
+ * @returns {Promise<void>}
+ */
 async function readObjects() {
     try {
         objects = await adapter.getForeignObjectsAsync(`${adapter.namespace}.*`, 'channel');
