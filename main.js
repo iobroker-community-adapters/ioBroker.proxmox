@@ -44,23 +44,23 @@ adapter.on('stateChange', (id, state) => {
         const command = id.split('.')[3];
         let vmid;
 
-        adapter.log.debug('state changed ' + command + ' : type:  ' + type + ' vmname: ' + vmname);
+        adapter.log.debug(`state changed ${command}: type:  ${type} vmname: ${vmname}`);
         proxmox.all(data => {
 
-            adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid);
+            adapter.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
             if (type === 'lxc' || type === 'qemu') {
                 // get vm vid
                 const vms = data.data;
                 const vm = vms.find(vm => vm.name === vmname);
                 if (vm) {
-                    adapter.log.debug('Find name in VMs: ' + JSON.stringify(vm));
+                    adapter.log.debug(`Find name in VMs: ${JSON.stringify(vm)}`);
                     vmid = vm.vmid;
                     node = vm.node;
                 } else {
-                    adapter.log.error('could not Find name in VMs: ' + JSON.stringify(data));
+                    adapter.log.error(`could not Find name in VMs: ${JSON.stringify(data)}`);
                     return;
                 }
-                adapter.log.debug('all data for vm start: node: ' + node + '| type: ' + type + '| vid: ' + vmid);
+                adapter.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
                 switch (command) {
                     case 'start':
                         proxmox.qemuStart(node, type, vmid, function (data) {
@@ -200,13 +200,13 @@ function sendRequest(nextRunTimeout) {
         proxmox.resetResponseCache(); // Clear cache to start fresh
 
         try {
-            proxmox.status(function (data) {
+            proxmox.status(data => {
                 _setNodes(data.data);
-                adapter.log.debug('Devices: ' + JSON.stringify(data));
+                adapter.log.debug(`Devices: ${JSON.stringify(data)}`);
             });
 
         } catch (e) {
-            adapter.log.warn('Cannot send request: ' + e);
+            adapter.log.warn(`Cannot send request: ${e}`);
             if (connected) {
                 connected = false;
                 adapter.log.debug('Disconnect');
@@ -260,7 +260,8 @@ async function _createNodes(devices) {
 
         const sid = `${adapter.namespace}.${element.type}_${element.node}`;
         if (!objects[sid]) {
-            await adapter.setObjectNotExistsAsync(sid, {
+            // add to channels in RAM
+            objects[sid] = {
                 type: 'channel',
                 common: {
                     name: element.node
@@ -269,7 +270,9 @@ async function _createNodes(devices) {
                 native: {
                     type: element.type
                 }
-            });
+            };
+
+            await adapter.setObjectNotExistsAsync(sid, objects[sid]);
 
             await adapter.setObjectNotExistsAsync(`${sid}.status`, {
                 common: {
@@ -378,6 +381,7 @@ async function _createNodes(devices) {
     for (const node of nodesToDelete) {
         try {
             await adapter.delObjectAsync(`node_${node}`, {recursive: true});
+            delete objects[`${adapter.namespace}.node_${node}`]; // del from RAM too
             adapter.log.info(`Deleted old node "${node}"`);
         } catch (e) {
             adapter.log.warn(`Could not delete old node "${node}": ${e.message}`);
@@ -386,19 +390,27 @@ async function _createNodes(devices) {
 }
 
 function _setNodes(devices) {
+    const knownObjIds = Object.keys(objects);
 
     for (const element of devices) {
-        adapter.log.debug('Node :  ' + JSON.stringify(element));
+        adapter.log.debug(`Node: ${JSON.stringify(element)}`);
 
-        const sid = adapter.namespace + '.' + element.type + '_' + element.node;
+        const sid = `${adapter.namespace}.${element.type}_${element.node}`;
 
-        adapter.setState(sid + '.cpu', parseInt(element.cpu * 10000) / 100, true);
-        adapter.setState(sid + '.cpu_max', element.maxcpu, true);
-        adapter.setState(sid + '.status', element.status, true);
+        // check if the item is already in RAM - if not it's newly created
+        if (!knownObjIds.includes(sid)) {
+            // new node restart adapter to create objects
+            adapter.log.info(`Detected new node "${element.node}" - restarting instance`);
+            return void adapter.restart();
+        }
+
+        adapter.setState(`${sid}.cpu`, parseInt(element.cpu * 10000) / 100, true);
+        adapter.setState(`${sid}.cpu_max`, element.maxcpu, true);
+        adapter.setState(`${sid}.status`, element.status, true);
 
         proxmox.nodeStatus(element.node, function (data) {
 
-            adapter.log.debug('Request states for node ' + element.node);
+            adapter.log.debug(`Request states for node ${element.node}`);
 
             const node_vals = data.data;
 
@@ -458,8 +470,9 @@ function _setNodes(devices) {
 }
 
 function _setVM() {
-    proxmox.all(function (data) {
+    proxmox.all(data => {
         const qemuArr = data.data;
+        const knownObjIds = Object.keys(objects);
 
         for (const qemu of qemuArr) {
             let sid = '';
@@ -475,7 +488,12 @@ function _setVM() {
                         return;
                     }
 
-                    sid = adapter.namespace + '.' + type + '_' + aktQemu.name;
+                    sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
+                    if (!knownObjIds.includes(sid)) {
+                        // new node restart adapter to create objects
+                        adapter.log.info(`Detected new VM/storage "${aktQemu.name}" - restarting instance`);
+                        return void adapter.restart();
+                    }
 
                     findState(sid, aktQemu, states => {
                         for (const element of states) {
@@ -517,9 +535,10 @@ function _createVM() {
             for (const vm of vmsToDelete) {
                 try {
                     await adapter.delObjectAsync(vm, {recursive: true});
-                    adapter.log.info(`Deleted old vm/storage "${vm}"`);
+                    delete objects[`${adapter.namespace}.${vm}`]; // del from RAM too
+                    adapter.log.info(`Deleted old VM/storage "${vm}"`);
                 } catch (e) {
-                    adapter.log.warn(`Could not delete old vm/storage "${vm}": ${e.message}`);
+                    adapter.log.warn(`Could not delete old VM/storage "${vm}": ${e.message}`);
                 }
             }
 
@@ -535,7 +554,7 @@ function _createVM() {
         }
     }
 
-    proxmox.all(async data => {
+    proxmox.all(data => {
         let callbackCnt = 0;
 
         const qemuArr = data.data;
@@ -568,7 +587,8 @@ function _createVM() {
                     adapter.log.debug(`new ${type}: ${aktQemu.name}`);
 
                     if (!objects[sid]) {
-                        await adapter.setObjectNotExistsAsync(sid, {
+                        // add to objects in RAM
+                        objects[sid] = {
                             type: 'channel',
                             common: {
                                 name: aktQemu.name
@@ -578,8 +598,9 @@ function _createVM() {
 
                                 type: type
                             }
-                        });
+                        };
 
+                        await adapter.setObjectNotExistsAsync(sid, objects[sid]);
                     }
 
                     await adapter.setObjectNotExistsAsync(`${sid}.start`, {
@@ -682,11 +703,12 @@ function _createVM() {
                         vmsToDelete.splice(idx, 1);
                     }
 
-                    sid = adapter.namespace + '.' + type + '_' + name;
-                    adapter.log.debug('new  storage: ' + name);
+                    sid = `${adapter.namespace}.${type}_${name}`;
+                    adapter.log.debug('new storage: ' + name);
 
                     if (!objects[sid]) {
-                        adapter.setObjectNotExists(sid, {
+                        // add to objects in RAM
+                        objects[sid] = {
                             type: 'channel',
                             common: {
                                 name: name
@@ -694,8 +716,10 @@ function _createVM() {
                             native: {
                                 type: type
                             }
-                        });
+                        };
+                        adapter.setObjectNotExists(sid, objects[sid]);
                     }
+
                     findState(sid, aktQemu, async states => {
                         for (const element of states) {
                             try {
