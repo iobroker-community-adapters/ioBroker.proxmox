@@ -112,18 +112,17 @@
                 "zh-cn": "初始适配器"
             }
         },
-        "title": "Proxmox VM",
         "titleLang": {
-            "en": "get your Proxmox vm`s to iobroker",
-            "de": "Holen Sie sich Ihre Proxmox VMs zu iobroker",
-            "ru": "получите Proxmox vm `s iobroker",
-            "pt": "obter o seu Proxmox vm`s para iobroker",
-            "nl": "haal je Proxmox vm`s naar iobroker",
-            "fr": "Obtenez votre Proxmox vm`s à iobroker",
-            "it": "prendi il tuo Proxmox vm su iobroker",
-            "es": "obtener su Proxmox vm`s a iobroker",
-            "pl": "zdobądź swoje Proxmox vm`s do iobroker",
-            "zh-cn": "让你的Proxmox vm成为iobroker"
+            "en": "Proxmox VM",
+            "de": "Proxmox VM",
+            "ru": "Proxmox ВМ",
+            "pt": "Proxmox VM",
+            "nl": "Proxmox VM",
+            "fr": "VM Proxmox",
+            "it": "Proxmox VM",
+            "es": "Proxmox VM",
+            "pl": "Proxmox VM",
+            "zh-cn": "Proxmox虚拟机"
         },
         "desc": {
             "en": "iobroker proxmox adapter",
@@ -138,10 +137,7 @@
             "zh-cn": "iobroker proxmox适配器"
         },
         "authors": [
-            {
-                "name": "MeisterTR",
-                "email": "meistertr.smarthome@gmail.com"
-            }
+            "MeisterTR <meistertr.smarthome@gmail.com>"
         ],
         "platform": "Javascript/Node.js",
         "mode": "daemon",
@@ -163,7 +159,7 @@
         "restartAdapters": [],
         "dependencies": [
             {
-                "js-controller": ">=2.0.0"
+                "js-controller": ">=2.2.8"
             }
         ]
     },

@@ -32,19 +32,21 @@
     "@iobroker/adapter-core": "^2.4.0"
   },
   "devDependencies": {
-    "@iobroker/testing": "^2.4.2",
+    "@alcalzone/release-script": "^1.8.3",
+    "@iobroker/testing": "^2.4.4",
     "axios": "^0.21.1",
-    "chai": "^4.2.0",
+    "chai": "^4.3.4",
+    "eslint": "^7.22.0",
     "gulp": "^4.0.2",
-    "mocha": "^8.2.1",
-    "eslint": "^7.18.0"
+    "mocha": "^8.3.2"
   },
   "main": "main.js",
   "scripts": {
     "test": "npm run test:package && npm run test:unit",
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit",
-    "test:integration": "mocha test/integration --exit"
+    "test:integration": "mocha test/integration --exit",
+    "release": "release-script"
   },
   "bugs": {
     "url": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/issues"
