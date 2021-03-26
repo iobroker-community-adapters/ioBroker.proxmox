@@ -19,7 +19,7 @@ At least Node 10.X.X is needed and js-controller 2.0.0 or above is required
 	### __WORK IN PROGRESS__
 -->
 
-### __WORK IN PROGRESS__
+### 1.3.0 (2021-03-26)
 * (foxriver76) Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly
 * (foxriver76) clean up deleted VM/storage/node objects
 __Requires js-controller >= 2.2.8__

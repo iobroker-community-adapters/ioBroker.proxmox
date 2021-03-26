@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "news": {
+            "1.3.0": {
+                "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
+                "de": "* Erkennen Sie neu hinzugefügte VMs / Speicher / Knoten zur Laufzeit und starten Sie die Instanz neu, um alles korrekt zu initialisieren\n* Bereinigen Sie gelöschte VM- / Speicher- / Knotenobjekte\n__Erfordert js-controller> = 2.2.8__",
+                "ru": "* Обнаружение вновь добавленных виртуальных машин / хранилищ / узлов во время выполнения и перезапуск экземпляра, чтобы все правильно инициализировать\n* очистить удаленные объекты ВМ / хранилища / узла\n__ Требуется js-controller> = 2.2.8__",
+                "pt": "* Detecte VMs / storages / nodes recém-adicionados durante o tempo de execução e reinicie a instância para inicializar tudo corretamente\n* limpar objetos VM / armazenamento / nó excluídos\n__Requer js-controller> = 2.2.8__",
+                "nl": "* Detecteer nieuw toegevoegde VM's / opslagplaatsen / knooppunten tijdens runtime en start de instantie opnieuw om alles correct te initialiseren\n* verwijder verwijderde VM / storage / node-objecten\n__Vereist js-controller> = 2.2.8__",
+                "fr": "* Détectez les VM / stockages / nœuds nouvellement ajoutés pendant l'exécution et redémarrez l'instance pour tout initialiser correctement\n* nettoyer les objets VM / stockage / nœuds supprimés\n__Nécessite js-controller> = 2.2.8__",
+                "it": "* Rileva le VM / archivi / nodi appena aggiunti durante il runtime e riavvia l'istanza per inizializzare tutto correttamente\n* ripulire gli oggetti VM / archiviazione / nodo cancellati\n__Richiede js-controller> = 2.2.8__",
+                "es": "* Detecta VM / almacenamientos / nodos recién agregados durante el tiempo de ejecución y reinicia la instancia para inicializar todo correctamente\n* limpiar objetos eliminados de VM / almacenamiento / nodo\n__Requiere js-controller> = 2.2.8__",
+                "pl": "* Wykryj nowo dodane maszyny wirtualne / magazyny / węzły podczas działania i zrestartuj instancję, aby wszystko poprawnie zainicjować\n* wyczyść usunięte obiekty VM / magazynu / węzła\n__Wymagania js-controller> = 2.2.8__",
+                "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__"
+            },
             "1.2.0": {
                 "en": "fix errors for js-controller 3.2 and ensure all objects are created at first run",
                 "de": "Beheben Sie Fehler für js-controller 3.2 und stellen Sie sicher, dass alle Objekte beim ersten Start erstellt werden",
@@ -15,7 +27,7 @@
                 "pl": "napraw błędy dla js-controller 3.2 i upewnij się, że wszystkie obiekty są tworzone przy pierwszym uruchomieniu",
                 "zh-cn": "修复js-controller 3.2的错误，并确保在第一次运行时创建了所有对象"
             },
-            "1.1.0":{
+            "1.1.0": {
                 "en": "better performance and bugfixes",
                 "de": "bessere Leistung und Bugfixes",
                 "ru": "лучшая производительность и исправления",
@@ -26,8 +38,8 @@
                 "es": "mejor rendimiento y corrección de errores",
                 "pl": "lepsza wydajność i poprawki błędów",
                 "zh-cn": "更好的性能和错误修正"
-              },
-            "1.0.2":{
+            },
+            "1.0.2": {
                 "en": "remove hardcoded pam, fix error",
                 "de": "Hardcodierte Pam entfernen, Fehler beheben",
                 "ru": "удалить жестко запрограммированный pam, исправить ошибку",
@@ -38,7 +50,7 @@
                 "es": "eliminar la codificación rígida de pam, corregir el error",
                 "pl": "usuń na stałe pam, napraw błąd",
                 "zh-cn": "删除硬编码的pam，修复错误"
-              },
+            },
             "1.0.1": {
                 "en": "Fix issue with special characters in password.",
                 "de": "Problem mit Sonderzeichen im Passwort behoben.",
@@ -50,7 +62,7 @@
                 "es": "Soluciona el problema con caracteres especiales en la contraseña.",
                 "pl": "Napraw problem ze znakami specjalnymi w haśle.",
                 "zh-cn": "解决密码中特殊字符的问题。"
-              },
+            },
             "0.5.1": {
                 "en": "add start/stop Button, add actual disk size",
                 "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
@@ -62,7 +74,7 @@
                 "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
                 "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
                 "zh-cn": "添加开始/停止按钮，添加实际磁盘大小"
-              },
+            },
             "0.3.2": {
                 "en": "fixed some bugs",
                 "de": "einige Fehler behoben",
@@ -167,16 +179,14 @@
         "param_requestInterval": 30,
         "port": 8006,
         "name": "root",
-        "server":"pam",
+        "server": "pam",
         "pwd": ""
     },
     "protectedNative": [
         "pwd",
         "name"
     ],
-    "encryptedNative": [
-
-    ],
+    "encryptedNative": [],
     "instanceObjects": [
         {
             "_id": "info",
