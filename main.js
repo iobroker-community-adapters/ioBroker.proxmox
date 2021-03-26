@@ -663,8 +663,8 @@ function _createVM() {
                         type: 'state',
                         common: {
                             name: 'status',
-                            type: 'boolean',
-                            role: 'button',
+                            type: 'string',
+                            role: 'indicator.status',
                             read: true,
                             write: true,
                             desc: 'Status of VM'
