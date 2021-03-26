@@ -666,7 +666,7 @@ function _createVM() {
                             type: 'string',
                             role: 'indicator.status',
                             read: true,
-                            write: true,
+                            write: false,
                             desc: 'Status of VM'
 
                         },
