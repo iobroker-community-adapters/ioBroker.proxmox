@@ -61,7 +61,7 @@ __node v10 or above required__
 * (MeisterTR) cleaning up
 
 ### 0.0.5 (02.05.2018)
-* (MeisterTR) fixed worong ram
+* (MeisterTR) fixed wrong ram
 
 ### 0.0.5 (29.04.2018)
 * (MeisterTR) Testing fixes, now ready for node4
