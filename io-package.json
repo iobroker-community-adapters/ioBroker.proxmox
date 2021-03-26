@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.3.0",
+        "version": "1.3.1",
         "news": {
+            "1.3.1": {
+                "en": "status of vms is now a string instead of incorrectly a button",
+                "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
+                "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
+                "pt": "status de vms agora é uma string em vez de incorretamente um botão",
+                "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
+                "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
+                "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
+                "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
+                "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
+                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮"
+            },
             "1.3.0": {
                 "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
                 "de": "* Erkennen Sie neu hinzugefügte VMs / Speicher / Knoten zur Laufzeit und starten Sie die Instanz neu, um alles korrekt zu initialisieren\n* Bereinigen Sie gelöschte VM- / Speicher- / Knotenobjekte\n__Erfordert js-controller> = 2.2.8__",
