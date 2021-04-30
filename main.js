@@ -406,7 +406,7 @@ function _setNodes(devices) {
 
         adapter.setState(`${sid}.cpu`, parseInt(element.cpu * 10000) / 100, true);
         adapter.setState(`${sid}.cpu_max`, element.maxcpu, true);
-        adapter.setState(`${sid}.status`, element.status, true);
+        adapter.setState(`${sid}.status`, element.status.toString(), true);
 
         proxmox.nodeStatus(element.node, function (data) {
 
@@ -738,6 +738,7 @@ function _createVM() {
     });
 }
 
+
 function findState(sid, states, cb) {
     const result = [];
 
@@ -761,14 +762,16 @@ function findState(sid, states, cb) {
         } else if (key === 'uptime') {
             result.push([sid, key, 'time', value]);
         } else if (key === 'status') {
-            result.push([sid, key, 'status', value]);
+            let stat = value.toString();
+            result.push([sid, key, 'status', stat]);
         } else if (key === 'netin' || key === 'netout') {
             result.push([sid, key, 'sizeb', value]);
         } else if (key === 'cpu') {
             result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
         } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
-            result.push([sid, key, 'default_num', value]);
-        } else if (key === 'content' || key === 'type' || key === 'status') {
+            let numb = parseInt(value);
+            result.push([sid, key, 'default_num', numb]);
+        } else if (key === 'content' || key === 'type') {
             result.push([sid, key, 'text', value]);
         }
     }
