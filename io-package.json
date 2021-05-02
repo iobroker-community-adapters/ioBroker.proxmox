@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.3.2",
+        "version": "1.3.3",
         "news": {
+            "1.3.3": {
+                "en": "we fixed some incorrect types",
+                "de": "Wir haben einige falsche Typen behoben",
+                "ru": "мы исправили некоторые неправильные типы",
+                "pt": "nós consertamos alguns tipos incorretos",
+                "nl": "we hebben enkele onjuiste typen gerepareerd",
+                "fr": "nous avons corrigé certains types incorrects",
+                "it": "abbiamo corretto alcuni tipi errati",
+                "es": "arreglamos algunos tipos incorrectos",
+                "pl": "naprawiliśmy niektóre nieprawidłowe typy",
+                "zh-cn": "我们修复了一些错误的类型"
+            },
             "1.3.2": {
                 "en": "status of vms is now a string instead of incorrectly a button",
                 "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
@@ -195,7 +207,7 @@
         "restartAdapters": [],
         "dependencies": [
             {
-                "js-controller": ">=2.2.8"
+                "js-controller": ">=3.2.0"
             }
         ]
     },
