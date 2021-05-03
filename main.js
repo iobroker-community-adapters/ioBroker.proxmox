@@ -274,18 +274,6 @@ async function _createNodes(devices) {
 
             await adapter.setObjectNotExistsAsync(sid, objects[sid]);
 
-            await adapter.setObjectNotExistsAsync(`${sid}.status`, {
-                common: {
-                    name: 'Status',
-                    role: 'indicator.status',
-                    write: false,
-                    read: true,
-                    type: 'string'
-                },
-                type: 'state',
-                native: {}
-            });
-
             await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
                 type: 'state',
                 common: {
@@ -314,6 +302,19 @@ async function _createNodes(devices) {
                 native: {}
             });
         }
+
+        // type has changed so extend no matter if yet exists
+        await adapter.extendObjectAsync(`${sid}.status`, {
+            common: {
+                name: 'Status',
+                role: 'indicator.status',
+                write: false,
+                read: true,
+                type: 'string'
+            },
+            type: 'state',
+            native: {}
+        }, {preserve: {common: ['name']}});
 
         if (element.cpu) {
             await _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
@@ -659,7 +660,8 @@ function _createVM() {
                         native: {}
                     });
 
-                    await adapter.setObjectNotExistsAsync(`${sid}.status`, {
+                    // type was boolean but has been corrected to string -> extend
+                    await adapter.extendObjectAsync(`${sid}.status`, {
                         type: 'state',
                         common: {
                             name: 'status',
@@ -671,7 +673,7 @@ function _createVM() {
 
                         },
                         native: {}
-                    });
+                    }, {preserve: {common: ['name']}});
 
                     findState(sid, aktQemu, async states => {
                         for (const element of states) {
@@ -769,9 +771,8 @@ function findState(sid, states, cb) {
         } else if (key === 'cpu') {
             result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
         } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
-            let numb = parseInt(value);
-            result.push([sid, key, 'default_num', numb]);
-        } else if (key === 'content' || key === 'type') {
+            result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
+        } else if (key === 'content' || key === 'type' || key === 'status') {
             result.push([sid, key, 'text', value]);
         }
     }
