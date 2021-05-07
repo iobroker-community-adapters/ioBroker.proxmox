@@ -160,6 +160,8 @@
                 "zh-cn": "初始适配器"
             }
         },
+        "connectionType": "local",
+        "dataSource": "poll",
         "titleLang": {
             "en": "Proxmox VM",
             "de": "Proxmox VM",
