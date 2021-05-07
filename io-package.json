@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.3.3",
+        "version": "1.3.4",
         "news": {
+            "1.3.4": {
+                "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
+                "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
+                "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
+                "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
+                "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
+                "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
+                "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
+                "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
+                "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
+                "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）"
+            },
             "1.3.3": {
                 "en": "we fixed some incorrect types",
                 "de": "Wir haben einige falsche Typen behoben",
@@ -192,6 +204,7 @@
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "logo.png",
+        "compact": true,
         "materialize": true,
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",

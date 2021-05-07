@@ -19,6 +19,10 @@ At least Node 10.X.X is needed and js-controller 3.2.0 or above is required
 	### __WORK IN PROGRESS__
 -->
 
+### 1.3.4 (2021-05-07)
+* (foxriver76) add dataSource and connectionType
+* (foxriver76) add compact mode (closes #12, closes #49)
+
 ### 1.3.3 (2021-05-02)
 * (foxriver76) we fixed some incorrect types
 
