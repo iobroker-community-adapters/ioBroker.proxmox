@@ -11,7 +11,7 @@
 This adapter reads out the data from your proxmox installation
 
 ## Requirements
-At least Node 10.X.X is needed and js-controller 2.0.0 or above is required
+At least Node 10.X.X is needed and js-controller 3.2.0 or above is required
 
 ## Changelog
 <!--
