@@ -21,6 +21,7 @@ At least Node 10.X.X is needed and js-controller 3.2.0 or above is required
 
 ### __WORK IN PROGRESS__
 * (thost96) fixed release action
+* (thost96) added tests for nodejs 16
 
 ### 1.3.4 (2021-05-07)
 * (foxriver76) add dataSource and connectionType
