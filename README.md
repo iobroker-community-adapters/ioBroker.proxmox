@@ -19,6 +19,10 @@ At least Node 10.X.X is needed and js-controller 3.2.0 or above is required
 	### __WORK IN PROGRESS__
 -->
 
+### __WORK IN PROGRESS__
+* (thost96) added link to proxmox host to instance list (issue #185)
+* (thost96) smaller fixes
+
 ### 1.3.4 (2021-05-07)
 * (foxriver76) add dataSource and connectionType
 * (foxriver76) add compact mode (closes #12, closes #49)
@@ -89,7 +93,7 @@ __node v10 or above required__
 
 The MIT License (MIT)
 
-Copyright (c) 2018 - 2021 MeisterTR <meistertr.smarthome@gmail.com>
+Copyright (c) 2018 - 2022 MeisterTR <meistertr.smarthome@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
