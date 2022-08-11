@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "proxmox",
-        "version": "1.3.4",
+        "version": "1.3.5",
         "news": {
+            "1.3.5": {
+                "en": "fixed warning if `max_cpu` is not in response",
+                "de": "feste warnung, wenn max_cpu nicht reagiert",
+                "ru": "фиксированное предупреждение, если max_cpu не находится в ответе",
+                "pt": "aviso fixo se max_cpu não estiver em resposta",
+                "nl": "vertaling:",
+                "fr": "avertissement fixe si max_cpu n'est pas en réponse",
+                "it": "avvertimento fisso se max_cpu non è in risposta",
+                "es": "advertencia fija si max_cpu no está en respuesta",
+                "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
+                "zh-cn": "如果不作出反应,定期警告"
+            },
             "1.3.4": {
                 "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
                 "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
@@ -205,6 +217,9 @@
         "mode": "daemon",
         "icon": "logo.png",
         "compact": true,
+        "localLinks": {
+            "_default": "https://%ip%:%port%"
+        },
         "materialize": true,
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",

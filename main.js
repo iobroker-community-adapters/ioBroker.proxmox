@@ -410,7 +410,9 @@ function startAdapter(options) {
             }
 
             adapter.setState(`${sid}.cpu`, parseInt(element.cpu * 10000) / 100, true);
-            adapter.setState(`${sid}.cpu_max`, element.maxcpu, true);
+            if (element.maxcpu) {
+                adapter.setState(`${sid}.cpu_max`, element.maxcpu, true);
+            }
             adapter.setState(`${sid}.status`, element.status, true);
 
             proxmox.nodeStatus(element.node, function (data) {
