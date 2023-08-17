@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: monthly
       time: "04:00"
-      timezone: Europe/Berlin
+      timezone: Europe/Berlin 
       
   - package-ecosystem: npm
     directory: "/"
