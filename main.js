@@ -2,7 +2,7 @@
 
 // you have to require the utils module and call adapter function
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
-const ProxmoxGet = require('./lib/proxmox');
+const ProxmoxUtils = require('./lib/proxmox');
 const adapterName = require('./package.json').name.split('.').pop();
 
 function BtoMb(val) {
@@ -10,7 +10,7 @@ function BtoMb(val) {
 }
 
 function p(vala, valb) {
-    return Math.round(vala / valb * 10000) / 100;
+    return Math.round((vala / valb) * 10000) / 100;
 }
 
 class Proxmox extends utils.Adapter {
@@ -39,17 +39,17 @@ class Proxmox extends utils.Adapter {
             return;
         }
 
-        this.proxmox = new ProxmoxGet(this);
+        this.proxmox = new ProxmoxUtils(this);
 
-        this.config.param_requestInterval = parseInt(this.config.param_requestInterval, 10) || 30;
+        this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
 
-        if (this.config.param_requestInterval < 5) {
+        if (this.config.requestInterval < 5) {
             this.log.info('Intervall < 5s, setting to 5s');
-            this.config.param_requestInterval = 5;
+            this.config.requestInterval = 5;
         }
 
-        this.proxmox._getTicket(async (result) => {
-            if (result === '200' || result === 200) {
+        try {
+            this.proxmox.ticket(async () => {
                 await this.readObjects();
 
                 // subscribe on all state changes
@@ -57,13 +57,14 @@ class Proxmox extends utils.Adapter {
 
                 this.getNodes();
 
-                await this.setStateAsync('info.connection', true, true);
-            } else {
-                await this.setStateAsync('info.connection', false, true);
-                this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
-                typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
-            }
-        });
+                await this.setStateAsync('info.connection', { val: true, ack: true });
+            });
+        } catch (err) {
+            await this.setStateAsync('info.connection', { val: false, ack: true });
+
+            this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
+            typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
+        }
     }
 
     /**
@@ -81,18 +82,18 @@ class Proxmox extends utils.Adapter {
             } else if (type === 'node') {
                 node = vmdata.split('_')[1];
             }
-    
+
             const command = id.split('.')[3];
             let vmid;
 
             this.log.debug(`state changed ${command}: type:  ${type} vmname: ${vmname}`);
-            this.proxmox.all(data => {
+            this.proxmox.all((data) => {
                 this.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
 
                 if (type === 'lxc' || type === 'qemu') {
                     // get vm vid
                     const vms = data.data;
-                    const vm = vms.find(vm => vm.name === vmname);
+                    const vm = vms.find((vm) => vm.name === vmname);
                     if (vm) {
                         this.log.debug(`Find name in VMs: ${JSON.stringify(vm)}`);
                         vmid = vm.vmid;
@@ -106,43 +107,43 @@ class Proxmox extends utils.Adapter {
                         case 'start':
                             this.proxmox.qemuStart(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'stop':
                             this.proxmox.qemuStop(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'reset':
                             this.proxmox.qemuReset(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'resume':
                             this.proxmox.qemuResume(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'shutdown':
                             this.proxmox.qemuShutdown(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'suspend':
                             this.proxmox.qemuSuspend(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'reboot':
                             this.proxmox.qemuReboot(node, type, vmid, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                     }
@@ -152,13 +153,13 @@ class Proxmox extends utils.Adapter {
                         case 'shutdown':
                             this.proxmox.nodeShutdown(node, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                         case 'reboot':
                             this.proxmox.nodeReboot(node, (data) => {
                                 this.log.info(data);
-                                sendRequest(10000);
+                                this.sendRequest(10000);
                             });
                             break;
                     }
@@ -173,13 +174,13 @@ class Proxmox extends utils.Adapter {
 
     sendRequest(nextRunTimeout) {
         this.requestInterval && this.clearTimeout(this.requestInterval);
-        this.requestInterval = this.setTimeout(this.sendRequest.bind(this), nextRunTimeout || this.config.param_requestInterval * 1000);
+        this.requestInterval = this.setTimeout(this.sendRequest.bind(this), nextRunTimeout || this.config.requestInterval * 1000);
 
         if (this.finish) {
             this.proxmox.resetResponseCache(); // Clear cache to start fresh
 
             try {
-                this.proxmox.status(data => {
+                this.proxmox.status((data) => {
                     this.setNodes(data.data);
                     this.log.debug(`Devices: ${JSON.stringify(data)}`);
                 });
@@ -188,14 +189,14 @@ class Proxmox extends utils.Adapter {
                 if (this.connected) {
                     this.connected = false;
                     this.log.debug('Disconnect');
-                    this.setState('info.connection', { val:false, ack: true });
+                    this.setState('info.connection', { val: false, ack: true });
                 }
             }
         }
     }
 
     getNodes() {
-        this.proxmox.status(async data => {
+        this.proxmox.status(async (data) => {
             if (!data.data) {
                 this.log.error('Can not get Proxmox nodes! please restart adapter');
                 return;
@@ -242,12 +243,11 @@ class Proxmox extends utils.Adapter {
                 this.objects[sid] = {
                     type: 'channel',
                     common: {
-                        name: element.node
-
+                        name: element.node,
                     },
                     native: {
-                        type: element.type
-                    }
+                        type: element.type,
+                    },
                 };
 
                 await this.setObjectNotExistsAsync(sid, this.objects[sid]);
@@ -260,10 +260,9 @@ class Proxmox extends utils.Adapter {
                         role: 'button',
                         read: true,
                         write: true,
-                        desc: 'shutdown node'
-
+                        desc: 'shutdown node',
                     },
-                    native: {}
+                    native: {},
                 });
 
                 await this.setObjectNotExistsAsync(`${sid}.reboot`, {
@@ -274,25 +273,28 @@ class Proxmox extends utils.Adapter {
                         role: 'button',
                         read: true,
                         write: true,
-                        desc: 'reboot node'
-
+                        desc: 'reboot node',
                     },
-                    native: {}
+                    native: {},
                 });
             }
 
             // type has changed so extend no matter if yet exists
-            await this.extendObjectAsync(`${sid}.status`, {
-                common: {
-                    name: 'Status',
-                    role: 'indicator.status',
-                    write: false,
-                    read: true,
-                    type: 'string'
+            await this.extendObjectAsync(
+                `${sid}.status`,
+                {
+                    common: {
+                        name: 'Status',
+                        role: 'indicator.status',
+                        write: false,
+                        read: true,
+                        type: 'string',
+                    },
+                    type: 'state',
+                    native: {},
                 },
-                type: 'state',
-                native: {}
-            }, { preserve: { common: ['name'] } });
+                { preserve: { common: ['name'] } },
+            );
 
             if (element.cpu) {
                 await this.createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
@@ -302,7 +304,6 @@ class Proxmox extends utils.Adapter {
             }
 
             this.proxmox.nodeStatus(element.node, async (data) => {
-
                 this.log.debug('Request states for node ' + element.node);
 
                 const node_vals = data.data;
@@ -443,7 +444,6 @@ class Proxmox extends utils.Adapter {
                 if (node_vals.swap.used !== undefined) {
                     await this.setStateChangedAsync(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
                 }
-
             });
         }
 
@@ -451,7 +451,7 @@ class Proxmox extends utils.Adapter {
     }
 
     setVM() {
-        this.proxmox.all(data => {
+        this.proxmox.all((data) => {
             const qemuArr = data.data;
             const knownObjIds = Object.keys(this.objects);
 
@@ -476,14 +476,12 @@ class Proxmox extends utils.Adapter {
                             return void this.restart();
                         }
 
-                        this.findState(sid, aktQemu, states => {
+                        this.findState(sid, aktQemu, (states) => {
                             for (const element of states) {
                                 this.setStateChanged(element[0] + '.' + element[1], element[3], true);
                             }
                         });
-
                     });
-
                 } else if (qemu.type === 'storage') {
                     const type = qemu.type;
 
@@ -493,7 +491,7 @@ class Proxmox extends utils.Adapter {
                         sid = this.namespace + '.' + type + '_' + name;
                         this.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
 
-                        this.findState(sid, aktQemu, states => {
+                        this.findState(sid, aktQemu, (states) => {
                             for (const element of states) {
                                 this.setStateChanged(element[0] + '.' + element[1], element[3], true);
                             }
@@ -535,7 +533,7 @@ class Proxmox extends utils.Adapter {
             }
         }
 
-        this.proxmox.all(data => {
+        this.proxmox.all((data) => {
             let callbackCnt = 0;
 
             const qemuArr = data.data;
@@ -550,7 +548,7 @@ class Proxmox extends utils.Adapter {
                     const type = qemu.type;
 
                     callbackCnt++;
-                    this.proxmox.qemuStatus(qemu.node, type, qemu.vmid, async data => {
+                    this.proxmox.qemuStatus(qemu.node, type, qemu.vmid, async (data) => {
                         const aktQemu = data.data;
 
                         if (!aktQemu) {
@@ -572,13 +570,11 @@ class Proxmox extends utils.Adapter {
                             this.objects[sid] = {
                                 type: 'channel',
                                 common: {
-                                    name: aktQemu.name
-
+                                    name: aktQemu.name,
                                 },
                                 native: {
-
-                                    type: type
-                                }
+                                    type: type,
+                                },
                             };
 
                             await this.setObjectNotExistsAsync(sid, this.objects[sid]);
@@ -592,10 +588,9 @@ class Proxmox extends utils.Adapter {
                                 role: 'button',
                                 read: true,
                                 write: true,
-                                desc: 'Start VM'
-
+                                desc: 'Start VM',
                             },
-                            native: {}
+                            native: {},
                         });
 
                         await this.setObjectNotExistsAsync(`${sid}.stop`, {
@@ -606,10 +601,9 @@ class Proxmox extends utils.Adapter {
                                 role: 'button',
                                 read: true,
                                 write: true,
-                                desc: 'stop VM'
-
+                                desc: 'stop VM',
                             },
-                            native: {}
+                            native: {},
                         });
 
                         await this.setObjectNotExistsAsync(`${sid}.shutdown`, {
@@ -620,10 +614,9 @@ class Proxmox extends utils.Adapter {
                                 role: 'button',
                                 read: true,
                                 write: true,
-                                desc: 'shutdown VM'
-
+                                desc: 'shutdown VM',
                             },
-                            native: {}
+                            native: {},
                         });
 
                         await this.setObjectNotExistsAsync(`${sid}.reboot`, {
@@ -634,28 +627,30 @@ class Proxmox extends utils.Adapter {
                                 role: 'button',
                                 read: true,
                                 write: true,
-                                desc: 'reboot VM'
-
+                                desc: 'reboot VM',
                             },
-                            native: {}
+                            native: {},
                         });
 
                         // type was boolean but has been corrected to string -> extend
-                        await this.extendObjectAsync(`${sid}.status`, {
-                            type: 'state',
-                            common: {
-                                name: 'status',
-                                type: 'string',
-                                role: 'indicator.status',
-                                read: true,
-                                write: false,
-                                desc: 'Status of VM'
-
+                        await this.extendObjectAsync(
+                            `${sid}.status`,
+                            {
+                                type: 'state',
+                                common: {
+                                    name: 'status',
+                                    type: 'string',
+                                    role: 'indicator.status',
+                                    read: true,
+                                    write: false,
+                                    desc: 'Status of VM',
+                                },
+                                native: {},
                             },
-                            native: {}
-                        }, { preserve: { common: ['name'] } });
+                            { preserve: { common: ['name'] } },
+                        );
 
-                        this.findState(sid, aktQemu, async states => {
+                        this.findState(sid, aktQemu, async (states) => {
                             for (const element of states) {
                                 try {
                                     await this.createState(element[0], element[1], element[2], element[3]);
@@ -693,16 +688,16 @@ class Proxmox extends utils.Adapter {
                             this.objects[sid] = {
                                 type: 'channel',
                                 common: {
-                                    name: name
+                                    name: name,
                                 },
                                 native: {
-                                    type: type
-                                }
+                                    type: type,
+                                },
                             };
                             this.setObjectNotExists(sid, this.objects[sid]);
                         }
 
-                        this.findState(sid, aktQemu, async states => {
+                        this.findState(sid, aktQemu, async (states) => {
                             for (const element of states) {
                                 try {
                                     await this.createState(element[0], element[1], element[2], element[3]);
@@ -794,10 +789,10 @@ class Proxmox extends utils.Adapter {
                         write: false,
                         read: true,
                         type: 'number',
-                        unit: 'sec.'
+                        unit: 'sec.',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
@@ -810,10 +805,10 @@ class Proxmox extends utils.Adapter {
                         write: false,
                         read: true,
                         type: 'number',
-                        unit: 'MiB'
+                        unit: 'MiB',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
@@ -826,10 +821,10 @@ class Proxmox extends utils.Adapter {
                         write: false,
                         read: true,
                         type: 'number',
-                        unit: 'byte'
+                        unit: 'byte',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
@@ -842,10 +837,10 @@ class Proxmox extends utils.Adapter {
                         write: false,
                         read: true,
                         type: 'number',
-                        unit: '%'
+                        unit: '%',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
@@ -857,10 +852,10 @@ class Proxmox extends utils.Adapter {
                         role: 'value',
                         write: false,
                         read: true,
-                        type: 'number'
+                        type: 'number',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
@@ -872,10 +867,10 @@ class Proxmox extends utils.Adapter {
                         role: 'value',
                         write: false,
                         read: true,
-                        type: 'string'
+                        type: 'string',
                     },
                     type: 'state',
-                    native: {}
+                    native: {},
                 });
 
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
