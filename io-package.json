@@ -221,28 +221,36 @@
         "localLinks": {
             "_default": "https://%ip%:%port%"
         },
-        "materialize": true,
-        "enabled": true,
+        "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
         "license": "MIT",
         "keywords": [
-            "template",
-            "vis",
-            "GUI",
-            "graphical",
-            "scada"
+            "proxmox",
+            "vm",
+            "virtual machine",
+            "lxc",
+            "container"
         ],
         "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
         "loglevel": "info",
         "type": "infrastructure",
+        "adminUI": {
+            "config": "json"
+        },
         "restartAdapters": [],
         "dependencies": [
             {
-                "js-controller": ">=3.2.0"
+                "js-controller": ">=3.3.22"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=6.0.0"
             }
         ]
     },
     "native": {
+        "ip": "",
         "param_requestInterval": 30,
         "port": 8006,
         "name": "root",
@@ -253,13 +261,26 @@
         "pwd",
         "name"
     ],
-    "encryptedNative": [],
+    "encryptedNative": [
+        "pwd"
+    ],
     "instanceObjects": [
         {
             "_id": "info",
             "type": "channel",
             "common": {
-                "name": "Information"
+                "name": {
+                    "en": "Information",
+                    "de": "Information",
+                    "ru": "Информация",
+                    "pt": "Em formação",
+                    "nl": "Informatie",
+                    "fr": "Informations",
+                    "it": "Informazione",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "zh-cn": "信息"
+                }
             },
             "native": {}
         },
@@ -267,8 +288,19 @@
             "_id": "info.connection",
             "type": "state",
             "common": {
-                "role": "indicator.connected",
-                "name": "If connected to Proxmox",
+                "name": {
+                    "en": "Connected to LaMetric",
+                    "de": "Verbindung mit LaMetric",
+                    "ru": "При подключении к LaMetric",
+                    "pt": "Se conectado ao LaMetric",
+                    "nl": "Indien verbonden met LaMetric",
+                    "fr": "Si connecté à LaMetric",
+                    "it": "Se connesso a LaMetric",
+                    "es": "Si está conectado a LaMetric",
+                    "pl": "W przypadku połączenia z LaMetric",
+                    "zh-cn": "如果连接到 LaMetric"
+                },
+                "role": "indicator.reachable",
                 "type": "boolean",
                 "read": true,
                 "write": false,

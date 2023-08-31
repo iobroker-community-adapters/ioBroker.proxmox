@@ -3,22 +3,42 @@
 # ioBroker.proxmox
 =================
 
-![Build Status](https://github.com/iobroker-community-adapters/ioBroker.proxmox/workflows/Test%20and%20Release/badge.svg)
-![Number of Installations](http://iobroker.live/badges/proxmox-installed.svg) ![Number of Installations](http://iobroker.live/badges/proxmox-stable.svg) [![NPM version](http://img.shields.io/npm/v/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.proxmox.svg)](https://www.npmjs.com/package/iobroker.proxmox)
+![Logo](admin/proxmox.png)
 
-[![NPM](https://nodei.co/npm/iobroker.proxmox.png?downloads=true)](https://nodei.co/npm/iobroker.proxmox/)
+# ioBroker.proxmox
 
-This adapter reads out the data from your proxmox installation
+[![NPM version](https://img.shields.io/npm/v/iobroker.proxmox?style=flat-square)](https://www.npmjs.com/package/iobroker.proxmox)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.proxmox?label=npm%20downloads&style=flat-square)](https://www.npmjs.com/package/iobroker.proxmox)
+![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/iobroker.proxmox?label=npm%20vulnerabilities&style=flat-square)
+![node-lts](https://img.shields.io/node/v-lts/iobroker.proxmox?style=flat-square)
+![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/iobroker.proxmox?label=npm%20dependencies&style=flat-square)
 
-## Requirements
-At least Node 10.X.X is needed and js-controller 3.2.0 or above is required
+![GitHub](https://img.shields.io/github/license/iobroker-community-adapters/iobroker.proxmox?style=flat-square)
+![GitHub repo size](https://img.shields.io/github/repo-size/iobroker-community-adapters/iobroker.proxmox?logo=github&style=flat-square)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/iobroker-community-adapters/iobroker.proxmox?logo=github&style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/iobroker-community-adapters/iobroker.proxmox?logo=github&style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/iobroker-community-adapters/iobroker.proxmox?logo=github&style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/iobroker-community-adapters/iobroker.proxmox/test-and-release.yml?branch=master&logo=github&style=flat-square)
+![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/iobroker-community-adapters/iobroker.proxmox?label=repo%20vulnerabilities&logo=github&style=flat-square)
+
+## Versions
+
+![Beta](https://img.shields.io/npm/v/iobroker.proxmox.svg?color=red&label=beta)
+![Stable](http://iobroker.live/badges/proxmox-stable.svg)
+![Installed](http://iobroker.live/badges/proxmox-installed.svg)
+
+Control and use data from your ProxmoxVM
 
 ## Changelog
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+
+* (klein0r) Updated admin instance configuration
+__Requires js-controller >= 3.3.22__
+__Requires admin >= 6.0.0__
 
 ### 1.3.5 (2022-08-11)
 * (foxriver76) fixed warning if `max_cpu` is not in response

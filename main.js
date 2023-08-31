@@ -1,129 +1,163 @@
-/* jshint -W097 */ // jshint strict:false
-/*jslint node: true */
 'use strict';
 
 // you have to require the utils module and call adapter function
 const utils = require('@iobroker/adapter-core'); // Get common adapter utils
-let adapter;
 const ProxmoxGet = require('./lib/proxmox');
+const adapterName = require('./package.json').name.split('.').pop();
 
-let proxmox;
-let objects = {};
-let connected = false;
-let requestInterval;
-let finish = false;
+function BtoMb(val) {
+    return Math.round(val / 1048576);
+}
 
-function startAdapter(options) {
-    options = {name: 'proxmox', ...options};
-    adapter = new utils.Adapter(options);
+function p(vala, valb) {
+    return Math.round(vala / valb * 10000) / 100;
+}
 
-    // is called when adapter shuts down - callback has to be called under any circumstances!
-    adapter.on('unload', callback => {
-        try {
-            proxmox.stop();
-            clearTimeout(requestInterval);
-            adapter.log.info('cleaned everything up...');
-            callback();
-        } catch {
-            callback();
+class Proxmox extends utils.Adapter {
+    constructor(options) {
+        super({
+            ...options,
+            name: adapterName,
+        });
+
+        this.proxmox;
+        this.objects = {};
+        this.connected = false;
+        this.finish = false;
+
+        this.requestInterval = null;
+
+        this.on('ready', this.onReady.bind(this));
+        this.on('stateChange', this.onStateChange.bind(this));
+        this.on('unload', this.onUnload.bind(this));
+    }
+
+    async onReady() {
+        if (this.config.ip === '192.000.000.000') {
+            this.log.error('Please set the IP of your Proxmox host.');
+            typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
+            return;
         }
-    });
 
-    // is called if a subscribed state changes
-    adapter.on('stateChange', (id, state) => {
-        // Warning, state can be null if it was deleted
-        //adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+        this.proxmox = new ProxmoxGet(this);
 
-        // you can use the ack flag to detect if it is status (true) or command (false)
+        this.config.param_requestInterval = parseInt(this.config.param_requestInterval, 10) || 30;
+
+        if (this.config.param_requestInterval < 5) {
+            this.log.info('Intervall < 5s, setting to 5s');
+            this.config.param_requestInterval = 5;
+        }
+
+        this.proxmox._getTicket(async (result) => {
+            if (result === '200' || result === 200) {
+                await readObjects();
+
+                // subscribe on all state changes
+                await this.subscribeStatesAsync('*');
+
+                _getNodes();
+
+                await this.setStateAsync('info.connection', true, true);
+            } else {
+                await this.setStateAsync('info.connection', false, true);
+                this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
+                typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
+            }
+        });
+    }
+
+    /**
+     * @param {string} id
+     * @param {ioBroker.State | null | undefined} state
+     */
+    async onStateChange(id, state) {
         if (state && !state.ack) {
-            //adapter.log.info('ack is not set!');
             const vmdata = id.split('.')[2];
             const type = vmdata.split('_')[0];
             let vmname, node;
+
             if (type === 'lxc' || type === 'qemu') {
                 vmname = vmdata.split('_')[1];
             } else if (type === 'node') {
                 node = vmdata.split('_')[1];
             }
+    
             const command = id.split('.')[3];
             let vmid;
 
-            adapter.log.debug(`state changed ${command}: type:  ${type} vmname: ${vmname}`);
-            proxmox.all(data => {
+            this.log.debug(`state changed ${command}: type:  ${type} vmname: ${vmname}`);
+            this.proxmox.all(data => {
+                this.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
 
-                adapter.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
                 if (type === 'lxc' || type === 'qemu') {
                     // get vm vid
                     const vms = data.data;
                     const vm = vms.find(vm => vm.name === vmname);
                     if (vm) {
-                        adapter.log.debug(`Find name in VMs: ${JSON.stringify(vm)}`);
+                        this.log.debug(`Find name in VMs: ${JSON.stringify(vm)}`);
                         vmid = vm.vmid;
                         node = vm.node;
                     } else {
-                        adapter.log.error(`could not Find name in VMs: ${JSON.stringify(data)}`);
+                        this.log.error(`could not Find name in VMs: ${JSON.stringify(data)}`);
                         return;
                     }
-                    adapter.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
+                    this.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
                     switch (command) {
                         case 'start':
-                            proxmox.qemuStart(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuStart(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'stop':
-                            proxmox.qemuStop(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuStop(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'reset':
-                            proxmox.qemuReset(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuReset(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'resume':
-                            proxmox.qemuResume(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuResume(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'shutdown':
-                            proxmox.qemuShutdown(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuShutdown(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'suspend':
-                            proxmox.qemuSuspend(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuSuspend(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'reboot':
-                            proxmox.qemuReboot(node, type, vmid, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.qemuReboot(node, type, vmid, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
-
-                        default:
-                            break;
                     }
                 } else if (type === 'node') {
-                    adapter.log.debug('sending shutdown/reboot command');
+                    this.log.debug('sending shutdown/reboot command');
                     switch (command) {
                         case 'shutdown':
-                            proxmox.nodeShutdown(node, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.nodeShutdown(node, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
                         case 'reboot':
-                            proxmox.nodeReboot(node, function (data) {
-                                adapter.log.info(data);
+                            this.proxmox.nodeReboot(node, (data) => {
+                                this.log.info(data);
                                 sendRequest(10000);
                             });
                             break;
@@ -131,108 +165,48 @@ function startAdapter(options) {
                 }
             });
 
-            //proxmox.qemuStart("home","qemu","103",function (data) {
-            //    adapter.log.info(JSON.stringify(data  ))
+            //this.proxmox.qemuStart("home", "qemu", "103", (data) => {
+            //    this.log.info(JSON.stringify(data  ))
             //})
         }
-    });
-
-    // is called when databases are connected and adapter received configuration.
-    // start here!
-    adapter.on('ready', function () {
-        adapter.getForeignObject('system.config', (err, obj) => {
-            if (obj && obj.native && obj.native.secret) {
-                //noinspection JSUnresolvedVariable
-                adapter.config.pwd = decrypt(obj.native.secret, adapter.config.pwd);
-            } else {
-                //noinspection JSUnresolvedVariable
-                adapter.config.pwd = decrypt('Zgfr56gFe87jJOM', adapter.config.pwd);
-            }
-
-            if (adapter.config.ip === '192.000.000.000') {
-                adapter.log.error('Please set the IP of your Proxmox host.');
-                typeof adapter.terminate === 'function' ? adapter.terminate(11) : process.exit(11);
-                return;
-            }
-
-            adapter.config.ip = adapter.config.ip || '';
-            proxmox = new ProxmoxGet(adapter);
-
-            //check Interval
-            adapter.config.param_requestInterval = parseInt(adapter.config.param_requestInterval, 10) || 30;
-
-            if (adapter.config.param_requestInterval < 5) {
-                adapter.log.info('Intervall <5s, set to 5s');
-                adapter.config.param_requestInterval = 5;
-            }
-
-            proxmox._getTicket(function (result) {
-                if (result === '200' || result === 200) {
-                    main();
-                    adapter.setState('info.connection', true, true);
-                } else {
-                    adapter.setState('info.connection', false, true);
-                    adapter.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
-                    typeof adapter.terminate === 'function' ? adapter.terminate(11) : process.exit(11);
-                }
-            });
-        });
-    });
-
-    function decrypt(key, value) {
-        let result = '';
-        for (let i = 0; i < value.length; ++i) {
-            result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
-        }
-        return result;
     }
 
-    async function main() {
-        await readObjects();
-
-        // subscribe on all state changes
-        adapter.subscribeStates('*');
-
-        _getNodes();
-    }
-
-    function sendRequest(nextRunTimeout) {
+    sendRequest(nextRunTimeout) {
         requestInterval && clearTimeout(requestInterval);
-        requestInterval = setTimeout(sendRequest, nextRunTimeout || adapter.config.param_requestInterval * 1000);
+        requestInterval = setTimeout(sendRequest, nextRunTimeout || this.config.param_requestInterval * 1000);
 
         if (finish) {
-            proxmox.resetResponseCache(); // Clear cache to start fresh
+            this.proxmox.resetResponseCache(); // Clear cache to start fresh
 
             try {
-                proxmox.status(data => {
+                this.proxmox.status(data => {
                     _setNodes(data.data);
-                    adapter.log.debug(`Devices: ${JSON.stringify(data)}`);
+                    this.log.debug(`Devices: ${JSON.stringify(data)}`);
                 });
-
             } catch (e) {
-                adapter.log.warn(`Cannot send request: ${e}`);
+                this.log.warn(`Cannot send request: ${e}`);
                 if (connected) {
                     connected = false;
-                    adapter.log.debug('Disconnect');
-                    adapter.setState('info.connection', false, true);
+                    this.log.debug('Disconnect');
+                    this.setState('info.connection', false, true);
                 }
             }
         }
     }
 
-    function _getNodes() {
-        proxmox.status(async data => {
+    _getNodes() {
+        this.proxmox.status(async data => {
             if (!data.data) {
-                adapter.log.error('Can not get Proxmox nodes! please restart adapter');
+                this.log.error('Can not get Proxmox nodes! please restart adapter');
                 return;
             }
 
             try {
                 await _createNodes(data.data);
             } catch (e) {
-                adapter.log.error(`Could not create nodes, please restart adapter: ${e.message}`);
+                this.log.error(`Could not create nodes, please restart adapter: ${e.message}`);
             }
-            adapter.log.debug(`Devices: ${JSON.stringify(data)}`);
+            this.log.debug(`Devices: ${JSON.stringify(data)}`);
         });
     }
 
@@ -242,7 +216,7 @@ function startAdapter(options) {
      * @return {Promise<void>}
      * @private
      */
-    async function _createNodes(devices) {
+    async _createNodes(devices) {
         // get all known hosts to check if we have nodes in RAM which no longer exist
         const nodesToDelete = [];
 
@@ -254,7 +228,7 @@ function startAdapter(options) {
         }
 
         for (const element of devices) {
-            adapter.log.debug(`Node: ${JSON.stringify(element)}`);
+            this.log.debug(`Node: ${JSON.stringify(element)}`);
 
             // remove from nodesToDelete if still exists
             const idx = nodesToDelete.indexOf(element.node);
@@ -262,7 +236,7 @@ function startAdapter(options) {
                 nodesToDelete.splice(idx, 1);
             }
 
-            const sid = `${adapter.namespace}.${element.type}_${element.node}`;
+            const sid = `${this.namespace}.${element.type}_${element.node}`;
             if (!objects[sid]) {
                 // add to channels in RAM
                 objects[sid] = {
@@ -276,9 +250,9 @@ function startAdapter(options) {
                     }
                 };
 
-                await adapter.setObjectNotExistsAsync(sid, objects[sid]);
+                await this.setObjectNotExistsAsync(sid, objects[sid]);
 
-                await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
+                await this.setObjectNotExistsAsync(`${sid}.shutdown`, {
                     type: 'state',
                     common: {
                         name: 'shutdown',
@@ -292,7 +266,7 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setObjectNotExistsAsync(`${sid}.reboot`, {
+                await this.setObjectNotExistsAsync(`${sid}.reboot`, {
                     type: 'state',
                     common: {
                         name: 'reboot',
@@ -308,7 +282,7 @@ function startAdapter(options) {
             }
 
             // type has changed so extend no matter if yet exists
-            await adapter.extendObjectAsync(`${sid}.status`, {
+            await this.extendObjectAsync(`${sid}.status`, {
                 common: {
                     name: 'Status',
                     role: 'indicator.status',
@@ -327,9 +301,9 @@ function startAdapter(options) {
                 await _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
             }
 
-            proxmox.nodeStatus(element.node, async data => {
+            this.proxmox.nodeStatus(element.node, async (data) => {
 
-                adapter.log.debug('Request states for node ' + element.node);
+                this.log.debug('Request states for node ' + element.node);
 
                 const node_vals = data.data;
                 if (node_vals) {
@@ -385,39 +359,38 @@ function startAdapter(options) {
         // remove nodes
         for (const node of nodesToDelete) {
             try {
-                await adapter.delObjectAsync(`node_${node}`, {recursive: true});
-                delete objects[`${adapter.namespace}.node_${node}`]; // del from RAM too
-                adapter.log.info(`Deleted old node "${node}"`);
+                await this.delObjectAsync(`node_${node}`, { recursive: true });
+                delete objects[`${this.namespace}.node_${node}`]; // del from RAM too
+                this.log.info(`Deleted old node "${node}"`);
             } catch (e) {
-                adapter.log.warn(`Could not delete old node "${node}": ${e.message}`);
+                this.log.warn(`Could not delete old node "${node}": ${e.message}`);
             }
         }
     }
 
-    function _setNodes(devices) {
+    _setNodes(devices) {
         const knownObjIds = Object.keys(objects);
 
         for (const element of devices) {
-            adapter.log.debug(`Node: ${JSON.stringify(element)}`);
+            this.log.debug(`Node: ${JSON.stringify(element)}`);
 
-            const sid = `${adapter.namespace}.${element.type}_${element.node}`;
+            const sid = `${this.namespace}.${element.type}_${element.node}`;
 
             // check if the item is already in RAM - if not it's newly created
             if (!knownObjIds.includes(sid)) {
                 // new node restart adapter to create objects
-                adapter.log.info(`Detected new node "${element.node}" - restarting instance`);
-                return void adapter.restart();
+                this.log.info(`Detected new node "${element.node}" - restarting instance`);
+                return void this.restart();
             }
 
-            adapter.setState(`${sid}.cpu`, parseInt(element.cpu * 10000) / 100, true);
+            this.setState(`${sid}.cpu`, parseInt(element.cpu * 10000) / 100, true);
             if (element.maxcpu) {
-                adapter.setState(`${sid}.cpu_max`, element.maxcpu, true);
+                this.setState(`${sid}.cpu_max`, element.maxcpu, true);
             }
-            adapter.setState(`${sid}.status`, element.status, true);
+            this.setState(`${sid}.status`, element.status, true);
 
-            proxmox.nodeStatus(element.node, function (data) {
-
-                adapter.log.debug(`Request states for node ${element.node}`);
+            this.proxmox.nodeStatus(element.node, (data) => {
+                this.log.debug(`Request states for node ${element.node}`);
 
                 const node_vals = data.data;
 
@@ -427,48 +400,48 @@ function startAdapter(options) {
                 }
 
                 if (node_vals.uptime !== undefined) {
-                    adapter.setState(sid + '.uptime', node_vals.uptime, true);
+                    this.setState(sid + '.uptime', node_vals.uptime, true);
                 }
-                // adapter.setState(sid + '.' + name, val, true)
+                // this.setState(sid + '.' + name, val, true)
 
                 if (node_vals.wait !== undefined) {
-                    adapter.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
+                    this.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
                 }
 
                 if (node_vals.memory.used !== undefined) {
-                    adapter.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+                    this.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
                 }
                 if (node_vals.memory.used !== undefined) {
-                    adapter.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+                    this.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
                 }
                 if (node_vals.memory.total !== undefined) {
-                    adapter.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+                    this.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
                 }
                 if (node_vals.memory.free !== undefined) {
-                    adapter.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+                    this.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
                 }
 
                 if (node_vals.loadavg[0] !== undefined) {
-                    adapter.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+                    this.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
                 }
                 if (node_vals.loadavg[1] !== undefined) {
-                    adapter.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+                    this.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
                 }
                 if (node_vals.loadavg[2] !== undefined) {
-                    adapter.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+                    this.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
                 }
 
                 if (node_vals.swap.used !== undefined) {
-                    adapter.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+                    this.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
                 }
                 if (node_vals.swap.free !== undefined) {
-                    adapter.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+                    this.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
                 }
                 if (node_vals.swap.total !== undefined) {
-                    adapter.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+                    this.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
                 }
                 if (node_vals.swap.used !== undefined) {
-                    adapter.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+                    this.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
                 }
 
             });
@@ -476,8 +449,8 @@ function startAdapter(options) {
         _setVM();
     }
 
-    function _setVM() {
-        proxmox.all(data => {
+    _setVM() {
+        this.proxmox.all(data => {
             const qemuArr = data.data;
             const knownObjIds = Object.keys(objects);
 
@@ -487,7 +460,7 @@ function startAdapter(options) {
                 if (qemu.type === 'qemu' || qemu.type === 'lxc') {
                     const type = qemu.type;
 
-                    proxmox.qemuStatus(qemu.node, type, qemu.vmid, function (data) {
+                    this.proxmox.qemuStatus(qemu.node, type, qemu.vmid, (data) => {
                         const aktQemu = data.data;
 
                         //check if vm is empty
@@ -495,16 +468,16 @@ function startAdapter(options) {
                             return;
                         }
 
-                        sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
+                        sid = `${this.namespace}.${type}_${aktQemu.name}`;
                         if (!knownObjIds.includes(sid)) {
                             // new node restart adapter to create objects
-                            adapter.log.info(`Detected new VM/storage "${aktQemu.name}" - restarting instance`);
-                            return void adapter.restart();
+                            this.log.info(`Detected new VM/storage "${aktQemu.name}" - restarting instance`);
+                            return void this.restart();
                         }
 
                         findState(sid, aktQemu, states => {
                             for (const element of states) {
-                                adapter.setState(element[0] + '.' + element[1], element[3], true);
+                                this.setState(element[0] + '.' + element[1], element[3], true);
                             }
                         });
 
@@ -513,15 +486,15 @@ function startAdapter(options) {
                 } else if (qemu.type === 'storage') {
                     const type = qemu.type;
 
-                    proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
+                    this.proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                         const aktQemu = data.data;
 
-                        sid = adapter.namespace + '.' + type + '_' + name;
-                        adapter.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
+                        sid = this.namespace + '.' + type + '_' + name;
+                        this.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
 
                         findState(sid, aktQemu, states => {
                             for (const element of states) {
-                                adapter.setState(element[0] + '.' + element[1], element[3], true);
+                                this.setState(element[0] + '.' + element[1], element[3], true);
                             }
                         });
                     });
@@ -530,22 +503,22 @@ function startAdapter(options) {
         });
     }
 
-    function _createVM() {
+    _createVM() {
         const vmsToDelete = [];
 
         const createDone = async () => {
-            adapter.setState('info.connection', true, true);
+            this.setState('info.connection', true, true);
             if (!finish) {
                 finish = true;
 
                 // remove old vms/storage
                 for (const vm of vmsToDelete) {
                     try {
-                        await adapter.delObjectAsync(vm, {recursive: true});
-                        delete objects[`${adapter.namespace}.${vm}`]; // del from RAM too
-                        adapter.log.info(`Deleted old VM/storage "${vm}"`);
+                        await this.delObjectAsync(vm, { recursive: true });
+                        delete objects[`${this.namespace}.${vm}`]; // del from RAM too
+                        this.log.info(`Deleted old VM/storage "${vm}"`);
                     } catch (e) {
-                        adapter.log.warn(`Could not delete old VM/storage "${vm}": ${e.message}`);
+                        this.log.warn(`Could not delete old VM/storage "${vm}": ${e.message}`);
                     }
                 }
 
@@ -561,7 +534,7 @@ function startAdapter(options) {
             }
         }
 
-        proxmox.all(data => {
+        this.proxmox.all(data => {
             let callbackCnt = 0;
 
             const qemuArr = data.data;
@@ -576,7 +549,7 @@ function startAdapter(options) {
                     const type = qemu.type;
 
                     callbackCnt++;
-                    proxmox.qemuStatus(qemu.node, type, qemu.vmid, async data => {
+                    this.proxmox.qemuStatus(qemu.node, type, qemu.vmid, async data => {
                         const aktQemu = data.data;
 
                         if (!aktQemu) {
@@ -589,9 +562,9 @@ function startAdapter(options) {
                             vmsToDelete.splice(idx, 1);
                         }
 
-                        sid = `${adapter.namespace}.${type}_${aktQemu.name}`;
+                        sid = `${this.namespace}.${type}_${aktQemu.name}`;
 
-                        adapter.log.debug(`new ${type}: ${aktQemu.name}`);
+                        this.log.debug(`new ${type}: ${aktQemu.name}`);
 
                         if (!objects[sid]) {
                             // add to objects in RAM
@@ -607,10 +580,10 @@ function startAdapter(options) {
                                 }
                             };
 
-                            await adapter.setObjectNotExistsAsync(sid, objects[sid]);
+                            await this.setObjectNotExistsAsync(sid, objects[sid]);
                         }
 
-                        await adapter.setObjectNotExistsAsync(`${sid}.start`, {
+                        await this.setObjectNotExistsAsync(`${sid}.start`, {
                             type: 'state',
                             common: {
                                 name: 'start',
@@ -624,7 +597,7 @@ function startAdapter(options) {
                             native: {}
                         });
 
-                        await adapter.setObjectNotExistsAsync(`${sid}.stop`, {
+                        await this.setObjectNotExistsAsync(`${sid}.stop`, {
                             type: 'state',
                             common: {
                                 name: 'stop',
@@ -638,7 +611,7 @@ function startAdapter(options) {
                             native: {}
                         });
 
-                        await adapter.setObjectNotExistsAsync(`${sid}.shutdown`, {
+                        await this.setObjectNotExistsAsync(`${sid}.shutdown`, {
                             type: 'state',
                             common: {
                                 name: 'shutdown',
@@ -652,7 +625,7 @@ function startAdapter(options) {
                             native: {}
                         });
 
-                        await adapter.setObjectNotExistsAsync(`${sid}.reboot`, {
+                        await this.setObjectNotExistsAsync(`${sid}.reboot`, {
                             type: 'state',
                             common: {
                                 name: 'reboot',
@@ -667,7 +640,7 @@ function startAdapter(options) {
                         });
 
                         // type was boolean but has been corrected to string -> extend
-                        await adapter.extendObjectAsync(`${sid}.status`, {
+                        await this.extendObjectAsync(`${sid}.status`, {
                             type: 'state',
                             common: {
                                 name: 'status',
@@ -686,7 +659,7 @@ function startAdapter(options) {
                                 try {
                                     await _createState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
-                                    adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                                    this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
                             }
                             if (!--callbackCnt) {
@@ -698,7 +671,7 @@ function startAdapter(options) {
                     const type = qemu.type;
 
                     callbackCnt++;
-                    proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
+                    this.proxmox.storageStatus(qemu.node, qemu.storage, !!qemu.shared, (data, name) => {
                         const aktQemu = data.data;
 
                         if (!aktQemu) {
@@ -711,8 +684,8 @@ function startAdapter(options) {
                             vmsToDelete.splice(idx, 1);
                         }
 
-                        sid = `${adapter.namespace}.${type}_${name}`;
-                        adapter.log.debug('new storage: ' + name);
+                        sid = `${this.namespace}.${type}_${name}`;
+                        this.log.debug('new storage: ' + name);
 
                         if (!objects[sid]) {
                             // add to objects in RAM
@@ -725,7 +698,7 @@ function startAdapter(options) {
                                     type: type
                                 }
                             };
-                            adapter.setObjectNotExists(sid, objects[sid]);
+                            this.setObjectNotExists(sid, objects[sid]);
                         }
 
                         findState(sid, aktQemu, async states => {
@@ -733,7 +706,7 @@ function startAdapter(options) {
                                 try {
                                     await _createState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
-                                    adapter.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
+                                    this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
                             }
                             if (!--callbackCnt) {
@@ -746,20 +719,20 @@ function startAdapter(options) {
         });
     }
 
-    function findState(sid, states, cb) {
+    findState(sid, states, cb) {
         const result = [];
 
         for (const key of Object.keys(states)) {
             const value = states[key];
-            adapter.log.debug('search state' + key + ': ' + value);
+            this.log.debug('search state' + key + ': ' + value);
 
             if (key === 'mem') {
                 result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)]);
-                adapter.log.debug(states.mem, states.maxmem);
+                this.log.debug(states.mem, states.maxmem);
             }
             if (key === 'disk') {
                 result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)]);
-                adapter.log.debug(states.mem, states.maxmem);
+                this.log.debug(states.mem, states.maxmem);
             }
             if (key === 'used') {
                 result.push([sid, key + '_lev', 'level', p(states.used, states.total)]);
@@ -780,7 +753,7 @@ function startAdapter(options) {
                 result.push([sid, key, 'text', value]);
             }
         }
-        adapter.log.debug('found states:_' + JSON.stringify(result));
+        this.log.debug('found states:_' + JSON.stringify(result));
         cb(result);
     }
 
@@ -788,13 +761,13 @@ function startAdapter(options) {
      * Reads all channel objects and saves them in RAM
      * @returns {Promise<void>}
      */
-    async function readObjects() {
+    async readObjects() {
         try {
-            objects = await adapter.getForeignObjectsAsync(`${adapter.namespace}.*`, 'channel');
-            adapter.log.debug(`reading objects: ${JSON.stringify(objects)}`);
+            objects = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
+            this.log.debug(`reading objects: ${JSON.stringify(objects)}`);
             //updateConnect();
         } catch (e) {
-            adapter.log.error(e.message);
+            this.log.error(e.message);
         }
     }
 
@@ -808,11 +781,11 @@ function startAdapter(options) {
      * @return {Promise<void>}
      * @private
      */
-    async function _createState(sid, name, type, val) {
-        adapter.log.debug(`create state: ${name}`);
+    async _createState(sid, name, type, val) {
+        this.log.debug(`create state: ${name}`);
         switch (type) {
             case 'time':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -825,10 +798,10 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
             case 'size':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -841,10 +814,10 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
             case 'sizeb':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -857,10 +830,10 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
             case 'level':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -873,10 +846,10 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
             case 'default_num':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -888,10 +861,10 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
             case 'text':
-                await adapter.setObjectNotExistsAsync(`${sid}.${name}`, {
+                await this.setObjectNotExistsAsync(`${sid}.${name}`, {
                     common: {
                         name: name,
                         role: 'value',
@@ -903,23 +876,38 @@ function startAdapter(options) {
                     native: {}
                 });
 
-                await adapter.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateAsync(`${sid}.${name}`, val, true);
                 break;
+        }
+    }
+
+    /**
+     * @param {() => void} callback
+     */
+    onUnload(callback) {
+        try {
+            this.proxmox.stop();
+
+            if (this.requestInterval) {
+                this.log.debug('clearing request timeout');
+                this.clearTimeout(this.requestInterval);
+            }
+
+            callback();
+        } catch (e) {
+            callback();
         }
     }
 }
 
-function BtoMb(val) {
-    return Math.round(val / 1048576);
-}
-
-function p(vala, valb) {
-    return Math.round(vala / valb * 10000) / 100;
-}
-
-if (require.main === module) {
-    // start adapter
-    startAdapter();
+// @ts-ignore parent is a valid property on module
+if (module.parent) {
+    // Export the constructor in compact mode
+    /**
+     * @param {Partial<ioBroker.AdapterOptions>} [options={}]
+     */
+    module.exports = (options) => new Proxmox(options);
 } else {
-    module.exports = startAdapter;
+    // otherwise start the instance directly
+    new Proxmox();
 }

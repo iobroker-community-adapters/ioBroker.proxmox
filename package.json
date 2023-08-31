@@ -7,7 +7,7 @@
     "email": "meistertr.smarthome@gmail.com"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.5.0"
   },
   "contributors": [
     {
@@ -19,13 +19,13 @@
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "proxmox",
     "Smart Home",
-    "home automation"
+    "home automation",
+    "Proxmox"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/iobroker-community-adapters/ioBroker.proxmox"
+    "url": "git+https://github.com/iobroker-community-adapters/ioBroker.proxmox"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.0.3",
