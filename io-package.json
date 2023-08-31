@@ -215,14 +215,14 @@
         ],
         "platform": "Javascript/Node.js",
         "mode": "daemon",
-        "icon": "logo.png",
+        "icon": "proxmox.png",
         "compact": true,
         "localLinks": {
             "_default": "https://%ip%:%port%"
         },
         "materialize": true,
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/logo.png",
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
         "license": "MIT",
         "keywords": [
             "template",

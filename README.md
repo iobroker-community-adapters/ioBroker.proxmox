@@ -1,4 +1,5 @@
-![Logo](admin/logo.png)
+![Logo](admin/proxmox.png)
+
 # ioBroker.proxmox
 =================
 
