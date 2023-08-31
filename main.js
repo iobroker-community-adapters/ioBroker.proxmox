@@ -50,12 +50,12 @@ class Proxmox extends utils.Adapter {
 
         this.proxmox._getTicket(async (result) => {
             if (result === '200' || result === 200) {
-                await readObjects();
+                await this.readObjects();
 
                 // subscribe on all state changes
                 await this.subscribeStatesAsync('*');
 
-                _getNodes();
+                this.getNodes();
 
                 await this.setStateAsync('info.connection', true, true);
             } else {
@@ -172,29 +172,29 @@ class Proxmox extends utils.Adapter {
     }
 
     sendRequest(nextRunTimeout) {
-        requestInterval && clearTimeout(requestInterval);
-        requestInterval = setTimeout(sendRequest, nextRunTimeout || this.config.param_requestInterval * 1000);
+        this.requestInterval && this.clearTimeout(requestInterval);
+        this.requestInterval = this.setTimeout(this.sendRequest.bind(this), nextRunTimeout || this.config.param_requestInterval * 1000);
 
-        if (finish) {
+        if (this.finish) {
             this.proxmox.resetResponseCache(); // Clear cache to start fresh
 
             try {
                 this.proxmox.status(data => {
-                    _setNodes(data.data);
+                    this.setNodes(data.data);
                     this.log.debug(`Devices: ${JSON.stringify(data)}`);
                 });
             } catch (e) {
                 this.log.warn(`Cannot send request: ${e}`);
-                if (connected) {
-                    connected = false;
+                if (this.connected) {
+                    this.connected = false;
                     this.log.debug('Disconnect');
-                    this.setState('info.connection', false, true);
+                    this.setState('info.connection', { val:false, ack: true });
                 }
             }
         }
     }
 
-    _getNodes() {
+    getNodes() {
         this.proxmox.status(async data => {
             if (!data.data) {
                 this.log.error('Can not get Proxmox nodes! please restart adapter');
@@ -202,7 +202,7 @@ class Proxmox extends utils.Adapter {
             }
 
             try {
-                await _createNodes(data.data);
+                await this.createNodes(data.data);
             } catch (e) {
                 this.log.error(`Could not create nodes, please restart adapter: ${e.message}`);
             }
@@ -216,11 +216,11 @@ class Proxmox extends utils.Adapter {
      * @return {Promise<void>}
      * @private
      */
-    async _createNodes(devices) {
+    async createNodes(devices) {
         // get all known hosts to check if we have nodes in RAM which no longer exist
         const nodesToDelete = [];
 
-        for (const objId of Object.keys(objects)) {
+        for (const objId of Object.keys(this.objects)) {
             const channel = objId.split('.')[2];
             if (channel.startsWith('node_')) {
                 nodesToDelete.push(channel.substr(5));
@@ -237,9 +237,9 @@ class Proxmox extends utils.Adapter {
             }
 
             const sid = `${this.namespace}.${element.type}_${element.node}`;
-            if (!objects[sid]) {
+            if (!this.objects[sid]) {
                 // add to channels in RAM
-                objects[sid] = {
+                this.objects[sid] = {
                     type: 'channel',
                     common: {
                         name: element.node
@@ -250,7 +250,7 @@ class Proxmox extends utils.Adapter {
                     }
                 };
 
-                await this.setObjectNotExistsAsync(sid, objects[sid]);
+                await this.setObjectNotExistsAsync(sid, this.objects[sid]);
 
                 await this.setObjectNotExistsAsync(`${sid}.shutdown`, {
                     type: 'state',
@@ -292,13 +292,13 @@ class Proxmox extends utils.Adapter {
                 },
                 type: 'state',
                 native: {}
-            }, {preserve: {common: ['name']}});
+            }, { preserve: { common: ['name'] } });
 
             if (element.cpu) {
-                await _createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
+                await this.createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
             }
             if (element.maxcpu) {
-                await _createState(sid, 'cpu_max', 'default_num', element.maxcpu);
+                await this.createState(sid, 'cpu_max', 'default_num', element.maxcpu);
             }
 
             this.proxmox.nodeStatus(element.node, async (data) => {
@@ -308,51 +308,51 @@ class Proxmox extends utils.Adapter {
                 const node_vals = data.data;
                 if (node_vals) {
                     if (node_vals.uptime !== undefined) {
-                        await _createState(sid, 'uptime', 'time', node_vals.uptime);
+                        await this.createState(sid, 'uptime', 'time', node_vals.uptime);
                     }
 
                     if (node_vals.wait !== undefined) {
-                        await _createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
+                        await this.createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
                     }
 
                     if (node_vals.memory.used !== undefined) {
-                        await _createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                        await this.createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
                     }
                     if (node_vals.memory.used !== undefined) {
-                        await _createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                        await this.createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
                     }
                     if (node_vals.memory.total !== undefined) {
-                        await _createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                        await this.createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
                     }
                     if (node_vals.memory.free !== undefined) {
-                        await _createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                        await this.createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
                     }
 
                     if (node_vals.loadavg[0] !== undefined) {
-                        await _createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                        await this.createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
                     }
                     if (node_vals.loadavg[1] !== undefined) {
-                        await _createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                        await this.createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
                     }
                     if (node_vals.loadavg[2] !== undefined) {
-                        await _createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                        await this.createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
                     }
 
                     if (node_vals.swap.used !== undefined) {
-                        await _createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                        await this.createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
                     }
                     if (node_vals.swap.free !== undefined) {
-                        await _createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                        await this.createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
                     }
                     if (node_vals.swap.total !== undefined) {
-                        await _createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                        await this.createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
                     }
                     if (node_vals.swap.free !== undefined) {
-                        await _createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                        await this.createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
                     }
                 }
 
-                _createVM();
+                this.createVM();
             });
         }
 
@@ -360,7 +360,7 @@ class Proxmox extends utils.Adapter {
         for (const node of nodesToDelete) {
             try {
                 await this.delObjectAsync(`node_${node}`, { recursive: true });
-                delete objects[`${this.namespace}.node_${node}`]; // del from RAM too
+                delete this.objects[`${this.namespace}.node_${node}`]; // del from RAM too
                 this.log.info(`Deleted old node "${node}"`);
             } catch (e) {
                 this.log.warn(`Could not delete old node "${node}": ${e.message}`);
@@ -368,8 +368,8 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    _setNodes(devices) {
-        const knownObjIds = Object.keys(objects);
+    async setNodes(devices) {
+        const knownObjIds = Object.keys(this.objects);
 
         for (const element of devices) {
             this.log.debug(`Node: ${JSON.stringify(element)}`);
@@ -389,7 +389,7 @@ class Proxmox extends utils.Adapter {
             }
             this.setState(`${sid}.status`, element.status, true);
 
-            this.proxmox.nodeStatus(element.node, (data) => {
+            this.proxmox.nodeStatus(element.node, async (data) => {
                 this.log.debug(`Request states for node ${element.node}`);
 
                 const node_vals = data.data;
@@ -400,59 +400,60 @@ class Proxmox extends utils.Adapter {
                 }
 
                 if (node_vals.uptime !== undefined) {
-                    this.setState(sid + '.uptime', node_vals.uptime, true);
+                    await this.setStateChangedAsync(sid + '.uptime', node_vals.uptime, true);
                 }
-                // this.setState(sid + '.' + name, val, true)
+                // await this.setStateChangedAsync(sid + '.' + name, val, true)
 
                 if (node_vals.wait !== undefined) {
-                    this.setState(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
+                    await this.setStateChangedAsync(sid + '.iowait', parseInt(node_vals.wait * 10000) / 100, true);
                 }
 
                 if (node_vals.memory.used !== undefined) {
-                    this.setState(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
+                    await this.setStateChangedAsync(sid + '.memory.used', BtoMb(node_vals.memory.used), true);
                 }
                 if (node_vals.memory.used !== undefined) {
-                    this.setState(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
+                    await this.setStateChangedAsync(sid + '.memory.used_lev', p(node_vals.memory.used, node_vals.memory.total), true);
                 }
                 if (node_vals.memory.total !== undefined) {
-                    this.setState(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
+                    await this.setStateChangedAsync(sid + '.memory.total', BtoMb(node_vals.memory.total), true);
                 }
                 if (node_vals.memory.free !== undefined) {
-                    this.setState(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
+                    await this.setStateChangedAsync(sid + '.memory.free', BtoMb(node_vals.memory.free), true);
                 }
 
                 if (node_vals.loadavg[0] !== undefined) {
-                    this.setState(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
+                    await this.setStateChangedAsync(sid + '.loadavg.0', parseFloat(node_vals.loadavg[0]), true);
                 }
                 if (node_vals.loadavg[1] !== undefined) {
-                    this.setState(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
+                    await this.setStateChangedAsync(sid + '.loadavg.1', parseFloat(node_vals.loadavg[1]), true);
                 }
                 if (node_vals.loadavg[2] !== undefined) {
-                    this.setState(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
+                    await this.setStateChangedAsync(sid + '.loadavg.2', parseFloat(node_vals.loadavg[2]), true);
                 }
 
                 if (node_vals.swap.used !== undefined) {
-                    this.setState(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
+                    await this.setStateChangedAsync(sid + '.swap.used', BtoMb(node_vals.swap.used), true);
                 }
                 if (node_vals.swap.free !== undefined) {
-                    this.setState(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
+                    await this.setStateChangedAsync(sid + '.swap.free', BtoMb(node_vals.swap.free), true);
                 }
                 if (node_vals.swap.total !== undefined) {
-                    this.setState(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
+                    await this.setStateChangedAsync(sid + '.swap.total', BtoMb(node_vals.swap.total), true);
                 }
                 if (node_vals.swap.used !== undefined) {
-                    this.setState(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
+                    await this.setStateChangedAsync(sid + '.swap.used_lev', p(node_vals.swap.used, node_vals.swap.total), true);
                 }
 
             });
         }
-        _setVM();
+
+        this.setVM();
     }
 
-    _setVM() {
+    setVM() {
         this.proxmox.all(data => {
             const qemuArr = data.data;
-            const knownObjIds = Object.keys(objects);
+            const knownObjIds = Object.keys(this.objects);
 
             for (const qemu of qemuArr) {
                 let sid = '';
@@ -475,9 +476,9 @@ class Proxmox extends utils.Adapter {
                             return void this.restart();
                         }
 
-                        findState(sid, aktQemu, states => {
+                        this.findState(sid, aktQemu, states => {
                             for (const element of states) {
-                                this.setState(element[0] + '.' + element[1], element[3], true);
+                                this.setStateChanged(element[0] + '.' + element[1], element[3], true);
                             }
                         });
 
@@ -492,9 +493,9 @@ class Proxmox extends utils.Adapter {
                         sid = this.namespace + '.' + type + '_' + name;
                         this.log.debug('storage reload: ' + name + ' for node ' + qemu.node);
 
-                        findState(sid, aktQemu, states => {
+                        this.findState(sid, aktQemu, states => {
                             for (const element of states) {
-                                this.setState(element[0] + '.' + element[1], element[3], true);
+                                this.setStateChanged(element[0] + '.' + element[1], element[3], true);
                             }
                         });
                     });
@@ -503,31 +504,31 @@ class Proxmox extends utils.Adapter {
         });
     }
 
-    _createVM() {
+    createVM() {
         const vmsToDelete = [];
 
         const createDone = async () => {
-            this.setState('info.connection', true, true);
-            if (!finish) {
-                finish = true;
+            this.setState('info.connection', { val: true, ack: true });
+            if (!this.finish) {
+                this.finish = true;
 
                 // remove old vms/storage
                 for (const vm of vmsToDelete) {
                     try {
                         await this.delObjectAsync(vm, { recursive: true });
-                        delete objects[`${this.namespace}.${vm}`]; // del from RAM too
+                        delete this.objects[`${this.namespace}.${vm}`]; // del from RAM too
                         this.log.info(`Deleted old VM/storage "${vm}"`);
                     } catch (e) {
                         this.log.warn(`Could not delete old VM/storage "${vm}": ${e.message}`);
                     }
                 }
 
-                requestInterval && clearTimeout(requestInterval);
-                requestInterval = setTimeout(sendRequest, 5000);
+                this.requestInterval && this.clearTimeout(this.requestInterval);
+                this.requestInterval = this.setTimeout(this.sendRequest.bind(this), 5000);
             }
         };
 
-        for (const objId of Object.keys(objects)) {
+        for (const objId of Object.keys(this.objects)) {
             const channel = objId.split('.')[2];
             if (channel.startsWith('lxc_') || channel.startsWith('qemu_') || channel.startsWith('storage_')) {
                 vmsToDelete.push(channel);
@@ -566,9 +567,9 @@ class Proxmox extends utils.Adapter {
 
                         this.log.debug(`new ${type}: ${aktQemu.name}`);
 
-                        if (!objects[sid]) {
+                        if (!this.objects[sid]) {
                             // add to objects in RAM
-                            objects[sid] = {
+                            this.objects[sid] = {
                                 type: 'channel',
                                 common: {
                                     name: aktQemu.name
@@ -580,7 +581,7 @@ class Proxmox extends utils.Adapter {
                                 }
                             };
 
-                            await this.setObjectNotExistsAsync(sid, objects[sid]);
+                            await this.setObjectNotExistsAsync(sid, this.objects[sid]);
                         }
 
                         await this.setObjectNotExistsAsync(`${sid}.start`, {
@@ -652,12 +653,12 @@ class Proxmox extends utils.Adapter {
 
                             },
                             native: {}
-                        }, {preserve: {common: ['name']}});
+                        }, { preserve: { common: ['name'] } });
 
-                        findState(sid, aktQemu, async states => {
+                        this.findState(sid, aktQemu, async states => {
                             for (const element of states) {
                                 try {
-                                    await _createState(element[0], element[1], element[2], element[3]);
+                                    await this.createState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
                                     this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
@@ -687,9 +688,9 @@ class Proxmox extends utils.Adapter {
                         sid = `${this.namespace}.${type}_${name}`;
                         this.log.debug('new storage: ' + name);
 
-                        if (!objects[sid]) {
+                        if (!this.objects[sid]) {
                             // add to objects in RAM
-                            objects[sid] = {
+                            this.objects[sid] = {
                                 type: 'channel',
                                 common: {
                                     name: name
@@ -698,13 +699,13 @@ class Proxmox extends utils.Adapter {
                                     type: type
                                 }
                             };
-                            this.setObjectNotExists(sid, objects[sid]);
+                            this.setObjectNotExists(sid, this.objects[sid]);
                         }
 
-                        findState(sid, aktQemu, async states => {
+                        this.findState(sid, aktQemu, async states => {
                             for (const element of states) {
                                 try {
-                                    await _createState(element[0], element[1], element[2], element[3]);
+                                    await this.createState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
                                     this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
@@ -763,8 +764,8 @@ class Proxmox extends utils.Adapter {
      */
     async readObjects() {
         try {
-            objects = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
-            this.log.debug(`reading objects: ${JSON.stringify(objects)}`);
+            this.objects = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
+            this.log.debug(`reading objects: ${JSON.stringify(this.objects)}`);
             //updateConnect();
         } catch (e) {
             this.log.error(e.message);
@@ -781,8 +782,9 @@ class Proxmox extends utils.Adapter {
      * @return {Promise<void>}
      * @private
      */
-    async _createState(sid, name, type, val) {
-        this.log.debug(`create state: ${name}`);
+    async createState(sid, name, type, val) {
+        this.log.debug(`creating state: ${name}`);
+
         switch (type) {
             case 'time':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -798,7 +800,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'size':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -814,7 +816,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'sizeb':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -830,7 +832,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'level':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -846,7 +848,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'default_num':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -861,7 +863,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'text':
                 await this.setObjectNotExistsAsync(`${sid}.${name}`, {
@@ -876,7 +878,7 @@ class Proxmox extends utils.Adapter {
                     native: {}
                 });
 
-                await this.setStateAsync(`${sid}.${name}`, val, true);
+                await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
         }
     }
