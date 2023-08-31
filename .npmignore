@@ -1,3 +1,6 @@
+# exclude all dot-files and directories
+.*
+
 gulpfile.js
 admin/i18n
 tasks

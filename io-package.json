@@ -187,16 +187,16 @@
         "connectionType": "local",
         "dataSource": "poll",
         "titleLang": {
-            "en": "Proxmox VM",
-            "de": "Proxmox VM",
-            "ru": "Proxmox ВМ",
-            "pt": "Proxmox VM",
-            "nl": "Proxmox VM",
-            "fr": "VM Proxmox",
-            "it": "Proxmox VM",
-            "es": "Proxmox VM",
-            "pl": "Proxmox VM",
-            "zh-cn": "Proxmox虚拟机"
+            "en": "Proxmox",
+            "de": "Proxmox",
+            "ru": "Proxmox",
+            "pt": "Proxmox",
+            "nl": "Proxmox",
+            "fr": "Proxmox",
+            "it": "Proxmox",
+            "es": "Proxmox",
+            "pl": "Proxmox",
+            "zh-cn": "Proxmox"
         },
         "desc": {
             "en": "iobroker proxmox adapter",
@@ -211,7 +211,8 @@
             "zh-cn": "iobroker proxmox适配器"
         },
         "authors": [
-            "MeisterTR <meistertr.smarthome@gmail.com>"
+            "MeisterTR <meistertr.smarthome@gmail.com>",
+            "Matthias Kleine <info@haus-automatisierung.com>"
         ],
         "platform": "Javascript/Node.js",
         "mode": "daemon",
