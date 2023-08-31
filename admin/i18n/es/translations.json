@@ -1,14 +1,9 @@
 {
-    "Auto": "Auto",
-    "Manual": "Manual",
-    "My select": "Mi seleccion",
-    "ip adress": "dirección IP",
-    "on save adapter restarts with new config immediately": "en el adaptador de guardar se reinicia con nueva configuración de inmediato",
-    "password": "contraseña",
-    "pve login password": "pve contraseña de inicio de sesión",
-    "pve login user": "pve usuario de inicio de sesión",
-    "request Intervall in sec.": "Intervalo de solicitud en sec.",
-    "template adapter settings": "configuración del adaptador de plantilla",
-    "test1": "Prueba 1",
-    "test2": "Prueba 2"
+    "Options": "Opciones",
+    "IP Aaddress": "Dirección IP",
+    "Port": "Puerto",
+    "Request Interval": "Intervalo de solicitud",
+    "User name": "Nombre de usuario",
+    "Password": "Contraseña",
+    "Realm": "Reino"
 }

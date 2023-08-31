@@ -13,7 +13,8 @@
                 "it": "avvertimento fisso se max_cpu non è in risposta",
                 "es": "advertencia fija si max_cpu no está en respuesta",
                 "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
-                "zh-cn": "如果不作出反应,定期警告"
+                "zh-cn": "如果不作出反应,定期警告",
+                "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
             },
             "1.3.4": {
                 "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
@@ -25,7 +26,8 @@
                 "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
                 "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
                 "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
-                "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）"
+                "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
+                "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
             },
             "1.3.3": {
                 "en": "we fixed some incorrect types",
@@ -37,7 +39,8 @@
                 "it": "abbiamo corretto alcuni tipi errati",
                 "es": "arreglamos algunos tipos incorrectos",
                 "pl": "naprawiliśmy niektóre nieprawidłowe typy",
-                "zh-cn": "我们修复了一些错误的类型"
+                "zh-cn": "我们修复了一些错误的类型",
+                "uk": "ми виправили деякі неправильні типи"
             },
             "1.3.2": {
                 "en": "status of vms is now a string instead of incorrectly a button",
@@ -49,7 +52,8 @@
                 "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
                 "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
                 "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮"
+                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
+                "uk": "статус vms тепер є рядком, а не кнопкою"
             },
             "1.3.1": {
                 "en": "status of vms is now a string instead of incorrectly a button",
@@ -61,7 +65,8 @@
                 "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
                 "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
                 "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮"
+                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
+                "uk": "статус vms тепер є рядком, а не кнопкою"
             },
             "1.3.0": {
                 "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
@@ -73,7 +78,8 @@
                 "it": "* Rileva le VM / archivi / nodi appena aggiunti durante il runtime e riavvia l'istanza per inizializzare tutto correttamente\n* ripulire gli oggetti VM / archiviazione / nodo cancellati\n__Richiede js-controller> = 2.2.8__",
                 "es": "* Detecta VM / almacenamientos / nodos recién agregados durante el tiempo de ejecución y reinicia la instancia para inicializar todo correctamente\n* limpiar objetos eliminados de VM / almacenamiento / nodo\n__Requiere js-controller> = 2.2.8__",
                 "pl": "* Wykryj nowo dodane maszyny wirtualne / magazyny / węzły podczas działania i zrestartuj instancję, aby wszystko poprawnie zainicjować\n* wyczyść usunięte obiekty VM / magazynu / węzła\n__Wymagania js-controller> = 2.2.8__",
-                "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__"
+                "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__",
+                "uk": "* Виявляйте щойно додані віртуальні машини/сховища/вузли під час виконання та перезапускайте екземпляр, щоб ініціалізувати все правильно\n* очистити видалені об’єкти віртуальної машини/сховища/вузла\n__Потрібен js-контролер >= 2.2.8__"
             },
             "1.2.0": {
                 "en": "fix errors for js-controller 3.2 and ensure all objects are created at first run",
@@ -85,7 +91,8 @@
                 "it": "correggere gli errori per js-controller 3.2 e assicurarsi che tutti gli oggetti vengano creati alla prima esecuzione",
                 "es": "corrija los errores de js-controller 3.2 y asegúrese de que todos los objetos se creen en la primera ejecución",
                 "pl": "napraw błędy dla js-controller 3.2 i upewnij się, że wszystkie obiekty są tworzone przy pierwszym uruchomieniu",
-                "zh-cn": "修复js-controller 3.2的错误，并确保在第一次运行时创建了所有对象"
+                "zh-cn": "修复js-controller 3.2的错误，并确保在第一次运行时创建了所有对象",
+                "uk": "виправити помилки для js-controller 3.2 і переконатися, що всі об’єкти створено під час першого запуску"
             },
             "1.1.0": {
                 "en": "better performance and bugfixes",
@@ -97,7 +104,8 @@
                 "it": "migliori prestazioni e correzioni di bug",
                 "es": "mejor rendimiento y corrección de errores",
                 "pl": "lepsza wydajność i poprawki błędów",
-                "zh-cn": "更好的性能和错误修正"
+                "zh-cn": "更好的性能和错误修正",
+                "uk": "краща продуктивність і виправлення помилок"
             },
             "1.0.2": {
                 "en": "remove hardcoded pam, fix error",
@@ -109,7 +117,8 @@
                 "it": "rimuovere pam hardcoded, correggere l'errore",
                 "es": "eliminar la codificación rígida de pam, corregir el error",
                 "pl": "usuń na stałe pam, napraw błąd",
-                "zh-cn": "删除硬编码的pam，修复错误"
+                "zh-cn": "删除硬编码的pam，修复错误",
+                "uk": "видалити жорстко закодований pam, виправити помилку"
             },
             "1.0.1": {
                 "en": "Fix issue with special characters in password.",
@@ -121,7 +130,8 @@
                 "it": "Risolvi il problema con caratteri speciali nella password.",
                 "es": "Soluciona el problema con caracteres especiales en la contraseña.",
                 "pl": "Napraw problem ze znakami specjalnymi w haśle.",
-                "zh-cn": "解决密码中特殊字符的问题。"
+                "zh-cn": "解决密码中特殊字符的问题。",
+                "uk": "Виправити проблему зі спеціальними символами в паролі."
             },
             "0.5.1": {
                 "en": "add start/stop Button, add actual disk size",
@@ -133,7 +143,8 @@
                 "it": "Aggiungi pulsante start / stop, aggiungi la dimensione effettiva del disco",
                 "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
                 "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
-                "zh-cn": "添加开始/停止按钮，添加实际磁盘大小"
+                "zh-cn": "添加开始/停止按钮，添加实际磁盘大小",
+                "uk": "додати кнопку запуску/зупинки, додати фактичний розмір диска"
             },
             "0.3.2": {
                 "en": "fixed some bugs",
@@ -145,7 +156,8 @@
                 "it": "corretto alcuni bug",
                 "es": "arreglado algunos errores",
                 "pl": "naprawiono niektóre błędy",
-                "zh-cn": "修复了一些错误"
+                "zh-cn": "修复了一些错误",
+                "uk": "виправлено деякі помилки"
             },
             "0.3.0": {
                 "en": "added  container, storage and password encryption",
@@ -157,7 +169,8 @@
                 "it": "aggiunto il contenitore, la memorizzazione e la crittografia della password",
                 "es": "Contenedor añadido, almacenamiento y cifrado de contraseña.",
                 "pl": "dodano szyfrowanie kontenera, pamięci masowej i hasła",
-                "zh-cn": "添加了容器，存储和密码加密"
+                "zh-cn": "添加了容器，存储和密码加密",
+                "uk": "додано контейнер, сховище та шифрування пароля"
             },
             "0.0.2": {
                 "en": "first running version",
@@ -169,7 +182,8 @@
                 "it": "prima versione funzionante",
                 "es": "primera versión ejecutiva",
                 "pl": "pierwsza działająca wersja",
-                "zh-cn": "第一个运行版本"
+                "zh-cn": "第一个运行版本",
+                "uk": "перша запущена версія"
             },
             "0.0.1": {
                 "en": "initial adapter",
@@ -181,7 +195,8 @@
                 "it": "adattatore iniziale",
                 "es": "adaptador inicial",
                 "pl": "początkowy adapter",
-                "zh-cn": "初始适配器"
+                "zh-cn": "初始适配器",
+                "uk": "початковий адаптер"
             }
         },
         "connectionType": "local",
@@ -196,7 +211,8 @@
             "it": "Proxmox",
             "es": "Proxmox",
             "pl": "Proxmox",
-            "zh-cn": "Proxmox"
+            "zh-cn": "Proxmox",
+            "uk": "Проксмокс"
         },
         "desc": {
             "en": "iobroker proxmox adapter",
@@ -208,7 +224,8 @@
             "it": "adattatore iobroker proxmox",
             "es": "adaptador iobroker proxmox",
             "pl": "Adapter iobroker proxmox",
-            "zh-cn": "iobroker proxmox适配器"
+            "zh-cn": "iobroker proxmox适配器",
+            "uk": "адаптер iobroker proxmox"
         },
         "authors": [
             "MeisterTR <meistertr.smarthome@gmail.com>",
@@ -249,14 +266,6 @@
             }
         ]
     },
-    "native": {
-        "ip": "",
-        "param_requestInterval": 30,
-        "port": 8006,
-        "name": "root",
-        "server": "pam",
-        "pwd": ""
-    },
     "protectedNative": [
         "pwd",
         "name"
@@ -264,6 +273,14 @@
     "encryptedNative": [
         "pwd"
     ],
+    "native": {
+        "ip": "",
+        "port": 8006,
+        "requestInterval": 30,
+        "name": "root",
+        "pwd": "",
+        "server": "pam"
+    },
     "instanceObjects": [
         {
             "_id": "info",

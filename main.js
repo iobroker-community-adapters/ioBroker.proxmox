@@ -172,7 +172,7 @@ class Proxmox extends utils.Adapter {
     }
 
     sendRequest(nextRunTimeout) {
-        this.requestInterval && this.clearTimeout(requestInterval);
+        this.requestInterval && this.clearTimeout(this.requestInterval);
         this.requestInterval = this.setTimeout(this.sendRequest.bind(this), nextRunTimeout || this.config.param_requestInterval * 1000);
 
         if (this.finish) {

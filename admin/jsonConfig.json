@@ -8,11 +8,10 @@
             "items": {
                 "ip": {
                     "type": "text",
-                    "label": "IP",
+                    "label": "IP Address",
                     "sm": 12,
                     "md": 4,
-                    "lg": 4,
-                    "help": "IP address"
+                    "lg": 4
                 },
                 "port": {
                     "type": "number",
@@ -23,7 +22,7 @@
                     "lg": 4,
                     "label": "Port"
                 },
-                "param_requestInterval": {
+                "requestInterval": {
                     "type": "number",
                     "min": 5,
                     "sm": 12,
@@ -37,7 +36,7 @@
                     "sm": 12,
                     "md": 4,
                     "lg": 4,
-                    "label": "Username"
+                    "label": "User name"
                 },
                 "pwd": {
                     "type": "password",
@@ -63,7 +62,7 @@
                     "sm": 12,
                     "md": 4,
                     "lg": 4,
-                    "label": "Type"
+                    "label": "Realm"
                 }
             }
         }
