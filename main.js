@@ -1,7 +1,6 @@
 'use strict';
 
-// you have to require the utils module and call adapter function
-const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const utils = require('@iobroker/adapter-core');
 const ProxmoxUtils = require('./lib/proxmox');
 const adapterName = require('./package.json').name.split('.').pop();
 
@@ -49,6 +48,7 @@ class Proxmox extends utils.Adapter {
         }
 
         try {
+            // Get a new ticket (login)
             this.proxmox.ticket(async () => {
                 await this.readObjects();
 
@@ -73,8 +73,8 @@ class Proxmox extends utils.Adapter {
      */
     async onStateChange(id, state) {
         if (state && !state.ack) {
-            const vmdata = id.split('.')[2];
-            const type = vmdata.split('_')[0];
+            const vmdata = id.split('.')[2]; // <type>_<name>
+            const type = vmdata.split('_')[0]; // e.g. lxc, qemu, node, storage, ...
             let vmname, node;
 
             if (type === 'lxc' || type === 'qemu') {
@@ -86,9 +86,9 @@ class Proxmox extends utils.Adapter {
             const command = id.split('.')[3];
             let vmid;
 
-            this.log.debug(`state changed ${command}: type:  ${type} vmname: ${vmname}`);
+            this.log.debug(`state changed: "${command}" type: "${type}" vmname: "${vmname}"`);
             this.proxmox.all((data) => {
-                this.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
+                this.log.debug(`all data for vm - node: ${node} | type: ${type} | vid: ${vmid}`);
 
                 if (type === 'lxc' || type === 'qemu') {
                     // get vm vid
@@ -102,7 +102,9 @@ class Proxmox extends utils.Adapter {
                         this.log.error(`could not Find name in VMs: ${JSON.stringify(data)}`);
                         return;
                     }
-                    this.log.debug(`all data for vm start: node: ${node}| type: ${type}| vid: ${vmid}`);
+
+                    this.log.debug(`all data for vm - node: ${node} | type: ${type} | vid: ${vmid}`);
+
                     switch (command) {
                         case 'start':
                             this.proxmox.qemuStart(node, type, vmid, (data) => {
@@ -297,10 +299,10 @@ class Proxmox extends utils.Adapter {
             );
 
             if (element.cpu) {
-                await this.createState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
+                await this.createCustomState(sid, 'cpu', 'level', parseInt(element.cpu * 10000) / 100);
             }
             if (element.maxcpu) {
-                await this.createState(sid, 'cpu_max', 'default_num', element.maxcpu);
+                await this.createCustomState(sid, 'cpu_max', 'default_num', element.maxcpu);
             }
 
             this.proxmox.nodeStatus(element.node, async (data) => {
@@ -309,47 +311,47 @@ class Proxmox extends utils.Adapter {
                 const node_vals = data.data;
                 if (node_vals) {
                     if (node_vals.uptime !== undefined) {
-                        await this.createState(sid, 'uptime', 'time', node_vals.uptime);
+                        await this.createCustomState(sid, 'uptime', 'time', node_vals.uptime);
                     }
 
                     if (node_vals.wait !== undefined) {
-                        await this.createState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
+                        await this.createCustomState(sid, 'iowait', 'level', parseInt(node_vals.wait * 10000) / 100);
                     }
 
                     if (node_vals.memory.used !== undefined) {
-                        await this.createState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
+                        await this.createCustomState(sid, 'memory.used', 'size', BtoMb(node_vals.memory.used));
                     }
                     if (node_vals.memory.used !== undefined) {
-                        await this.createState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
+                        await this.createCustomState(sid, 'memory.used_lev', 'level', p(node_vals.memory.used, node_vals.memory.total));
                     }
                     if (node_vals.memory.total !== undefined) {
-                        await this.createState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
+                        await this.createCustomState(sid, 'memory.total', 'size', BtoMb(node_vals.memory.total));
                     }
                     if (node_vals.memory.free !== undefined) {
-                        await this.createState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
+                        await this.createCustomState(sid, 'memory.free', 'size', BtoMb(node_vals.memory.free));
                     }
 
                     if (node_vals.loadavg[0] !== undefined) {
-                        await this.createState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
+                        await this.createCustomState(sid, 'loadavg.0', 'default_num', parseFloat(node_vals.loadavg[0]));
                     }
                     if (node_vals.loadavg[1] !== undefined) {
-                        await this.createState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
+                        await this.createCustomState(sid, 'loadavg.1', 'default_num', parseFloat(node_vals.loadavg[1]));
                     }
                     if (node_vals.loadavg[2] !== undefined) {
-                        await this.createState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
+                        await this.createCustomState(sid, 'loadavg.2', 'default_num', parseFloat(node_vals.loadavg[2]));
                     }
 
                     if (node_vals.swap.used !== undefined) {
-                        await this.createState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
+                        await this.createCustomState(sid, 'swap.used', 'size', BtoMb(node_vals.swap.used));
                     }
                     if (node_vals.swap.free !== undefined) {
-                        await this.createState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
+                        await this.createCustomState(sid, 'swap.free', 'size', BtoMb(node_vals.swap.free));
                     }
                     if (node_vals.swap.total !== undefined) {
-                        await this.createState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
+                        await this.createCustomState(sid, 'swap.total', 'size', BtoMb(node_vals.swap.total));
                     }
                     if (node_vals.swap.free !== undefined) {
-                        await this.createState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
+                        await this.createCustomState(sid, 'swap.used_lev', 'level', p(node_vals.swap.used, node_vals.swap.total));
                     }
                 }
 
@@ -653,7 +655,7 @@ class Proxmox extends utils.Adapter {
                         this.findState(sid, aktQemu, async (states) => {
                             for (const element of states) {
                                 try {
-                                    await this.createState(element[0], element[1], element[2], element[3]);
+                                    await this.createCustomState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
                                     this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
@@ -700,7 +702,7 @@ class Proxmox extends utils.Adapter {
                         this.findState(sid, aktQemu, async (states) => {
                             for (const element of states) {
                                 try {
-                                    await this.createState(element[0], element[1], element[2], element[3]);
+                                    await this.createCustomState(element[0], element[1], element[2], element[3]);
                                 } catch (e) {
                                     this.log.error(`Could not create state for ${JSON.stringify(element)}: ${e.message}`);
                                 }
@@ -761,7 +763,6 @@ class Proxmox extends utils.Adapter {
         try {
             this.objects = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
             this.log.debug(`reading objects: ${JSON.stringify(this.objects)}`);
-            //updateConnect();
         } catch (e) {
             this.log.error(e.message);
         }
@@ -777,7 +778,7 @@ class Proxmox extends utils.Adapter {
      * @return {Promise<void>}
      * @private
      */
-    async createState(sid, name, type, val) {
+    async createCustomState(sid, name, type, val) {
         this.log.debug(`creating state: ${name}`);
 
         switch (type) {
