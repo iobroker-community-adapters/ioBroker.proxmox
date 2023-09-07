@@ -558,7 +558,7 @@ class Proxmox extends utils.Adapter {
                     native: {},
                 });
 
-                this.findState(sid, resourceStatus, async (states) => {
+                await this.findState(sid, resourceStatus, async (states) => {
                     for (const s of states) {
                         try {
                             await this.createCustomState(s[0], s[1], s[2], s[3]);
@@ -592,7 +592,7 @@ class Proxmox extends utils.Adapter {
                     this.setObjectNotExists(sid, this.objects[sid]);
                 }
 
-                this.findState(sid, storageStatus, async (states) => {
+                await this.findState(sid, storageStatus, async (states) => {
                     for (const s of states) {
                         try {
                             await this.createCustomState(s[0], s[1], s[2], s[3]);
@@ -707,9 +707,9 @@ class Proxmox extends utils.Adapter {
                     return void this.restart();
                 }
 
-                this.findState(sid, resourceStatus, (states) => {
+                await this.findState(sid, resourceStatus, async (states) => {
                     for (const element of states) {
-                        this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
                     }
                 });
             } else if (res.type === 'storage') {
@@ -719,16 +719,16 @@ class Proxmox extends utils.Adapter {
 
                 sid = this.namespace + '.' + type + '_' + res.storage;
 
-                this.findState(sid, storageStatus, (states) => {
+                await this.findState(sid, storageStatus, async (states) => {
                     for (const element of states) {
-                        this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
                     }
                 });
             }
         }
     }
 
-    findState(sid, states, cb) {
+    async findState(sid, states, cb) {
         const result = [];
 
         for (const key of Object.keys(states)) {
@@ -761,7 +761,7 @@ class Proxmox extends utils.Adapter {
 
         this.log.debug('found states: ' + JSON.stringify(result));
 
-        cb(result);
+        await cb(result);
     }
 
     /**
@@ -804,7 +804,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'size':
@@ -820,7 +819,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'sizeb':
@@ -836,7 +834,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'level':
@@ -852,7 +849,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'default_num':
@@ -867,7 +863,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
             case 'text':
@@ -882,7 +877,6 @@ class Proxmox extends utils.Adapter {
                     type: 'state',
                     native: {},
                 });
-
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
         }
