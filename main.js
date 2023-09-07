@@ -72,7 +72,6 @@ class Proxmox extends utils.Adapter {
      */
     async onStateChange(id, state) {
         if (state && !state.ack) {
-
             const obj = await this.getForeignObjectAsync(id);
             if (obj && obj?.native?.type) {
                 const type = obj.native.type;
@@ -86,63 +85,72 @@ class Proxmox extends utils.Adapter {
 
                     switch (command) {
                         case 'start':
-                            this.proxmox && this.proxmox.qemuStart(node, type, vmid).then((data) => {
-                                this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuStart(node, type, vmid).then((data) => {
+                                    this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
 
                             break;
                         case 'stop':
-                            this.proxmox && this.proxmox.qemuStop(node, type, vmid).then((data) => {
-                                this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuStop(node, type, vmid).then((data) => {
+                                    this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'reset':
-                            this.proxmox && this.proxmox.qemuReset(node, type, vmid).then((data) => {
-                                this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuReset(node, type, vmid).then((data) => {
+                                    this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'resume':
-                            this.proxmox && this.proxmox.qemuResume(node, type, vmid).then((data) => {
-                                this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuResume(node, type, vmid).then((data) => {
+                                    this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'shutdown':
-                            this.proxmox && this.proxmox.qemuShutdown(node, type, vmid).then((data) => {
-                                this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuShutdown(node, type, vmid).then((data) => {
+                                    this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'suspend':
-                            this.proxmox && this.proxmox.qemuSuspend(node, type, vmid).then((data) => {
-                                this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuSuspend(node, type, vmid).then((data) => {
+                                    this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'reboot':
-                            this.proxmox && this.proxmox.qemuReboot(node, type, vmid).then((data) => {
-                                this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.qemuReboot(node, type, vmid).then((data) => {
+                                    this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                     }
                 } else if (type === 'node') {
                     this.log.debug('sending shutdown/reboot command');
                     switch (command) {
                         case 'shutdown':
-                            this.proxmox && this.proxmox.nodeShutdown(node).then((data) => {
-                                this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.nodeShutdown(node).then((data) => {
+                                    this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                         case 'reboot':
-                            this.proxmox && this.proxmox.nodeReboot(node).then((data) => {
-                                this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            });
+                            this.proxmox &&
+                                this.proxmox.nodeReboot(node).then((data) => {
+                                    this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                });
                             break;
                     }
                 }
@@ -152,25 +160,28 @@ class Proxmox extends utils.Adapter {
 
     sendRequest(nextRunTimeout) {
         this.requestInterval && this.clearTimeout(this.requestInterval);
-        this.requestInterval = this.setTimeout(async () => {
-            this.requestInterval = null;
+        this.requestInterval = this.setTimeout(
+            async () => {
+                this.requestInterval = null;
 
-            if (this.proxmox) {
-                this.log.debug('sendRequest interval started');
-                this.proxmox.resetResponseCache(); // Clear cache to start fresh
+                if (this.proxmox) {
+                    this.log.debug('sendRequest interval started');
+                    this.proxmox.resetResponseCache(); // Clear cache to start fresh
 
-                try {
-                    const nodes = await this.proxmox.getNodes();
-                    this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
-                    await this.setNodes(nodes);
-                } catch (e) {
-                    this.log.warn(`Cannot send request: ${e}`);
-                    this.setState('info.connection', { val: false, ack: true });
+                    try {
+                        const nodes = await this.proxmox.getNodes();
+                        this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+                        await this.setNodes(nodes);
+                    } catch (e) {
+                        this.log.warn(`Cannot send request: ${e}`);
+                        this.setState('info.connection', { val: false, ack: true });
+                    }
                 }
-            }
 
-            this.sendRequest();
-        }, nextRunTimeout || this.config.requestInterval * 1000);
+                this.sendRequest();
+            },
+            nextRunTimeout || this.config.requestInterval * 1000,
+        );
     }
 
     async getNodes() {
@@ -643,7 +654,7 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(sid + '.memory.used', { val: BtoMb(nodeStatus.memory.used), ack: true });
                 }
                 if (nodeStatus.memory.used !== undefined) {
-                    await this.setStateChangedAsync(sid + '.memory.used_lev', { val: p(nodeStatus.memory.used, nodeStatus.memory.total), ack: true });
+                    await this.setStateChangedAsync(sid + '.memory.used_lev', { val: p(nodeStatus.memory.used, nodeStatus.memory.total), ack: true });
                 }
                 if (nodeStatus.memory.total !== undefined) {
                     await this.setStateChangedAsync(sid + '.memory.total', { val: BtoMb(nodeStatus.memory.total), ack: true });
