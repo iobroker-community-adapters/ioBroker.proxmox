@@ -1,11 +1,6 @@
 ![Logo](admin/proxmox.png)
 
 # ioBroker.proxmox
-=================
-
-![Logo](admin/proxmox.png)
-
-# ioBroker.proxmox
 
 [![NPM version](https://img.shields.io/npm/v/iobroker.proxmox?style=flat-square)](https://www.npmjs.com/package/iobroker.proxmox)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.proxmox?label=npm%20downloads&style=flat-square)](https://www.npmjs.com/package/iobroker.proxmox)
@@ -37,6 +32,7 @@ Control and use data from your ProxmoxVM
 ### __WORK IN PROGRESS__
 
 * (klein0r) Updated admin instance configuration
+* (klein0r) Refactoring of adapter
 __Requires js-controller >= 3.3.22__
 __Requires admin >= 6.0.0__
 
