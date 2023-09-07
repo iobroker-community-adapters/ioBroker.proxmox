@@ -29,7 +29,7 @@ Control and use data from your ProxmoxVM
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.0.0 (2023-09-07)
 
 * (klein0r) Updated admin instance configuration
 * (klein0r) Refactoring of adapter
@@ -55,7 +55,7 @@ __Requires admin >= 6.0.0__
 * (foxriver76) Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly
 * (foxriver76) clean up deleted VM/storage/node objects
 __Requires js-controller >= 2.2.8__
-  
+
 ### 1.2.0 (2020-01-24)
 * (foxriver76) Created info connection state + channel
 * (foxriver76) status is a string and not a boolean, so set obj type correctly

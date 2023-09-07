@@ -1,330 +1,226 @@
 {
-    "common": {
-        "name": "proxmox",
-        "version": "1.3.5",
-        "news": {
-            "1.3.5": {
-                "en": "fixed warning if `max_cpu` is not in response",
-                "de": "feste warnung, wenn max_cpu nicht reagiert",
-                "ru": "фиксированное предупреждение, если max_cpu не находится в ответе",
-                "pt": "aviso fixo se max_cpu não estiver em resposta",
-                "nl": "vertaling:",
-                "fr": "avertissement fixe si max_cpu n'est pas en réponse",
-                "it": "avvertimento fisso se max_cpu non è in risposta",
-                "es": "advertencia fija si max_cpu no está en respuesta",
-                "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
-                "zh-cn": "如果不作出反应,定期警告",
-                "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
-            },
-            "1.3.4": {
-                "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
-                "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
-                "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
-                "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
-                "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
-                "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
-                "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
-                "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
-                "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
-                "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
-                "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
-            },
-            "1.3.3": {
-                "en": "we fixed some incorrect types",
-                "de": "Wir haben einige falsche Typen behoben",
-                "ru": "мы исправили некоторые неправильные типы",
-                "pt": "nós consertamos alguns tipos incorretos",
-                "nl": "we hebben enkele onjuiste typen gerepareerd",
-                "fr": "nous avons corrigé certains types incorrects",
-                "it": "abbiamo corretto alcuni tipi errati",
-                "es": "arreglamos algunos tipos incorrectos",
-                "pl": "naprawiliśmy niektóre nieprawidłowe typy",
-                "zh-cn": "我们修复了一些错误的类型",
-                "uk": "ми виправили деякі неправильні типи"
-            },
-            "1.3.2": {
-                "en": "status of vms is now a string instead of incorrectly a button",
-                "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
-                "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
-                "pt": "status de vms agora é uma string em vez de incorretamente um botão",
-                "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
-                "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
-                "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
-                "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
-                "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
-                "uk": "статус vms тепер є рядком, а не кнопкою"
-            },
-            "1.3.1": {
-                "en": "status of vms is now a string instead of incorrectly a button",
-                "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
-                "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
-                "pt": "status de vms agora é uma string em vez de incorretamente um botão",
-                "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
-                "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
-                "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
-                "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
-                "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
-                "uk": "статус vms тепер є рядком, а не кнопкою"
-            },
-            "1.3.0": {
-                "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
-                "de": "* Erkennen Sie neu hinzugefügte VMs / Speicher / Knoten zur Laufzeit und starten Sie die Instanz neu, um alles korrekt zu initialisieren\n* Bereinigen Sie gelöschte VM- / Speicher- / Knotenobjekte\n__Erfordert js-controller> = 2.2.8__",
-                "ru": "* Обнаружение вновь добавленных виртуальных машин / хранилищ / узлов во время выполнения и перезапуск экземпляра, чтобы все правильно инициализировать\n* очистить удаленные объекты ВМ / хранилища / узла\n__ Требуется js-controller> = 2.2.8__",
-                "pt": "* Detecte VMs / storages / nodes recém-adicionados durante o tempo de execução e reinicie a instância para inicializar tudo corretamente\n* limpar objetos VM / armazenamento / nó excluídos\n__Requer js-controller> = 2.2.8__",
-                "nl": "* Detecteer nieuw toegevoegde VM's / opslagplaatsen / knooppunten tijdens runtime en start de instantie opnieuw om alles correct te initialiseren\n* verwijder verwijderde VM / storage / node-objecten\n__Vereist js-controller> = 2.2.8__",
-                "fr": "* Détectez les VM / stockages / nœuds nouvellement ajoutés pendant l'exécution et redémarrez l'instance pour tout initialiser correctement\n* nettoyer les objets VM / stockage / nœuds supprimés\n__Nécessite js-controller> = 2.2.8__",
-                "it": "* Rileva le VM / archivi / nodi appena aggiunti durante il runtime e riavvia l'istanza per inizializzare tutto correttamente\n* ripulire gli oggetti VM / archiviazione / nodo cancellati\n__Richiede js-controller> = 2.2.8__",
-                "es": "* Detecta VM / almacenamientos / nodos recién agregados durante el tiempo de ejecución y reinicia la instancia para inicializar todo correctamente\n* limpiar objetos eliminados de VM / almacenamiento / nodo\n__Requiere js-controller> = 2.2.8__",
-                "pl": "* Wykryj nowo dodane maszyny wirtualne / magazyny / węzły podczas działania i zrestartuj instancję, aby wszystko poprawnie zainicjować\n* wyczyść usunięte obiekty VM / magazynu / węzła\n__Wymagania js-controller> = 2.2.8__",
-                "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__",
-                "uk": "* Виявляйте щойно додані віртуальні машини/сховища/вузли під час виконання та перезапускайте екземпляр, щоб ініціалізувати все правильно\n* очистити видалені об’єкти віртуальної машини/сховища/вузла\n__Потрібен js-контролер >= 2.2.8__"
-            },
-            "1.2.0": {
-                "en": "fix errors for js-controller 3.2 and ensure all objects are created at first run",
-                "de": "Beheben Sie Fehler für js-controller 3.2 und stellen Sie sicher, dass alle Objekte beim ersten Start erstellt werden",
-                "ru": "исправить ошибки для js-controller 3.2 и убедиться, что все объекты создаются при первом запуске",
-                "pt": "corrigir erros para js-controller 3.2 e garantir que todos os objetos sejam criados na primeira execução",
-                "nl": "repareer fouten voor js-controller 3.2 en zorg ervoor dat alle objecten bij de eerste keer worden gemaakt",
-                "fr": "corriger les erreurs de js-controller 3.2 et s'assurer que tous les objets sont créés lors de la première exécution",
-                "it": "correggere gli errori per js-controller 3.2 e assicurarsi che tutti gli oggetti vengano creati alla prima esecuzione",
-                "es": "corrija los errores de js-controller 3.2 y asegúrese de que todos los objetos se creen en la primera ejecución",
-                "pl": "napraw błędy dla js-controller 3.2 i upewnij się, że wszystkie obiekty są tworzone przy pierwszym uruchomieniu",
-                "zh-cn": "修复js-controller 3.2的错误，并确保在第一次运行时创建了所有对象",
-                "uk": "виправити помилки для js-controller 3.2 і переконатися, що всі об’єкти створено під час першого запуску"
-            },
-            "1.1.0": {
-                "en": "better performance and bugfixes",
-                "de": "bessere Leistung und Bugfixes",
-                "ru": "лучшая производительность и исправления",
-                "pt": "melhor desempenho e correções de bugs",
-                "nl": "betere prestaties en bugfixes",
-                "fr": "meilleures performances et corrections de bugs",
-                "it": "migliori prestazioni e correzioni di bug",
-                "es": "mejor rendimiento y corrección de errores",
-                "pl": "lepsza wydajność i poprawki błędów",
-                "zh-cn": "更好的性能和错误修正",
-                "uk": "краща продуктивність і виправлення помилок"
-            },
-            "1.0.2": {
-                "en": "remove hardcoded pam, fix error",
-                "de": "Hardcodierte Pam entfernen, Fehler beheben",
-                "ru": "удалить жестко запрограммированный pam, исправить ошибку",
-                "pt": "remover pam codificado, corrigir erro",
-                "nl": "verwijder hardcoded pam, herstel fout",
-                "fr": "supprimer le pam codé en dur, corriger l'erreur",
-                "it": "rimuovere pam hardcoded, correggere l'errore",
-                "es": "eliminar la codificación rígida de pam, corregir el error",
-                "pl": "usuń na stałe pam, napraw błąd",
-                "zh-cn": "删除硬编码的pam，修复错误",
-                "uk": "видалити жорстко закодований pam, виправити помилку"
-            },
-            "1.0.1": {
-                "en": "Fix issue with special characters in password.",
-                "de": "Problem mit Sonderzeichen im Passwort behoben.",
-                "ru": "Исправлена проблема со специальными символами в пароле.",
-                "pt": "Corrija o problema com caracteres especiais na senha.",
-                "nl": "Probleem met speciale tekens in wachtwoord oplossen.",
-                "fr": "Correction d'un problème avec des caractères spéciaux dans le mot de passe.",
-                "it": "Risolvi il problema con caratteri speciali nella password.",
-                "es": "Soluciona el problema con caracteres especiales en la contraseña.",
-                "pl": "Napraw problem ze znakami specjalnymi w haśle.",
-                "zh-cn": "解决密码中特殊字符的问题。",
-                "uk": "Виправити проблему зі спеціальними символами в паролі."
-            },
-            "0.5.1": {
-                "en": "add start/stop Button, add actual disk size",
-                "de": "Start / Stopp-Taste hinzufügen, tatsächliche Festplattengröße hinzufügen",
-                "ru": "Добавить кнопку Пуск / Стоп, добавить фактический размер диска",
-                "pt": "adicionar botão iniciar / parar, adicionar tamanho real do disco",
-                "nl": "start / stop-knop toevoegen, werkelijke schijfgrootte toevoegen",
-                "fr": "Ajouter un bouton start / stop, ajouter la taille réelle du disque",
-                "it": "Aggiungi pulsante start / stop, aggiungi la dimensione effettiva del disco",
-                "es": "agregue el botón de inicio / parada, agregue el tamaño real del disco",
-                "pl": "dodaj przycisk Start / stop, dodaj rzeczywisty rozmiar dysku",
-                "zh-cn": "添加开始/停止按钮，添加实际磁盘大小",
-                "uk": "додати кнопку запуску/зупинки, додати фактичний розмір диска"
-            },
-            "0.3.2": {
-                "en": "fixed some bugs",
-                "de": "einige Fehler behoben",
-                "ru": "исправлены некоторые ошибки",
-                "pt": "consertou alguns bugs",
-                "nl": "een aantal bugs opgelost",
-                "fr": "correction de quelques bugs",
-                "it": "corretto alcuni bug",
-                "es": "arreglado algunos errores",
-                "pl": "naprawiono niektóre błędy",
-                "zh-cn": "修复了一些错误",
-                "uk": "виправлено деякі помилки"
-            },
-            "0.3.0": {
-                "en": "added  container, storage and password encryption",
-                "de": "Container, Speicher und Passwort-Verschlüsselung hinzugefügt",
-                "ru": "добавлен контейнер, хранилище и шифрование паролей",
-                "pt": "contêiner, armazenamento e criptografia de senhas adicionados",
-                "nl": "toegevoegde container-, opslag- en wachtwoordversleuteling",
-                "fr": "ajout du conteneur, du stockage et du cryptage du mot de passe",
-                "it": "aggiunto il contenitore, la memorizzazione e la crittografia della password",
-                "es": "Contenedor añadido, almacenamiento y cifrado de contraseña.",
-                "pl": "dodano szyfrowanie kontenera, pamięci masowej i hasła",
-                "zh-cn": "添加了容器，存储和密码加密",
-                "uk": "додано контейнер, сховище та шифрування пароля"
-            },
-            "0.0.2": {
-                "en": "first running version",
-                "de": "erste laufende Version",
-                "ru": "первая версия",
-                "pt": "primeira versão em execução",
-                "nl": "eerste versie",
-                "fr": "première version en cours",
-                "it": "prima versione funzionante",
-                "es": "primera versión ejecutiva",
-                "pl": "pierwsza działająca wersja",
-                "zh-cn": "第一个运行版本",
-                "uk": "перша запущена версія"
-            },
-            "0.0.1": {
-                "en": "initial adapter",
-                "de": "Initiale Version",
-                "ru": "Первоначальный адаптер",
-                "pt": "Versão inicial",
-                "fr": "Version initiale",
-                "nl": "Eerste release",
-                "it": "adattatore iniziale",
-                "es": "adaptador inicial",
-                "pl": "początkowy adapter",
-                "zh-cn": "初始适配器",
-                "uk": "початковий адаптер"
-            }
-        },
-        "connectionType": "local",
-        "dataSource": "poll",
-        "titleLang": {
-            "en": "Proxmox",
-            "de": "Proxmox",
-            "ru": "Proxmox",
-            "pt": "Proxmox",
-            "nl": "Proxmox",
-            "fr": "Proxmox",
-            "it": "Proxmox",
-            "es": "Proxmox",
-            "pl": "Proxmox",
-            "zh-cn": "Proxmox",
-            "uk": "Проксмокс"
-        },
-        "desc": {
-            "en": "iobroker proxmox adapter",
-            "de": "iobroker Proxmox Adapter",
-            "ru": "iobroker proxmox adapter",
-            "pt": "adaptador proxmox iobroker",
-            "nl": "iobroker proxmox-adapter",
-            "fr": "adaptateur iobroker proxmox",
-            "it": "adattatore iobroker proxmox",
-            "es": "adaptador iobroker proxmox",
-            "pl": "Adapter iobroker proxmox",
-            "zh-cn": "iobroker proxmox适配器",
-            "uk": "адаптер iobroker proxmox"
-        },
-        "authors": [
-            "MeisterTR <meistertr.smarthome@gmail.com>",
-            "Matthias Kleine <info@haus-automatisierung.com>"
-        ],
-        "platform": "Javascript/Node.js",
-        "mode": "daemon",
-        "icon": "proxmox.png",
-        "compact": true,
-        "localLinks": {
-            "_default": "https://%ip%:%port%"
-        },
-        "enabled": false,
-        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
-        "license": "MIT",
-        "keywords": [
-            "proxmox",
-            "vm",
-            "virtual machine",
-            "lxc",
-            "container"
-        ],
-        "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
-        "loglevel": "info",
-        "type": "infrastructure",
-        "adminUI": {
-            "config": "json"
-        },
-        "restartAdapters": [],
-        "dependencies": [
-            {
-                "js-controller": ">=3.3.22"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=6.0.0"
-            }
-        ]
+  "common": {
+    "name": "proxmox",
+    "version": "2.0.0",
+    "news": {
+      "2.0.0": {
+        "en": "* Updated admin instance configuration\n* Refactoring of adapter\n* Allow dots in resource names\n\n__Requires js-controller >= 3.3.22__\n__Requires admin >= 6.0.0__",
+        "de": "* Aktualisierte Admin-Instanz-Konfiguration\n* Refactoring des Adapters\n* Erlauben Sie Punkte in Ressourcennamen\n\n_Anforderungen js-controller >= 3.3.22_\n_Erfordert Admin >= 6.0.0_",
+        "ru": "* Обновленная настройка админ\n* Рефакторинг адаптера\n* Разрешить точки в именах ресурсов\n\n_ Требуется js-контроллер >= 3.7.22_\n_Требуется админ >= 6.0.0_",
+        "pt": "* Configuração de instância de administrador atualizada\n* Refactoring do adaptador\n* Permitir pontos em nomes de recursos\n\n_ Requer js-controller >= 3.3.22_\n_Requer admin >= 6.0.0_",
+        "nl": "♪ Verouderde administratie configu\n♪ Refactoring of adapter ♪\n♪ Vertaling:\n\nRequires-controller 3,3,22\nVertaling:",
+        "fr": "* Configuration d ' instance d ' administration actualisée\n* Refactoring of adaptateur\n* Autoriser les points dans les noms de ressources\n\n_ Nécessite js-controller 3.3.22_\n_ Nécessite l'administration >= 6.0.0_",
+        "it": "# Configurazione delle istanze admin aggiornata\n* Refactoring dell'adattatore\n# Consentire punti nei nomi delle risorse\n\n_Richiede js-controller >= 3.3.22_\n_ Richiede admin >= 6.0.0_",
+        "es": "* Configuración actualizada de instancias de administración\n* Refactorización del adaptador\n* Permitir puntos en nombres de recursos\n\n_Requiere js-controller 3.3.22_\n_Requiere administración= 6.0.0_",
+        "pl": "* Administracja\nRefaktor adaptatora\n* Allow dot\n\n_Requires js-controller >=== 3.3.2\n_Requires admin >= 6.0.0_",
+        "uk": "Ім'я * Оновлена конфігурація екземпляра адміністратора\n* Рефакторинг адаптера\nІм'я * Дозволити крапки в ресурсах\n\n_Вимагає js-controller >= 3.3.22_\n_Вимагає admin >= 6.0.0_",
+        "zh-cn": "* A/64/50。 最新专题组合\n* 重新定性\n* A/64/50。 资源的名称\n\n____________________3.3.22:\n__________"
+      },
+      "1.3.5": {
+        "en": "fixed warning if `max_cpu` is not in response",
+        "de": "feste warnung, wenn max_cpu nicht reagiert",
+        "ru": "фиксированное предупреждение, если max_cpu не находится в ответе",
+        "pt": "aviso fixo se max_cpu não estiver em resposta",
+        "nl": "vertaling:",
+        "fr": "avertissement fixe si max_cpu n'est pas en réponse",
+        "it": "avvertimento fisso se max_cpu non è in risposta",
+        "es": "advertencia fija si max_cpu no está en respuesta",
+        "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
+        "zh-cn": "如果不作出反应,定期警告",
+        "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
+      },
+      "1.3.4": {
+        "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
+        "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
+        "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
+        "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
+        "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
+        "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
+        "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
+        "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
+        "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
+        "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
+        "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
+      },
+      "1.3.3": {
+        "en": "we fixed some incorrect types",
+        "de": "Wir haben einige falsche Typen behoben",
+        "ru": "мы исправили некоторые неправильные типы",
+        "pt": "nós consertamos alguns tipos incorretos",
+        "nl": "we hebben enkele onjuiste typen gerepareerd",
+        "fr": "nous avons corrigé certains types incorrects",
+        "it": "abbiamo corretto alcuni tipi errati",
+        "es": "arreglamos algunos tipos incorrectos",
+        "pl": "naprawiliśmy niektóre nieprawidłowe typy",
+        "zh-cn": "我们修复了一些错误的类型",
+        "uk": "ми виправили деякі неправильні типи"
+      },
+      "1.3.2": {
+        "en": "status of vms is now a string instead of incorrectly a button",
+        "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
+        "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
+        "pt": "status de vms agora é uma string em vez de incorretamente um botão",
+        "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
+        "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
+        "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
+        "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
+        "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
+        "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
+        "uk": "статус vms тепер є рядком, а не кнопкою"
+      },
+      "1.3.1": {
+        "en": "status of vms is now a string instead of incorrectly a button",
+        "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
+        "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
+        "pt": "status de vms agora é uma string em vez de incorretamente um botão",
+        "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
+        "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
+        "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
+        "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
+        "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
+        "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
+        "uk": "статус vms тепер є рядком, а не кнопкою"
+      },
+      "1.3.0": {
+        "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
+        "de": "* Erkennen Sie neu hinzugefügte VMs / Speicher / Knoten zur Laufzeit und starten Sie die Instanz neu, um alles korrekt zu initialisieren\n* Bereinigen Sie gelöschte VM- / Speicher- / Knotenobjekte\n__Erfordert js-controller> = 2.2.8__",
+        "ru": "* Обнаружение вновь добавленных виртуальных машин / хранилищ / узлов во время выполнения и перезапуск экземпляра, чтобы все правильно инициализировать\n* очистить удаленные объекты ВМ / хранилища / узла\n__ Требуется js-controller> = 2.2.8__",
+        "pt": "* Detecte VMs / storages / nodes recém-adicionados durante o tempo de execução e reinicie a instância para inicializar tudo corretamente\n* limpar objetos VM / armazenamento / nó excluídos\n__Requer js-controller> = 2.2.8__",
+        "nl": "* Detecteer nieuw toegevoegde VM's / opslagplaatsen / knooppunten tijdens runtime en start de instantie opnieuw om alles correct te initialiseren\n* verwijder verwijderde VM / storage / node-objecten\n__Vereist js-controller> = 2.2.8__",
+        "fr": "* Détectez les VM / stockages / nœuds nouvellement ajoutés pendant l'exécution et redémarrez l'instance pour tout initialiser correctement\n* nettoyer les objets VM / stockage / nœuds supprimés\n__Nécessite js-controller> = 2.2.8__",
+        "it": "* Rileva le VM / archivi / nodi appena aggiunti durante il runtime e riavvia l'istanza per inizializzare tutto correttamente\n* ripulire gli oggetti VM / archiviazione / nodo cancellati\n__Richiede js-controller> = 2.2.8__",
+        "es": "* Detecta VM / almacenamientos / nodos recién agregados durante el tiempo de ejecución y reinicia la instancia para inicializar todo correctamente\n* limpiar objetos eliminados de VM / almacenamiento / nodo\n__Requiere js-controller> = 2.2.8__",
+        "pl": "* Wykryj nowo dodane maszyny wirtualne / magazyny / węzły podczas działania i zrestartuj instancję, aby wszystko poprawnie zainicjować\n* wyczyść usunięte obiekty VM / magazynu / węzła\n__Wymagania js-controller> = 2.2.8__",
+        "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__",
+        "uk": "* Виявляйте щойно додані віртуальні машини/сховища/вузли під час виконання та перезапускайте екземпляр, щоб ініціалізувати все правильно\n* очистити видалені об’єкти віртуальної машини/сховища/вузла\n__Потрібен js-контролер >= 2.2.8__"
+      }
     },
-    "protectedNative": [
-        "pwd",
-        "name"
-    ],
-    "encryptedNative": [
-        "pwd"
-    ],
-    "native": {
-        "ip": "192.000.000.000",
-        "port": 8006,
-        "requestInterval": 30,
-        "name": "root",
-        "pwd": "",
-        "server": "pam"
+    "connectionType": "local",
+    "dataSource": "poll",
+    "titleLang": {
+      "en": "Proxmox",
+      "de": "Proxmox",
+      "ru": "Proxmox",
+      "pt": "Proxmox",
+      "nl": "Proxmox",
+      "fr": "Proxmox",
+      "it": "Proxmox",
+      "es": "Proxmox",
+      "pl": "Proxmox",
+      "zh-cn": "Proxmox",
+      "uk": "Проксмокс"
     },
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Information",
-                    "de": "Information",
-                    "ru": "Информация",
-                    "pt": "Em formação",
-                    "nl": "Informatie",
-                    "fr": "Informations",
-                    "it": "Informazione",
-                    "es": "Información",
-                    "pl": "Informacja",
-                    "zh-cn": "信息"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "name": {
-                    "en": "Connected to LaMetric",
-                    "de": "Verbindung mit LaMetric",
-                    "ru": "При подключении к LaMetric",
-                    "pt": "Se conectado ao LaMetric",
-                    "nl": "Indien verbonden met LaMetric",
-                    "fr": "Si connecté à LaMetric",
-                    "it": "Se connesso a LaMetric",
-                    "es": "Si está conectado a LaMetric",
-                    "pl": "W przypadku połączenia z LaMetric",
-                    "zh-cn": "如果连接到 LaMetric"
-                },
-                "role": "indicator.reachable",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
+    "desc": {
+      "en": "iobroker proxmox adapter",
+      "de": "iobroker Proxmox Adapter",
+      "ru": "iobroker proxmox adapter",
+      "pt": "adaptador proxmox iobroker",
+      "nl": "iobroker proxmox-adapter",
+      "fr": "adaptateur iobroker proxmox",
+      "it": "adattatore iobroker proxmox",
+      "es": "adaptador iobroker proxmox",
+      "pl": "Adapter iobroker proxmox",
+      "zh-cn": "iobroker proxmox适配器",
+      "uk": "адаптер iobroker proxmox"
+    },
+    "authors": [
+      "MeisterTR <meistertr.smarthome@gmail.com>",
+      "Matthias Kleine <info@haus-automatisierung.com>"
+    ],
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "icon": "proxmox.png",
+    "compact": true,
+    "localLinks": {
+      "_default": "https://%ip%:%port%"
+    },
+    "enabled": false,
+    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
+    "license": "MIT",
+    "keywords": [
+      "proxmox",
+      "vm",
+      "virtual machine",
+      "lxc",
+      "container"
+    ],
+    "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
+    "loglevel": "info",
+    "type": "infrastructure",
+    "adminUI": {
+      "config": "json"
+    },
+    "restartAdapters": [],
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=6.0.0"
+      }
+    ]
+  },
+  "protectedNative": [
+    "pwd",
+    "name"
+  ],
+  "encryptedNative": [
+    "pwd"
+  ],
+  "native": {
+    "ip": "192.000.000.000",
+    "port": 8006,
+    "requestInterval": 30,
+    "name": "root",
+    "pwd": "",
+    "server": "pam"
+  },
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Information",
+          "ru": "Информация",
+          "pt": "Em formação",
+          "nl": "Informatie",
+          "fr": "Informations",
+          "it": "Informazione",
+          "es": "Información",
+          "pl": "Informacja",
+          "zh-cn": "信息"
         }
-    ],
-    "objects": []
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Connected to LaMetric",
+          "de": "Verbindung mit LaMetric",
+          "ru": "При подключении к LaMetric",
+          "pt": "Se conectado ao LaMetric",
+          "nl": "Indien verbonden met LaMetric",
+          "fr": "Si connecté à LaMetric",
+          "it": "Se connesso a LaMetric",
+          "es": "Si está conectado a LaMetric",
+          "pl": "W przypadku połączenia z LaMetric",
+          "zh-cn": "如果连接到 LaMetric"
+        },
+        "role": "indicator.reachable",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ],
+  "objects": []
 }
