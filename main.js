@@ -225,10 +225,12 @@ class Proxmox extends utils.Adapter {
             }
         */
         for (const node of nodes) {
-            this.log.debug(`Node: ${JSON.stringify(node)}`);
-            nodesKeep.push(`node_${node.node}`);
+            const nodeName = String(node.node).replace('.', '-');
 
-            const sid = `${this.namespace}.${node.type}_${node.node}`;
+            this.log.debug(`Node: ${JSON.stringify(node)}`);
+            nodesKeep.push(`node_${nodeName}`);
+
+            const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
             if (!this.objects[sid]) {
                 // add to channels in RAM
@@ -404,11 +406,12 @@ class Proxmox extends utils.Adapter {
             let sid = '';
             if (res.type === 'qemu' || res.type === 'lxc') {
                 const type = res.type;
-
+                
                 const resourceStatus = await this.proxmox.getResourceStatus(res.node, type, res.vmid);
-                resourcesKeep.push(`${type}_${resourceStatus.name}`);
+                const resName = String(resourceStatus.name).replace('.', '-');
 
-                sid = `${this.namespace}.${type}_${resourceStatus.name}`;
+                resourcesKeep.push(`${type}_${resName}`);
+                sid = `${this.namespace}.${type}_${resName}`;
 
                 this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
 
@@ -577,9 +580,10 @@ class Proxmox extends utils.Adapter {
                 const type = res.type;
 
                 const storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
-                resourcesKeep.push(`${type}_${res.storage}`);
+                const storageName = String(res.storage).replace('.', '-');
 
-                sid = `${this.namespace}.${type}_${res.storage}`;
+                resourcesKeep.push(`${type}_${storageName}`);
+                sid = `${this.namespace}.${type}_${storageName}`;
 
                 this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
@@ -702,12 +706,13 @@ class Proxmox extends utils.Adapter {
                 const type = res.type;
 
                 const resourceStatus = await this.proxmox.getResourceStatus(res.node, type, res.vmid, true);
+                const resName = String(resourceStatus.name).replace('.', '-');
 
-                sid = `${this.namespace}.${type}_${resourceStatus.name}`;
+                sid = `${this.namespace}.${type}_${resName}`;
 
                 if (!knownObjIds.includes(sid)) {
                     // new node restart adapter to create objects
-                    this.log.info(`Detected new VM/storage "${resourceStatus.name}" - restarting instance`);
+                    this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
                     return void this.restart();
                 }
 
@@ -719,7 +724,7 @@ class Proxmox extends utils.Adapter {
             } else if (res.type === 'storage') {
                 const type = res.type;
 
-                const storageStatus = await this.proxmox.storageStatus(res.node, res.storage, !!res.shared);
+                const storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
 
                 sid = this.namespace + '.' + type + '_' + res.storage;
 

@@ -33,6 +33,8 @@ Control and use data from your ProxmoxVM
 
 * (klein0r) Updated admin instance configuration
 * (klein0r) Refactoring of adapter
+* (klein0r) Allow dots in resource names
+
 __Requires js-controller >= 3.3.22__
 __Requires admin >= 6.0.0__
 
