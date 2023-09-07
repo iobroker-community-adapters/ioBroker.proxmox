@@ -7,7 +7,7 @@
     "email": "meistertr.smarthome@gmail.com"
   },
   "engines": {
-    "node": ">=14.5.0"
+    "node": ">=16"
   },
   "contributors": [
     {
