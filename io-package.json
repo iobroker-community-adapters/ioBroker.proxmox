@@ -274,7 +274,7 @@
         "pwd"
     ],
     "native": {
-        "ip": "",
+        "ip": "192.000.000.000",
         "port": 8006,
         "requestInterval": 30,
         "name": "root",
