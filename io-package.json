@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "news": {
+      "2.0.1": {
+        "en": "Added node disks (heals, wearout)",
+        "de": "Knotenscheiben hinzugefügt (Hälse, Verschleiß)",
+        "ru": "Добавлены диски node (здоровья, износ)",
+        "pt": "Discos de nó adicionados (calças, desgaste)",
+        "nl": "Toegevoegd node disks (helft)",
+        "fr": "Ajout de disques node (chiffres, usure)",
+        "it": "Aggiunto nodo dischi (guari, usura)",
+        "es": "Discos de nodo añadidos (sanación, desgaste)",
+        "pl": "Wyposażony dysk węzłowy (heals, wearout)",
+        "uk": "Додано диски вершини (заготовки, знос)",
+        "zh-cn": "增加不成见(黑客,穿着)"
+      },
       "2.0.0": {
         "en": "* Updated admin instance configuration\n* Refactoring of adapter\n* Allow dots in resource names\n\n__Requires js-controller >= 3.3.22__\n__Requires admin >= 6.0.0__",
         "de": "* Aktualisierte Admin-Instanz-Konfiguration\n* Refactoring des Adapters\n* Erlauben Sie Punkte in Ressourcennamen\n\n_Anforderungen js-controller >= 3.3.22_\n_Erfordert Admin >= 6.0.0_",
@@ -80,19 +93,6 @@
         "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
         "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
         "uk": "статус vms тепер є рядком, а не кнопкою"
-      },
-      "1.3.0": {
-        "en": "* Detect newly added VMs/storages/nodes during runtime and restart instance to initialize everything correctly\n* clean up deleted VM/storage/node objects\n__Requires js-controller >= 2.2.8__",
-        "de": "* Erkennen Sie neu hinzugefügte VMs / Speicher / Knoten zur Laufzeit und starten Sie die Instanz neu, um alles korrekt zu initialisieren\n* Bereinigen Sie gelöschte VM- / Speicher- / Knotenobjekte\n__Erfordert js-controller> = 2.2.8__",
-        "ru": "* Обнаружение вновь добавленных виртуальных машин / хранилищ / узлов во время выполнения и перезапуск экземпляра, чтобы все правильно инициализировать\n* очистить удаленные объекты ВМ / хранилища / узла\n__ Требуется js-controller> = 2.2.8__",
-        "pt": "* Detecte VMs / storages / nodes recém-adicionados durante o tempo de execução e reinicie a instância para inicializar tudo corretamente\n* limpar objetos VM / armazenamento / nó excluídos\n__Requer js-controller> = 2.2.8__",
-        "nl": "* Detecteer nieuw toegevoegde VM's / opslagplaatsen / knooppunten tijdens runtime en start de instantie opnieuw om alles correct te initialiseren\n* verwijder verwijderde VM / storage / node-objecten\n__Vereist js-controller> = 2.2.8__",
-        "fr": "* Détectez les VM / stockages / nœuds nouvellement ajoutés pendant l'exécution et redémarrez l'instance pour tout initialiser correctement\n* nettoyer les objets VM / stockage / nœuds supprimés\n__Nécessite js-controller> = 2.2.8__",
-        "it": "* Rileva le VM / archivi / nodi appena aggiunti durante il runtime e riavvia l'istanza per inizializzare tutto correttamente\n* ripulire gli oggetti VM / archiviazione / nodo cancellati\n__Richiede js-controller> = 2.2.8__",
-        "es": "* Detecta VM / almacenamientos / nodos recién agregados durante el tiempo de ejecución y reinicia la instancia para inicializar todo correctamente\n* limpiar objetos eliminados de VM / almacenamiento / nodo\n__Requiere js-controller> = 2.2.8__",
-        "pl": "* Wykryj nowo dodane maszyny wirtualne / magazyny / węzły podczas działania i zrestartuj instancję, aby wszystko poprawnie zainicjować\n* wyczyść usunięte obiekty VM / magazynu / węzła\n__Wymagania js-controller> = 2.2.8__",
-        "zh-cn": "*在运行时检测新添加的VM /存储/节点并重新启动实例以正确初始化所有内容\n*清理已删除的VM /存储/节点对象\n__需要js-controller> = 2.2.8__",
-        "uk": "* Виявляйте щойно додані віртуальні машини/сховища/вузли під час виконання та перезапускайте екземпляр, щоб ініціалізувати все правильно\n* очистити видалені об’єкти віртуальної машини/сховища/вузла\n__Потрібен js-контролер >= 2.2.8__"
       }
     },
     "connectionType": "local",

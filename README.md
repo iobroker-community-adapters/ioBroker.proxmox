@@ -29,7 +29,7 @@ Control and use data from your ProxmoxVM
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.0.1 (2023-09-07)
 * (klein0r) Added node disks (heals, wearout)
 
 ### 2.0.0 (2023-09-07)
