@@ -406,7 +406,7 @@ class Proxmox extends utils.Adapter {
             let sid = '';
             if (res.type === 'qemu' || res.type === 'lxc') {
                 const type = res.type;
-                
+
                 const resourceStatus = await this.proxmox.getResourceStatus(res.node, type, res.vmid);
                 const resName = String(resourceStatus.name).replace('.', '-');
 
