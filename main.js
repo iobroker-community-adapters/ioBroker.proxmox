@@ -373,35 +373,37 @@ class Proxmox extends utils.Adapter {
                 }
             }
 
-            try {
-                const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
-                if (nodeDisks) {
-                    for (const disk of nodeDisks) {
-                        const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
-                        if (disk.type !== undefined) {
-                            await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
-                        }
-                        if (disk.size !== undefined) {
-                            await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
-                        }
-                        if (disk.health !== undefined) {
-                            await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
-                        }
-                        if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
-                            await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
-                        }
-                        if (disk.model !== undefined) {
-                            await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
-                        }
+            if (this.config.requestDiskInformation) {
+                try {
+                    const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
+                    if (nodeDisks) {
+                        for (const disk of nodeDisks) {
+                            const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
+                            if (disk.type !== undefined) {
+                                await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
+                            }
+                            if (disk.size !== undefined) {
+                                await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
+                            }
+                            if (disk.health !== undefined) {
+                                await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
+                            }
+                            if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
+                                await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
+                            }
+                            if (disk.model !== undefined) {
+                                await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
+                            }
 
-                        const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                        if (nodeDiskSmart?.data?.text) {
-                            await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
+                            const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
+                            if (nodeDiskSmart?.data?.text) {
+                                await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
+                            }
                         }
                     }
+                } catch (err) {
+                    this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
                 }
-            } catch (err) {
-                this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
             }
 
             await this.createVM();
@@ -713,35 +715,37 @@ class Proxmox extends utils.Adapter {
                 }
             }
 
-            try {
-                const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
-                if (nodeDisks) {
-                    for (const disk of nodeDisks) {
-                        const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
-                        if (disk.type !== undefined) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.type`, { val: disk.type, ack: true });
-                        }
-                        if (disk.size !== undefined) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.size`, { val: disk.size, ack: true });
-                        }
-                        if (disk.health !== undefined) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.health`, { val: disk.health, ack: true });
-                        }
-                        if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.wearout`, { val: disk.wearout, ack: true });
-                        }
-                        if (disk.model !== undefined) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.model`, { val: disk.model, ack: true });
-                        }
+            if (this.config.requestDiskInformation) {
+                try {
+                    const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
+                    if (nodeDisks) {
+                        for (const disk of nodeDisks) {
+                            const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
+                            if (disk.type !== undefined) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.type`, { val: disk.type, ack: true });
+                            }
+                            if (disk.size !== undefined) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.size`, { val: disk.size, ack: true });
+                            }
+                            if (disk.health !== undefined) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.health`, { val: disk.health, ack: true });
+                            }
+                            if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.wearout`, { val: disk.wearout, ack: true });
+                            }
+                            if (disk.model !== undefined) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.model`, { val: disk.model, ack: true });
+                            }
 
-                        const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                        if (nodeDiskSmart?.data?.text) {
-                            await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, { val: nodeDiskSmart.data.text, ack: true });
+                            const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
+                            if (nodeDiskSmart?.data?.text) {
+                                await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, { val: nodeDiskSmart.data.text, ack: true });
+                            }
                         }
                     }
+                } catch (err) {
+                    this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
                 }
-            } catch (err) {
-                this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
             }
         }
 

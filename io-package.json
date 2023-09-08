@@ -175,7 +175,8 @@
     "requestInterval": 30,
     "name": "root",
     "pwd": "",
-    "server": "pam"
+    "server": "pam",
+    "requestDiskInformation": false
   },
   "instanceObjects": [
     {

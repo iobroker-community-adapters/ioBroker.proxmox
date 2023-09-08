@@ -63,6 +63,22 @@
                     "md": 4,
                     "lg": 4,
                     "label": "Realm"
+                },
+                "_additionalInformationHeader": {
+                    "newLine": true,
+                    "type": "header",
+                    "text": "Additional information",
+                    "size": 3,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12
+                },
+                "requestDiskInformation": {
+                    "type": "checkbox",
+                    "label": "Request disk information",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
                 }
             }
         }

@@ -5,5 +5,7 @@
     "Request Interval": "Request Interval",
     "User name": "User name",
     "Password": "Password",
-    "Realm": "Realm"
+    "Realm": "Realm",
+    "Additional information": "Additional information",
+    "Request disk information": "Request disk information"
 }

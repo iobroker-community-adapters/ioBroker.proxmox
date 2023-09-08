@@ -30,6 +30,7 @@ Control and use data from your ProxmoxVM
 	### __WORK IN PROGRESS__
 -->
 ### __WORK IN PROGRESS__
+* (klein0r) Added option for disk information
 * (klein0r) Check type of disk wearout
 * (klein0r) Catch exception when requesting disk information
 
