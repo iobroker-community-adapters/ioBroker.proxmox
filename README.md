@@ -29,6 +29,10 @@ Control and use data from your ProxmoxVM
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* (klein0r) Check type of disk wearout
+* (klein0r) Catch exception when requesting disk information
+
 ### 2.0.1 (2023-09-07)
 * (klein0r) Added node disks (heals, wearout)
 
