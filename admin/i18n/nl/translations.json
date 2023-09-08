@@ -5,5 +5,7 @@
     "Request Interval": "Interval aanvragen",
     "User name": "Gebruikersnaam",
     "Password": "Wachtwoord",
-    "Realm": "Rijk"
+    "Realm": "Rijk",
+    "Additional information": "Extra informatie",
+    "Request disk information": "Schijfinformatie opvragen"
 }

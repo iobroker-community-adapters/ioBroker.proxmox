@@ -5,5 +5,7 @@
     "Request Interval": "请求间隔",
     "User name": "用户名",
     "Password": "密码",
-    "Realm": "领域"
+    "Realm": "领域",
+    "Additional information": "附加信息",
+    "Request disk information": "请求磁盘信息"
 }

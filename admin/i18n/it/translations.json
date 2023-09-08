@@ -5,5 +5,7 @@
     "Request Interval": "Richiedi intervallo",
     "User name": "Nome utente",
     "Password": "Parola d'ordine",
-    "Realm": "Regno"
+    "Realm": "Regno",
+    "Additional information": "Informazioni aggiuntive",
+    "Request disk information": "Richiedi informazioni sul disco"
 }

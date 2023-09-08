@@ -5,5 +5,7 @@
     "Request Interval": "Интервал запроса",
     "User name": "Имя пользователя",
     "Password": "Пароль",
-    "Realm": "Область"
+    "Realm": "Область",
+    "Additional information": "Дополнительная информация",
+    "Request disk information": "Запросить информацию о диске"
 }

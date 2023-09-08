@@ -5,5 +5,7 @@
     "Request Interval": "Інтервал запиту",
     "User name": "Ім'я користувача",
     "Password": "Пароль",
-    "Realm": "Королівство"
+    "Realm": "Королівство",
+    "Additional information": "Додаткова інформація",
+    "Request disk information": "Запит інформації про диск"
 }
