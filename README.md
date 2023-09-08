@@ -29,7 +29,7 @@ Control and use data from your ProxmoxVM
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.0.2 (2023-09-08)
 * (klein0r) Added option for disk information
 * (klein0r) Check type of disk wearout
 * (klein0r) Catch exception when requesting disk information

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "news": {
+      "2.0.2": {
+        "en": "Added option for disk information\nCheck type of disk wearout\nCatch exception when requesting disk information",
+        "de": "Option für Festplatteninformationen hinzugefügt\nÜberprüfen Sie die Art der Scheibenverschleiß\nFangausnahme bei der Anforderung von Datenträgern",
+        "ru": "Добавлена опция для информации о диске\nПроверить тип вывода диска\nИсключение Catch при запросе информации о диске",
+        "pt": "Opção adicionada para informações de disco\nTipo de verificação do desgaste do disco\nPegar exceção ao solicitar informações de disco",
+        "nl": "Optie voor disk informatie\nControle type disk slijtage\nVang uitzondering als verzoek om informatie over disk",
+        "fr": "Option ajoutée pour l'information sur le disque\nVérifier le type d'usure du disque\nAttrapez l'exception lorsque vous demandez des informations sur le disque",
+        "it": "Aggiunta opzione per informazioni su disco\nControllare il tipo di usura del disco\nPrendere l'eccezione quando si richiede informazioni su disco",
+        "es": "Opción adicional para la información de disco\nTipo de registro de disco\nExtracción de excepción al solicitar información en disco",
+        "pl": "Wstępna opcja dla informacji dyskowej\nOkładka\nCatch wyjątek po zażądzeniu informacji na dysku",
+        "uk": "Додано опцію для інформації про диск\nПеревірити тип диска\nВиняток кішки при запитуванні інформації про диск",
+        "zh-cn": "增加资料的选择\nD. 穿过失的检查类型\n要求不了解资料的例外情况"
+      },
       "2.0.1": {
         "en": "Added node disks (heals, wearout)",
         "de": "Knotenscheiben hinzugefügt (Hälse, Verschleiß)",
@@ -69,19 +82,6 @@
         "uk": "ми виправили деякі неправильні типи"
       },
       "1.3.2": {
-        "en": "status of vms is now a string instead of incorrectly a button",
-        "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
-        "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
-        "pt": "status de vms agora é uma string em vez de incorretamente um botão",
-        "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
-        "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
-        "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
-        "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
-        "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-        "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
-        "uk": "статус vms тепер є рядком, а не кнопкою"
-      },
-      "1.3.1": {
         "en": "status of vms is now a string instead of incorrectly a button",
         "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
         "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
