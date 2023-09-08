@@ -216,7 +216,7 @@ class Proxmox extends utils.Adapter {
             }
         */
         for (const node of nodes) {
-            const nodeName = String(node.node).replace('.', '-');
+            const nodeName = this.prepareNameForId(node.node);
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
             nodesKeep.push(`node_${nodeName}`);
@@ -441,7 +441,7 @@ class Proxmox extends utils.Adapter {
                 const type = res.type;
 
                 const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
-                const resName = String(resourceStatus.name).replace('.', '-');
+                const resName = this.prepareNameForId(resourceStatus.name);
 
                 resourcesKeep.push(`${type}_${resName}`);
                 sid = `${this.namespace}.${type}_${resName}`;
@@ -613,7 +613,7 @@ class Proxmox extends utils.Adapter {
                 const type = res.type;
 
                 const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-                const storageName = String(res.storage).replace('.', '-');
+                const storageName = this.prepareNameForId(res.storage);
 
                 resourcesKeep.push(`${type}_${storageName}`);
                 sid = `${this.namespace}.${type}_${storageName}`;
@@ -772,7 +772,7 @@ class Proxmox extends utils.Adapter {
                 const type = res.type;
 
                 const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
-                const resName = String(resourceStatus.name).replace('.', '-');
+                const resName = this.prepareNameForId(resourceStatus.name);
 
                 sid = `${this.namespace}.${type}_${resName}`;
 
@@ -960,6 +960,10 @@ class Proxmox extends utils.Adapter {
     removeNamespace(id) {
         const re = new RegExp(this.namespace + '*\\.', 'g');
         return id.replace(re, '');
+    }
+
+    prepareNameForId(val) {
+        return String(val).replace('.', '-');
     }
 
     /**
