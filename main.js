@@ -379,6 +379,15 @@ class Proxmox extends utils.Adapter {
                     if (nodeDisks) {
                         for (const disk of nodeDisks) {
                             const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
+
+                            await this.setObjectNotExistsAsync(`${sid}.${diskPath}`, {
+                                type: 'folder',
+                                common: {
+                                    name: disk.devpath,
+                                },
+                                native: {},
+                            });
+
                             if (disk.type !== undefined) {
                                 await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
                             }
