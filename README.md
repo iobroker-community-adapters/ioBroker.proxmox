@@ -22,7 +22,13 @@
 ![Stable](http://iobroker.live/badges/proxmox-stable.svg)
 ![Installed](http://iobroker.live/badges/proxmox-installed.svg)
 
-Control and use data from your ProxmoxVM
+Control and use data from your Proxmox VE
+
+## Documentation
+
+[🇺🇸 Documentation](./docs/en/README.md)
+
+[🇩🇪 Dokumentation](./docs/de/README.md)
 
 ## Changelog
 <!--
