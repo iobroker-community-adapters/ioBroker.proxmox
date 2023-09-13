@@ -88,43 +88,56 @@ class Proxmox extends utils.Adapter {
                             this.proxmox?.qemuStart(node, type, vmid).then((data) => {
                                 this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
-
                             break;
                         case 'stop':
                             this.proxmox?.qemuStop(node, type, vmid).then((data) => {
                                 this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                         case 'reset':
                             this.proxmox?.qemuReset(node, type, vmid).then((data) => {
                                 this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                         case 'resume':
                             this.proxmox?.qemuResume(node, type, vmid).then((data) => {
                                 this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                         case 'shutdown':
                             this.proxmox?.qemuShutdown(node, type, vmid).then((data) => {
                                 this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                         case 'suspend':
                             this.proxmox?.qemuSuspend(node, type, vmid).then((data) => {
                                 this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                         case 'reboot':
                             this.proxmox?.qemuReboot(node, type, vmid).then((data) => {
                                 this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                             });
                             break;
                     }
@@ -135,12 +148,16 @@ class Proxmox extends utils.Adapter {
                             this.proxmox?.nodeShutdown(node).then((data) => {
                                 this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
                             });
                             break;
                         case 'reboot':
                             this.proxmox?.nodeReboot(node).then((data) => {
                                 this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
                                 this.sendRequest(10000);
+                            }).catch((err) => {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
                             });
                             break;
                     }
@@ -327,50 +344,54 @@ class Proxmox extends utils.Adapter {
             }
 
             this.log.debug(`Requesting states for node ${node.node}`);
-            const nodeStatus = await this.proxmox?.getNodeStatus(node.node);
-            if (nodeStatus) {
-                if (nodeStatus.uptime !== undefined) {
-                    await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
-                }
-                if (nodeStatus.wait !== undefined) {
-                    await this.createCustomState(sid, 'iowait', 'level', parseInt(nodeStatus.wait * 10000) / 100);
-                }
+            try {
+                const nodeStatus = await this.proxmox?.getNodeStatus(node.node);
+                if (nodeStatus) {
+                    if (nodeStatus.uptime !== undefined) {
+                        await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
+                    }
+                    if (nodeStatus.wait !== undefined) {
+                        await this.createCustomState(sid, 'iowait', 'level', parseInt(nodeStatus.wait * 10000) / 100);
+                    }
 
-                if (nodeStatus.memory.used !== undefined) {
-                    await this.createCustomState(sid, 'memory.used', 'size', BtoMb(nodeStatus.memory.used));
-                }
-                if (nodeStatus.memory.used !== undefined) {
-                    await this.createCustomState(sid, 'memory.used_lev', 'level', p(nodeStatus.memory.used, nodeStatus.memory.total));
-                }
-                if (nodeStatus.memory.total !== undefined) {
-                    await this.createCustomState(sid, 'memory.total', 'size', BtoMb(nodeStatus.memory.total));
-                }
-                if (nodeStatus.memory.free !== undefined) {
-                    await this.createCustomState(sid, 'memory.free', 'size', BtoMb(nodeStatus.memory.free));
-                }
+                    if (nodeStatus.memory.used !== undefined) {
+                        await this.createCustomState(sid, 'memory.used', 'size', BtoMb(nodeStatus.memory.used));
+                    }
+                    if (nodeStatus.memory.used !== undefined) {
+                        await this.createCustomState(sid, 'memory.used_lev', 'level', p(nodeStatus.memory.used, nodeStatus.memory.total));
+                    }
+                    if (nodeStatus.memory.total !== undefined) {
+                        await this.createCustomState(sid, 'memory.total', 'size', BtoMb(nodeStatus.memory.total));
+                    }
+                    if (nodeStatus.memory.free !== undefined) {
+                        await this.createCustomState(sid, 'memory.free', 'size', BtoMb(nodeStatus.memory.free));
+                    }
 
-                if (nodeStatus.loadavg[0] !== undefined) {
-                    await this.createCustomState(sid, 'loadavg.0', 'default_num', parseFloat(nodeStatus.loadavg[0]));
-                }
-                if (nodeStatus.loadavg[1] !== undefined) {
-                    await this.createCustomState(sid, 'loadavg.1', 'default_num', parseFloat(nodeStatus.loadavg[1]));
-                }
-                if (nodeStatus.loadavg[2] !== undefined) {
-                    await this.createCustomState(sid, 'loadavg.2', 'default_num', parseFloat(nodeStatus.loadavg[2]));
-                }
+                    if (nodeStatus.loadavg[0] !== undefined) {
+                        await this.createCustomState(sid, 'loadavg.0', 'default_num', parseFloat(nodeStatus.loadavg[0]));
+                    }
+                    if (nodeStatus.loadavg[1] !== undefined) {
+                        await this.createCustomState(sid, 'loadavg.1', 'default_num', parseFloat(nodeStatus.loadavg[1]));
+                    }
+                    if (nodeStatus.loadavg[2] !== undefined) {
+                        await this.createCustomState(sid, 'loadavg.2', 'default_num', parseFloat(nodeStatus.loadavg[2]));
+                    }
 
-                if (nodeStatus.swap.used !== undefined) {
-                    await this.createCustomState(sid, 'swap.used', 'size', BtoMb(nodeStatus.swap.used));
+                    if (nodeStatus.swap.used !== undefined) {
+                        await this.createCustomState(sid, 'swap.used', 'size', BtoMb(nodeStatus.swap.used));
+                    }
+                    if (nodeStatus.swap.free !== undefined) {
+                        await this.createCustomState(sid, 'swap.free', 'size', BtoMb(nodeStatus.swap.free));
+                    }
+                    if (nodeStatus.swap.total !== undefined) {
+                        await this.createCustomState(sid, 'swap.total', 'size', BtoMb(nodeStatus.swap.total));
+                    }
+                    if (nodeStatus.swap.free !== undefined) {
+                        await this.createCustomState(sid, 'swap.used_lev', 'level', p(nodeStatus.swap.used, nodeStatus.swap.total));
+                    }
                 }
-                if (nodeStatus.swap.free !== undefined) {
-                    await this.createCustomState(sid, 'swap.free', 'size', BtoMb(nodeStatus.swap.free));
-                }
-                if (nodeStatus.swap.total !== undefined) {
-                    await this.createCustomState(sid, 'swap.total', 'size', BtoMb(nodeStatus.swap.total));
-                }
-                if (nodeStatus.swap.free !== undefined) {
-                    await this.createCustomState(sid, 'swap.used_lev', 'level', p(nodeStatus.swap.used, nodeStatus.swap.total));
-                }
+            } catch (err) {
+                this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
             }
 
             if (this.config.requestDiskInformation) {
@@ -434,225 +455,229 @@ class Proxmox extends utils.Adapter {
             .filter((id) => id.startsWith('lxc_') || id.startsWith('qemu_') || id.startsWith('storage_'));
         const resourcesKeep = [];
 
-        const resources = await this.proxmox?.getClusterResources();
-        for (const res of resources) {
-            let sid = '';
-            if (res.type === 'qemu' || res.type === 'lxc') {
-                const type = res.type;
+        try {
+            const resources = await this.proxmox?.getClusterResources();
+            for (const res of resources) {
+                let sid = '';
+                if (res.type === 'qemu' || res.type === 'lxc') {
+                    const type = res.type;
 
-                const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
-                const resName = this.prepareNameForId(resourceStatus.name);
+                    const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
+                    const resName = this.prepareNameForId(resourceStatus.name);
 
-                resourcesKeep.push(`${type}_${resName}`);
-                sid = `${this.namespace}.${type}_${resName}`;
+                    resourcesKeep.push(`${type}_${resName}`);
+                    sid = `${this.namespace}.${type}_${resName}`;
 
-                this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
+                    this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
 
-                if (!this.objects[sid]) {
-                    // add to objects in RAM
-                    this.objects[sid] = {
-                        type: 'channel',
+                    if (!this.objects[sid]) {
+                        // add to objects in RAM
+                        this.objects[sid] = {
+                            type: 'channel',
+                            common: {
+                                name: resourceStatus.name,
+                            },
+                            native: {
+                                type: type,
+                            },
+                        };
+
+                        await this.setObjectNotExistsAsync(sid, this.objects[sid]);
+                    }
+
+                    await this.extendObjectAsync(`${sid}.start`, {
+                        type: 'state',
                         common: {
-                            name: resourceStatus.name,
+                            name: {
+                                en: 'Start',
+                                de: 'Start',
+                                ru: 'Начало',
+                                pt: 'Começar',
+                                nl: 'Begin',
+                                fr: 'Commencez',
+                                it: 'Inizio',
+                                es: 'Comienzo',
+                                pl: 'Start',
+                                uk: 'Почати',
+                                'zh-cn': '导 言',
+                            },
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
                         },
                         native: {
-                            type: type,
+                            node: res.node,
+                            type: res.type,
+                            vmid: res.vmid,
                         },
-                    };
+                    });
 
-                    await this.setObjectNotExistsAsync(sid, this.objects[sid]);
-                }
-
-                await this.extendObjectAsync(`${sid}.start`, {
-                    type: 'state',
-                    common: {
-                        name: {
-                            en: 'Start',
-                            de: 'Start',
-                            ru: 'Начало',
-                            pt: 'Começar',
-                            nl: 'Begin',
-                            fr: 'Commencez',
-                            it: 'Inizio',
-                            es: 'Comienzo',
-                            pl: 'Start',
-                            uk: 'Почати',
-                            'zh-cn': '导 言',
-                        },
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true,
-                    },
-                    native: {
-                        node: res.node,
-                        type: res.type,
-                        vmid: res.vmid,
-                    },
-                });
-
-                await this.extendObjectAsync(`${sid}.stop`, {
-                    type: 'state',
-                    common: {
-                        name: {
-                            en: 'Stop',
-                            de: 'Stopp',
-                            ru: 'Стоп',
-                            pt: 'Pára',
-                            nl: 'Stop',
-                            fr: 'Arrête',
-                            it: 'Fermati',
-                            es: 'Para',
-                            pl: 'Stop',
-                            uk: 'Зареєструватися',
-                            'zh-cn': '禁止',
-                        },
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true,
-                    },
-                    native: {
-                        node: res.node,
-                        type: res.type,
-                        vmid: res.vmid,
-                    },
-                });
-
-                await this.extendObjectAsync(`${sid}.shutdown`, {
-                    type: 'state',
-                    common: {
-                        name: {
-                            en: 'Shutdown',
-                            de: 'Herunterfahren',
-                            ru: 'Закрыть',
-                            pt: 'Desligamento',
-                            nl: 'Vertaling',
-                            fr: 'Tais-toi',
-                            it: 'Chiusura',
-                            es: 'Apago',
-                            pl: 'Shutdown',
-                            uk: 'Відправити',
-                            'zh-cn': '舒适',
-                        },
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true,
-                    },
-                    native: {
-                        node: res.node,
-                        type: res.type,
-                        vmid: res.vmid,
-                    },
-                });
-
-                await this.extendObjectAsync(`${sid}.reboot`, {
-                    type: 'state',
-                    common: {
-                        name: {
-                            en: 'Reboot',
-                            de: 'Neustart',
-                            ru: 'Перезагрузка',
-                            pt: 'Reiniciar',
-                            nl: 'Reboot',
-                            fr: 'Reboot',
-                            it: 'Reboot',
-                            es: 'Reboot',
-                            pl: 'Reboot',
-                            uk: 'Перезавантаження',
-                            'zh-cn': 'Reboot',
-                        },
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true,
-                    },
-                    native: {
-                        node: res.node,
-                        type: res.type,
-                        vmid: res.vmid,
-                    },
-                });
-
-                // type was boolean but has been corrected to string -> extend
-                await this.extendObjectAsync(`${sid}.status`, {
-                    type: 'state',
-                    common: {
-                        name: {
-                            en: 'Status',
-                            de: 'Status',
-                            ru: 'Статус',
-                            pt: 'Estado',
-                            nl: 'Status',
-                            fr: 'État',
-                            it: 'Stato',
-                            es: 'Situación',
-                            pl: 'Status',
-                            uk: 'Статус на сервери',
-                            'zh-cn': '现状',
-                        },
-                        type: 'string',
-                        role: 'indicator.status',
-                        read: true,
-                        write: false,
-                    },
-                    native: {},
-                });
-
-                await this.findState(sid, resourceStatus, async (states) => {
-                    for (const s of states) {
-                        try {
-                            await this.createCustomState(s[0], s[1], s[2], s[3]);
-                        } catch (e) {
-                            this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                        }
-                    }
-                });
-            } else if (res.type === 'storage') {
-                const type = res.type;
-
-                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-                const storageName = this.prepareNameForId(res.storage);
-
-                resourcesKeep.push(`${type}_${storageName}`);
-                sid = `${this.namespace}.${type}_${storageName}`;
-
-                this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
-
-                if (!this.objects[sid]) {
-                    // add to objects in RAM
-                    this.objects[sid] = {
-                        type: 'channel',
+                    await this.extendObjectAsync(`${sid}.stop`, {
+                        type: 'state',
                         common: {
-                            name: res.storage,
+                            name: {
+                                en: 'Stop',
+                                de: 'Stopp',
+                                ru: 'Стоп',
+                                pt: 'Pára',
+                                nl: 'Stop',
+                                fr: 'Arrête',
+                                it: 'Fermati',
+                                es: 'Para',
+                                pl: 'Stop',
+                                uk: 'Зареєструватися',
+                                'zh-cn': '禁止',
+                            },
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
                         },
                         native: {
-                            type,
+                            node: res.node,
+                            type: res.type,
+                            vmid: res.vmid,
                         },
-                    };
-                    this.setObjectNotExists(sid, this.objects[sid]);
-                }
+                    });
 
-                await this.findState(sid, storageStatus, async (states) => {
-                    for (const s of states) {
-                        try {
-                            await this.createCustomState(s[0], s[1], s[2], s[3]);
-                        } catch (e) {
-                            this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                    await this.extendObjectAsync(`${sid}.shutdown`, {
+                        type: 'state',
+                        common: {
+                            name: {
+                                en: 'Shutdown',
+                                de: 'Herunterfahren',
+                                ru: 'Закрыть',
+                                pt: 'Desligamento',
+                                nl: 'Vertaling',
+                                fr: 'Tais-toi',
+                                it: 'Chiusura',
+                                es: 'Apago',
+                                pl: 'Shutdown',
+                                uk: 'Відправити',
+                                'zh-cn': '舒适',
+                            },
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                        },
+                        native: {
+                            node: res.node,
+                            type: res.type,
+                            vmid: res.vmid,
+                        },
+                    });
+
+                    await this.extendObjectAsync(`${sid}.reboot`, {
+                        type: 'state',
+                        common: {
+                            name: {
+                                en: 'Reboot',
+                                de: 'Neustart',
+                                ru: 'Перезагрузка',
+                                pt: 'Reiniciar',
+                                nl: 'Reboot',
+                                fr: 'Reboot',
+                                it: 'Reboot',
+                                es: 'Reboot',
+                                pl: 'Reboot',
+                                uk: 'Перезавантаження',
+                                'zh-cn': 'Reboot',
+                            },
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true,
+                        },
+                        native: {
+                            node: res.node,
+                            type: res.type,
+                            vmid: res.vmid,
+                        },
+                    });
+
+                    // type was boolean but has been corrected to string -> extend
+                    await this.extendObjectAsync(`${sid}.status`, {
+                        type: 'state',
+                        common: {
+                            name: {
+                                en: 'Status',
+                                de: 'Status',
+                                ru: 'Статус',
+                                pt: 'Estado',
+                                nl: 'Status',
+                                fr: 'État',
+                                it: 'Stato',
+                                es: 'Situación',
+                                pl: 'Status',
+                                uk: 'Статус на сервери',
+                                'zh-cn': '现状',
+                            },
+                            type: 'string',
+                            role: 'indicator.status',
+                            read: true,
+                            write: false,
+                        },
+                        native: {},
+                    });
+
+                    await this.findState(sid, resourceStatus, async (states) => {
+                        for (const s of states) {
+                            try {
+                                await this.createCustomState(s[0], s[1], s[2], s[3]);
+                            } catch (e) {
+                                this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                            }
                         }
-                    }
-                });
-            }
-        }
+                    });
+                } else if (res.type === 'storage') {
+                    const type = res.type;
 
-        // Delete non existent nodes
-        for (const res of resourcesAll) {
-            if (!resourcesKeep.includes(res)) {
-                await this.delObjectAsync(res, { recursive: true });
-                delete this.objects[`${this.namespace}.${res}`]; // del from RAM too
-                this.log.info(`Deleted old resource "${res}"`);
+                    const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+                    const storageName = this.prepareNameForId(res.storage);
+
+                    resourcesKeep.push(`${type}_${storageName}`);
+                    sid = `${this.namespace}.${type}_${storageName}`;
+
+                    this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
+
+                    if (!this.objects[sid]) {
+                        // add to objects in RAM
+                        this.objects[sid] = {
+                            type: 'channel',
+                            common: {
+                                name: res.storage,
+                            },
+                            native: {
+                                type,
+                            },
+                        };
+                        this.setObjectNotExists(sid, this.objects[sid]);
+                    }
+
+                    await this.findState(sid, storageStatus, async (states) => {
+                        for (const s of states) {
+                            try {
+                                await this.createCustomState(s[0], s[1], s[2], s[3]);
+                            } catch (e) {
+                                this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                            }
+                        }
+                    });
+                }
             }
+
+            // Delete non existent nodes
+            for (const res of resourcesAll) {
+                if (!resourcesKeep.includes(res)) {
+                    await this.delObjectAsync(res, { recursive: true });
+                    delete this.objects[`${this.namespace}.${res}`]; // del from RAM too
+                    this.log.info(`Deleted old resource "${res}"`);
+                }
+            }
+        } catch (err) {
+            this.log.warn(`Unable to get cluster resources: ${err}`);
         }
     }
 
@@ -671,57 +696,61 @@ class Proxmox extends utils.Adapter {
                 return void this.restart();
             }
 
-            this.setState(`${sid}.cpu`, parseInt(node.cpu * 10000) / 100, true);
+            await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
             if (node.maxcpu) {
-                await this.setStateChangedAsync(`${sid}.cpu_max`, node.maxcpu, true);
+                await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
             }
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             this.log.debug(`Requesting states for node ${node.node}`);
-            const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
-            if (nodeStatus) {
-                if (nodeStatus.uptime !== undefined) {
-                    await this.setStateChangedAsync(sid + '.uptime', { val: nodeStatus.uptime, ack: true });
-                }
-                if (nodeStatus.wait !== undefined) {
-                    await this.setStateChangedAsync(sid + '.iowait', { val: parseInt(nodeStatus.wait * 10000) / 100, ack: true });
-                }
+            try {
+                const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
+                if (nodeStatus) {
+                    if (nodeStatus.uptime !== undefined) {
+                        await this.setStateChangedAsync(sid + '.uptime', { val: nodeStatus.uptime, ack: true });
+                    }
+                    if (nodeStatus.wait !== undefined) {
+                        await this.setStateChangedAsync(sid + '.iowait', { val: parseInt(nodeStatus.wait * 10000) / 100, ack: true });
+                    }
 
-                if (nodeStatus.memory.used !== undefined) {
-                    await this.setStateChangedAsync(sid + '.memory.used', { val: BtoMb(nodeStatus.memory.used), ack: true });
-                }
-                if (nodeStatus.memory.used !== undefined) {
-                    await this.setStateChangedAsync(sid + '.memory.used_lev', { val: p(nodeStatus.memory.used, nodeStatus.memory.total), ack: true });
-                }
-                if (nodeStatus.memory.total !== undefined) {
-                    await this.setStateChangedAsync(sid + '.memory.total', { val: BtoMb(nodeStatus.memory.total), ack: true });
-                }
-                if (nodeStatus.memory.free !== undefined) {
-                    await this.setStateChangedAsync(sid + '.memory.free', { val: BtoMb(nodeStatus.memory.free), ack: true });
-                }
+                    if (nodeStatus.memory.used !== undefined) {
+                        await this.setStateChangedAsync(sid + '.memory.used', { val: BtoMb(nodeStatus.memory.used), ack: true });
+                    }
+                    if (nodeStatus.memory.used !== undefined) {
+                        await this.setStateChangedAsync(sid + '.memory.used_lev', { val: p(nodeStatus.memory.used, nodeStatus.memory.total), ack: true });
+                    }
+                    if (nodeStatus.memory.total !== undefined) {
+                        await this.setStateChangedAsync(sid + '.memory.total', { val: BtoMb(nodeStatus.memory.total), ack: true });
+                    }
+                    if (nodeStatus.memory.free !== undefined) {
+                        await this.setStateChangedAsync(sid + '.memory.free', { val: BtoMb(nodeStatus.memory.free), ack: true });
+                    }
 
-                if (nodeStatus.loadavg[0] !== undefined) {
-                    await this.setStateChangedAsync(sid + '.loadavg.0', { val: parseFloat(nodeStatus.loadavg[0]), ack: true });
-                }
-                if (nodeStatus.loadavg[1] !== undefined) {
-                    await this.setStateChangedAsync(sid + '.loadavg.1', { val: parseFloat(nodeStatus.loadavg[1]), ack: true });
-                }
-                if (nodeStatus.loadavg[2] !== undefined) {
-                    await this.setStateChangedAsync(sid + '.loadavg.2', { val: parseFloat(nodeStatus.loadavg[2]), ack: true });
-                }
+                    if (nodeStatus.loadavg[0] !== undefined) {
+                        await this.setStateChangedAsync(sid + '.loadavg.0', { val: parseFloat(nodeStatus.loadavg[0]), ack: true });
+                    }
+                    if (nodeStatus.loadavg[1] !== undefined) {
+                        await this.setStateChangedAsync(sid + '.loadavg.1', { val: parseFloat(nodeStatus.loadavg[1]), ack: true });
+                    }
+                    if (nodeStatus.loadavg[2] !== undefined) {
+                        await this.setStateChangedAsync(sid + '.loadavg.2', { val: parseFloat(nodeStatus.loadavg[2]), ack: true });
+                    }
 
-                if (nodeStatus.swap.used !== undefined) {
-                    await this.setStateChangedAsync(sid + '.swap.used', { val: BtoMb(nodeStatus.swap.used), ack: true });
+                    if (nodeStatus.swap.used !== undefined) {
+                        await this.setStateChangedAsync(sid + '.swap.used', { val: BtoMb(nodeStatus.swap.used), ack: true });
+                    }
+                    if (nodeStatus.swap.free !== undefined) {
+                        await this.setStateChangedAsync(sid + '.swap.free', { val: BtoMb(nodeStatus.swap.free), ack: true });
+                    }
+                    if (nodeStatus.swap.total !== undefined) {
+                        await this.setStateChangedAsync(sid + '.swap.total', { val: BtoMb(nodeStatus.swap.total), ack: true });
+                    }
+                    if (nodeStatus.swap.used !== undefined) {
+                        await this.setStateChangedAsync(sid + '.swap.used_lev', { val: p(nodeStatus.swap.used, nodeStatus.swap.total), ack: true });
+                    }
                 }
-                if (nodeStatus.swap.free !== undefined) {
-                    await this.setStateChangedAsync(sid + '.swap.free', { val: BtoMb(nodeStatus.swap.free), ack: true });
-                }
-                if (nodeStatus.swap.total !== undefined) {
-                    await this.setStateChangedAsync(sid + '.swap.total', { val: BtoMb(nodeStatus.swap.total), ack: true });
-                }
-                if (nodeStatus.swap.used !== undefined) {
-                    await this.setStateChangedAsync(sid + '.swap.used_lev', { val: p(nodeStatus.swap.used, nodeStatus.swap.total), ack: true });
-                }
+            } catch (err) {
+                this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
             }
 
             if (this.config.requestDiskInformation) {
@@ -762,44 +791,48 @@ class Proxmox extends utils.Adapter {
     }
 
     async setVM() {
-        const resources = await this.proxmox?.getClusterResources();
-        const knownObjIds = Object.keys(this.objects);
+        try {
+            const resources = await this.proxmox?.getClusterResources();
+            const knownObjIds = Object.keys(this.objects);
 
-        for (const res of resources) {
-            let sid = '';
+            for (const res of resources) {
+                let sid = '';
 
-            if (res.type === 'qemu' || res.type === 'lxc') {
-                const type = res.type;
+                if (res.type === 'qemu' || res.type === 'lxc') {
+                    const type = res.type;
 
-                const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
-                const resName = this.prepareNameForId(resourceStatus.name);
+                    const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
+                    const resName = this.prepareNameForId(resourceStatus.name);
 
-                sid = `${this.namespace}.${type}_${resName}`;
+                    sid = `${this.namespace}.${type}_${resName}`;
 
-                if (!knownObjIds.includes(sid)) {
-                    // new node restart adapter to create objects
-                    this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
-                    return void this.restart();
+                    if (!knownObjIds.includes(sid)) {
+                        // new node restart adapter to create objects
+                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
+                        return void this.restart();
+                    }
+
+                    await this.findState(sid, resourceStatus, async (states) => {
+                        for (const element of states) {
+                            await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                        }
+                    });
+                } else if (res.type === 'storage') {
+                    const type = res.type;
+
+                    const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+
+                    sid = this.namespace + '.' + type + '_' + res.storage;
+
+                    await this.findState(sid, storageStatus, async (states) => {
+                        for (const element of states) {
+                            await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                        }
+                    });
                 }
-
-                await this.findState(sid, resourceStatus, async (states) => {
-                    for (const element of states) {
-                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
-                    }
-                });
-            } else if (res.type === 'storage') {
-                const type = res.type;
-
-                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-
-                sid = this.namespace + '.' + type + '_' + res.storage;
-
-                await this.findState(sid, storageStatus, async (states) => {
-                    for (const element of states) {
-                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
-                    }
-                });
             }
+        } catch (err) {
+            this.log.warn(`Unable to get cluster resources: ${err}`);
         }
     }
 

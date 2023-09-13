@@ -35,6 +35,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* (klein0r) Improved error handling
+
 ### 2.0.2 (2023-09-08)
 * (klein0r) Added option for disk information
 * (klein0r) Check type of disk wearout
