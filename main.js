@@ -85,80 +85,107 @@ class Proxmox extends utils.Adapter {
 
                     switch (command) {
                         case 'start':
-                            this.proxmox?.qemuStart(node, type, vmid).then((data) => {
-                                this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuStart(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'stop':
-                            this.proxmox?.qemuStop(node, type, vmid).then((data) => {
-                                this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuStop(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'reset':
-                            this.proxmox?.qemuReset(node, type, vmid).then((data) => {
-                                this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuReset(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'resume':
-                            this.proxmox?.qemuResume(node, type, vmid).then((data) => {
-                                this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuResume(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'shutdown':
-                            this.proxmox?.qemuShutdown(node, type, vmid).then((data) => {
-                                this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuShutdown(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'suspend':
-                            this.proxmox?.qemuSuspend(node, type, vmid).then((data) => {
-                                this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuSuspend(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                         case 'reboot':
-                            this.proxmox?.qemuReboot(node, type, vmid).then((data) => {
-                                this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.qemuReboot(node, type, vmid)
+                                .then((data) => {
+                                    this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                });
                             break;
                     }
                 } else if (type === 'node') {
                     this.log.debug('sending shutdown/reboot command');
                     switch (command) {
                         case 'shutdown':
-                            this.proxmox?.nodeShutdown(node).then((data) => {
-                                this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.nodeShutdown(node)
+                                .then((data) => {
+                                    this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
+                                });
                             break;
                         case 'reboot':
-                            this.proxmox?.nodeReboot(node).then((data) => {
-                                this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
-                                this.sendRequest(10000);
-                            }).catch((err) => {
-                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
-                            });
+                            this.proxmox
+                                ?.nodeReboot(node)
+                                .then((data) => {
+                                    this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
+                                    this.sendRequest(10000);
+                                })
+                                .catch((err) => {
+                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
+                                });
                             break;
                     }
                 }
