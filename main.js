@@ -413,7 +413,7 @@ class Proxmox extends utils.Adapter {
                     if (nodeStatus.swap.total !== undefined) {
                         await this.createCustomState(sid, 'swap.total', 'size', BtoMb(nodeStatus.swap.total));
                     }
-                    if (nodeStatus.swap.free !== undefined) {
+                    if (nodeStatus.swap.free !== undefined && nodeStatus.swap.total !== undefined) {
                         await this.createCustomState(sid, 'swap.used_lev', 'level', p(nodeStatus.swap.used, nodeStatus.swap.total));
                     }
                 }
@@ -772,7 +772,7 @@ class Proxmox extends utils.Adapter {
                     if (nodeStatus.swap.total !== undefined) {
                         await this.setStateChangedAsync(sid + '.swap.total', { val: BtoMb(nodeStatus.swap.total), ack: true });
                     }
-                    if (nodeStatus.swap.used !== undefined) {
+                    if (nodeStatus.swap.used !== undefined && nodeStatus.swap.total !== undefined) {
                         await this.setStateChangedAsync(sid + '.swap.used_lev', { val: p(nodeStatus.swap.used, nodeStatus.swap.total), ack: true });
                     }
                 }
