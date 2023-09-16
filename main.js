@@ -264,7 +264,7 @@ class Proxmox extends utils.Adapter {
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
 
-            if (this.config.requestDiskInformation) {
+            if (this.config.newTreeStructure) {
                 nodesKeep.push(`node.${nodeName}`);
             } else {
                 nodesKeep.push(`node_${nodeName}`);
@@ -499,7 +499,7 @@ class Proxmox extends utils.Adapter {
                     const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
                     const resName = this.prepareNameForId(resourceStatus.name);
 
-                    if (this.config.requestDiskInformation) {
+                    if (this.config.newTreeStructure) {
                         resourcesKeep.push(`${type}.${resName}`);
                         sid = `${this.namespace}.${type}.${resName}`;
                     } else {
@@ -682,7 +682,7 @@ class Proxmox extends utils.Adapter {
                             const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
                             const storageName = this.prepareNameForId(res.storage);
 
-                            if (this.config.requestDiskInformation) {
+                            if (this.config.newTreeStructure) {
                                 resourcesKeep.push(`${type}.${storageName}`);
                                 sid = `${this.namespace}.${type}.${storageName}`;
                             } else {
@@ -920,7 +920,7 @@ class Proxmox extends utils.Adapter {
                     const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
                     const resName = this.prepareNameForId(resourceStatus.name);
 
-                    if (this.config.requestDiskInformation) {
+                    if (this.config.newTreeStructure) {
                         sid = `${this.namespace}.${type}.${resName}`;
                     } else {
                         sid = `${this.namespace}.${type}_${resName}`;
