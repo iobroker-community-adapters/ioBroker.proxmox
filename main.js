@@ -76,8 +76,12 @@ class Proxmox extends utils.Adapter {
             if (obj && obj?.native?.type) {
                 const type = obj.native.type;
                 const node = obj.native.node;
-                const command = id.split('.')[3];
 
+                let command = id.split('.')[3];
+
+                if (this.config.newTreeStructure && type !== 'node') {
+                    command = id.split('.')[4];
+                }
                 this.log.debug(`state changed: "${command}" type: "${type}" node: "${node}"`);
 
                 if (type === 'lxc' || type === 'qemu') {
@@ -314,6 +318,8 @@ class Proxmox extends utils.Adapter {
                 },
             });
 
+            this.subscribeForeignStates(`${sid}.shutdown`);
+
             await this.extendObjectAsync(`${sid}.reboot`, {
                 type: 'state',
                 common: {
@@ -340,6 +346,8 @@ class Proxmox extends utils.Adapter {
                     type: node.type,
                 },
             });
+
+            this.subscribeForeignStates(`${sid}.reboot`);
 
             // type has changed so extend no matter if yet exists
             await this.extendObjectAsync(`${sid}.status`, {
@@ -552,6 +560,8 @@ class Proxmox extends utils.Adapter {
                         },
                     });
 
+                    this.subscribeForeignStates(`${sid}.start`);
+
                     await this.extendObjectAsync(`${sid}.stop`, {
                         type: 'state',
                         common: {
@@ -579,6 +589,8 @@ class Proxmox extends utils.Adapter {
                             vmid: res.vmid,
                         },
                     });
+
+                    this.subscribeForeignStates(`${sid}.stop`);
 
                     await this.extendObjectAsync(`${sid}.shutdown`, {
                         type: 'state',
@@ -608,6 +620,8 @@ class Proxmox extends utils.Adapter {
                         },
                     });
 
+                    this.subscribeForeignStates(`${sid}.shutdown`);
+
                     await this.extendObjectAsync(`${sid}.reboot`, {
                         type: 'state',
                         common: {
@@ -635,6 +649,8 @@ class Proxmox extends utils.Adapter {
                             vmid: res.vmid,
                         },
                     });
+
+                    this.subscribeForeignStates(`.${sid}.reboot`);
 
                     // type was boolean but has been corrected to string -> extend
                     await this.extendObjectAsync(`${sid}.status`, {
