@@ -79,6 +79,13 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 6
+                },
+                "newTreeStructure": {
+                    "type": "checkbox",
+                    "label": "new tree structure",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
                 }
             }
         }
