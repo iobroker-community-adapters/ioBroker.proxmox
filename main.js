@@ -263,7 +263,12 @@ class Proxmox extends utils.Adapter {
             const nodeName = this.prepareNameForId(node.node);
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
-            nodesKeep.push(`node.${nodeName}`);
+
+            if (this.config.requestDiskInformation) {
+                nodesKeep.push(`node.${nodeName}`);
+            } else {
+                nodesKeep.push(`node_${nodeName}`);
+            }
 
             const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
@@ -494,8 +499,13 @@ class Proxmox extends utils.Adapter {
                     const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
                     const resName = this.prepareNameForId(resourceStatus.name);
 
-                    resourcesKeep.push(`${type}.${resName}`);
-                    sid = `${this.namespace}.${type}.${resName}`;
+                    if (this.config.requestDiskInformation) {
+                        resourcesKeep.push(`${type}.${resName}`);
+                        sid = `${this.namespace}.${type}.${resName}`;
+                    } else {
+                        resourcesKeep.push(`${type}_${resName}`);
+                        sid = `${this.namespace}.${type}_${resName}`;
+                    }
 
                     this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
 
@@ -672,8 +682,13 @@ class Proxmox extends utils.Adapter {
                             const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
                             const storageName = this.prepareNameForId(res.storage);
 
-                            resourcesKeep.push(`${type}.${storageName}`);
-                            sid = `${this.namespace}.${type}.${storageName}`;
+                            if (this.config.requestDiskInformation) {
+                                resourcesKeep.push(`${type}.${storageName}`);
+                                sid = `${this.namespace}.${type}.${storageName}`;
+                            } else {
+                                resourcesKeep.push(`${type}_${storageName}`);
+                                sid = `${this.namespace}.${type}_${storageName}`;
+                            }
 
                             this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
@@ -905,7 +920,11 @@ class Proxmox extends utils.Adapter {
                     const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
                     const resName = this.prepareNameForId(resourceStatus.name);
 
-                    sid = `${this.namespace}.${type}.${resName}`;
+                    if (this.config.requestDiskInformation) {
+                        sid = `${this.namespace}.${type}.${resName}`;
+                    } else {
+                        sid = `${this.namespace}.${type}_${resName}`;
+                    }
 
                     if (!knownObjIds.includes(sid)) {
                         // new node restart adapter to create objects
@@ -926,24 +945,22 @@ class Proxmox extends utils.Adapter {
                     }
 
                     if (res.status !== 'offline') {
-
                         try {
                             const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
                             sid = this.namespace + '.' + type + '_' + res.storage;
+                            await this.findState(sid, storageStatus, async (states) => {
+                                for (const element of states) {
+                                    await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                                }
+                            });
                         } catch (err) {
                             this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
                         }
-
-                        await this.findState(sid, storageStatus, async (states) => {
-                            for (const element of states) {
-                                await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
-                            }
-                        });
                     }
                 }
             }
         } catch (err) {
-            this.log.warn(`Unable to get cluster resources: ${err}`);
+            this.log.warn(`Unable to get cluster resources: ${err.message} `);
         }
     }
 
