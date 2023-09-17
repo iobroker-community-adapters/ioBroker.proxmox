@@ -241,9 +241,11 @@ class Proxmox extends utils.Adapter {
      * @private
      */
     async createNodes(nodes) {
-        const nodesAll = Object.keys(this.objects)
+        let nodesAll = Object.keys(this.objects)
             .map(this.removeNamespace.bind(this))
             .filter((id) => id.startsWith('node_'));
+
+
         const nodesKeep = [];
 
         /**
@@ -268,11 +270,11 @@ class Proxmox extends utils.Adapter {
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
 
-            if (this.config.newTreeStructure) {
-                nodesKeep.push(`node.${nodeName}`);
-            } else {
+//            if (this.config.newTreeStructure) {
+//                nodesKeep.push(`node.${nodeName}`);
+//            } else {
                 nodesKeep.push(`node_${nodeName}`);
-            }
+//            }
 
             const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
@@ -505,12 +507,11 @@ class Proxmox extends utils.Adapter {
                     const type = res.type;
 
                     const resName = this.prepareNameForId(res.name);
+                    resourcesKeep.push(`${type}.${resName}`);
 
                     if (this.config.newTreeStructure) {
-                        resourcesKeep.push(`${type}.${resName}`);
                         sid = `${this.namespace}.${type}.${resName}`;
                     } else {
-                        resourcesKeep.push(`${type}_${resName}`);
                         sid = `${this.namespace}.${type}_${resName}`;
                     }
 
@@ -694,11 +695,11 @@ class Proxmox extends utils.Adapter {
                     const type = res.type;
                     const storageName = this.prepareNameForId(res.storage);
 
+                    resourcesKeep.push(`${type}.${storageName}`);
+
                     if (this.config.newTreeStructure) {
-                        resourcesKeep.push(`${type}.${storageName}`);
                         sid = `${this.namespace}.${type}.${storageName}`;
                     } else {
-                        resourcesKeep.push(`${type}_${storageName}`);
                         sid = `${this.namespace}.${type}_${storageName}`;
                     }
 
@@ -747,7 +748,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.warn(`Unable to get cluster resources: ${err}`);
+            this.log.debug(`Unable to get cluster resources: ${err}`);
         }
     }
 
@@ -975,7 +976,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.warn(`Unable to get cluster resources: ${err.message} `);
+            this.log.debug(`Unable to get cluster resources: ${err.message} `);
         }
     }
 
