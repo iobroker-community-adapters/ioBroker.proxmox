@@ -485,6 +485,10 @@ class Proxmox extends utils.Adapter {
             await this.createCeph();
         }
 
+        if (this.config.requestHAInformation) {
+            await this.createHA();
+        }
+
         await this.createVM();
 
 
@@ -502,8 +506,53 @@ class Proxmox extends utils.Adapter {
      * Create CEPH
      * @private
      */
-    async createCeph() {
+    async createHA() {
+        const haid = `${this.namespace}.ha`;
 
+        await this.setObjectNotExistsAsync(`${haid}`, {
+            type: 'chanel',
+            common: {
+                name: 'ha',
+            },
+            native: {},
+        });
+
+        const haInformation = await this.proxmox?.getHAStatusInformation();
+
+        for (let lpEntry in haInformation.data) {
+            let lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+            const lpData = haInformation.data[lpEntry];
+            if (lpType == 'object') {
+                for (let lpEntry2 in lpData) {
+                    let lpType2 = typeof lpData[lpEntry2];
+                    const lpData2 = lpData[lpEntry2];
+                    let lpData2Id = lpData.id;
+
+                    if (lpEntry2 == 'id') {
+                        continue;
+                    }
+
+                    lpData2Id = lpData2Id.replace(/:/g, '_');
+
+                    await this.extendObjectAsync(`${haid}.${lpData2Id}_${lpEntry2}`, {
+                        type: 'state',
+                        common: {
+                            name: lpEntry2,
+                            type: lpType2,
+                            read: true,
+                            write: false,
+                            role: 'value',
+                        },
+                        native: {},
+                    });
+                    await this.setStateChangedAsync(`${haid}.${lpData2Id}_${lpEntry2}`, lpData2, true);
+                }
+            }
+        }
+    }
+
+
+    async createCeph() {
         const cephid = `${this.namespace}.ceph`;
 
         await this.setObjectNotExistsAsync(`${cephid}`, {
@@ -514,11 +563,11 @@ class Proxmox extends utils.Adapter {
             native: {},
         });
 
-
         const cephInformation = await this.proxmox?.getCephInformation();
 
         for (let lpEntry in cephInformation.data) {
             let lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+            const lpData = cephInformation.data[lpEntry];
             if (lpType == 'object') {
                 await this.setObjectNotExistsAsync(`${cephid}.${lpEntry}`, {
                     type: 'folder',
@@ -530,7 +579,7 @@ class Proxmox extends utils.Adapter {
 
                 for (let lpEntry2 in cephInformation.data[lpEntry]) {
                     let lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
-
+                    const lpData2 = cephInformation.data[lpEntry][lpEntry2];
                     if (lpType2 == 'object') {
                         continue;
                     }
@@ -546,6 +595,7 @@ class Proxmox extends utils.Adapter {
                         },
                         native: {},
                     });
+                    await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                 }
             } else {
                 await this.extendObjectAsync(`${cephid}.${lpEntry}`, {
@@ -559,6 +609,7 @@ class Proxmox extends utils.Adapter {
                     },
                     native: {},
                 });
+                await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
             }
         }
     }
@@ -998,9 +1049,11 @@ class Proxmox extends utils.Adapter {
             await this.setCeph();
         }
 
+        if (this.config.requestHAInformation) {
+            await this.setHA();
+        }
+
         await this.setVM();
-
-
     }
     async setCeph() {
         try {
@@ -1027,6 +1080,36 @@ class Proxmox extends utils.Adapter {
             this.log.debug(`Unable to get Ceph resources: ${err.message} `);
         }
     }
+
+    async setHA() {
+        try {
+            const haid = `${this.namespace}.ha`;
+            const haInformation = await this.proxmox?.getHAStatusInformation();
+
+            for (let lpEntry in haInformation.data) {
+                let lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+                const lpData = haInformation.data[lpEntry];
+                if (lpType == 'object') {
+                    for (let lpEntry2 in lpData) {
+                        let lpType2 = typeof lpData[lpEntry2];
+                        const lpData2 = lpData[lpEntry2];
+                        let lpData2Id = lpData.id;
+
+                        if (lpEntry2 == 'id') {
+                            continue;
+                        }
+
+                        lpData2Id = lpData2Id.replace(/:/g, '_');
+
+                        await this.setStateChangedAsync(`${haid}.${lpData2Id}_${lpEntry2}`, lpData2, true);
+                    }
+                }
+            }
+        } catch (err) {
+            this.log.debug(`Unable to get HA resources: ${err.message} `);
+        }
+    }
+
     async setVM() {
         try {
             const resources = await this.proxmox?.getClusterResources();

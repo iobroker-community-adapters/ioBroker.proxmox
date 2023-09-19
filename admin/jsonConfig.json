@@ -87,6 +87,13 @@
                     "md": 6,
                     "lg": 6
                 },
+                "requestHAInformation": {
+                    "type": "checkbox",
+                    "label": "Request HA information",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
                 "newTreeStructure": {
                     "type": "checkbox",
                     "label": "new tree structure",
