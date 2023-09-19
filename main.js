@@ -502,10 +502,6 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    /**
-     * Create CEPH
-     * @private
-     */
     async createHA() {
         const haid = `${this.namespace}.ha`;
 
@@ -584,6 +580,8 @@ class Proxmox extends utils.Adapter {
                         continue;
                     }
 
+                    lpEntry2 = lpEntry2.replace(/:/g, '_');
+
                     await this.extendObjectAsync(`${cephid}.${lpEntry}.${lpEntry2}`, {
                         type: 'state',
                         common: {
@@ -598,6 +596,8 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                 }
             } else {
+            
+                lpEntry = lpEntry.replace(/:/g, '_');
                 await this.extendObjectAsync(`${cephid}.${lpEntry}`, {
                     type: 'state',
                     common: {
@@ -1070,9 +1070,12 @@ class Proxmox extends utils.Adapter {
                         if (lpType2   == 'object') {
                             continue;
                         }
+                        
+                        lpEntry2 = lpEntry2.replace(/:/g, '_');
                         await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                     }
                 } else {
+                    lpEntry = lpEntry.replace(/:/g, '_');
                     await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
                 }
             }
