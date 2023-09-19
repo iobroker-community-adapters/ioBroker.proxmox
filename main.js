@@ -480,6 +480,11 @@ class Proxmox extends utils.Adapter {
                 }
             }
         }
+
+        if (this.config.requestCephInformation) {
+            await this.createCeph();
+        }
+
         await this.createVM();
 
 
@@ -492,6 +497,73 @@ class Proxmox extends utils.Adapter {
             }
         }
     }
+
+    /**
+     * Create CEPH
+     * @private
+     */
+    async createCeph() {
+
+        const cephid = `${this.namespace}.ceph`;
+
+        await this.setObjectNotExistsAsync(`${cephid}`, {
+            type: 'chanel',
+            common: {
+                name: 'ceph',
+            },
+            native: {},
+        });
+
+
+        const cephInformation = await this.proxmox?.getCephInformation();
+
+        for (let lpEntry in cephInformation.data) {
+            let lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+            if (lpType == 'object') {
+                await this.setObjectNotExistsAsync(`${cephid}.${lpEntry}`, {
+                    type: 'folder',
+                    common: {
+                        name: lpEntry,
+                    },
+                    native: {},
+                });
+
+                for (let lpEntry2 in cephInformation.data[lpEntry]) {
+                    let lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
+
+                    if (lpType2 == 'object') {
+                        continue;
+                    }
+
+                    await this.extendObjectAsync(`${cephid}.${lpEntry}.${lpEntry2}`, {
+                        type: 'state',
+                        common: {
+                            name: lpEntry2,
+                            type: lpType2,
+                            read: true,
+                            write: false,
+                            role: 'value',
+                        },
+                        native: {},
+                    });
+                }
+            } else {
+                await this.extendObjectAsync(`${cephid}.${lpEntry}`, {
+                    type: 'state',
+                    common: {
+                        name: lpEntry,
+                        type: lpType,
+                        read: true,
+                        write: false,
+                        role: 'value',
+                    },
+                    native: {},
+                });
+            }
+        }
+    }
+
+
 
     async createVM() {
         const resourcesAll = Object.keys(this.objects)
@@ -857,7 +929,10 @@ class Proxmox extends utils.Adapter {
                                 ack: true
                             });
                         }
+
+
                     }
+
                 } catch (err) {
                     this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
                 }
@@ -919,9 +994,39 @@ class Proxmox extends utils.Adapter {
             }
         }
 
-        await this.setVM();
-    }
+        if (this.config.requestCephInformation) {
+            await this.setCeph();
+        }
 
+        await this.setVM();
+
+
+    }
+    async setCeph() {
+        try {
+            const cephid = `${this.namespace}.ceph`;
+            const cephInformation = await this.proxmox?.getCephInformation();
+
+            for (let lpEntry in cephInformation.data) {
+                const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+                const lpData = cephInformation.data[lpEntry];
+                if (lpType == 'object') {
+                    for (let lpEntry2 in cephInformation.data[lpEntry]) {
+                        const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
+                        const lpData2 = cephInformation.data[lpEntry][lpEntry2];
+                        if (lpType2   == 'object') {
+                            continue;
+                        }
+                        await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
+                    }
+                } else {
+                    await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
+                }
+            }
+        } catch (err) {
+            this.log.debug(`Unable to get Ceph resources: ${err.message} `);
+        }
+    }
     async setVM() {
         try {
             const resources = await this.proxmox?.getClusterResources();
