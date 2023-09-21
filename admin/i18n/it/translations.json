@@ -7,5 +7,8 @@
     "Password": "Parola d'ordine",
     "Realm": "Regno",
     "Additional information": "Informazioni aggiuntive",
-    "Request disk information": "Richiedi informazioni sul disco"
+    "Request disk information": "Richiedi informazioni sul disco",
+    "Request Ceph information": "Richiedi informazioni su Ceph",
+    "Request HA information": "Richiedi informazioni su HA",
+    "new tree structure": "nuova struttura"
 }

@@ -7,5 +7,8 @@
     "Password": "Пароль",
     "Realm": "Королівство",
     "Additional information": "Додаткова інформація",
-    "Request disk information": "Запит інформації про диск"
+    "Request disk information": "Запит інформації про диск",
+    "Request Ceph information": "Запит інформації Ceph",
+    "Request HA information": "Запит інформації HA",
+    "new tree structure": "нова структура дерева"
 }

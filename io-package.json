@@ -1,235 +1,238 @@
 {
-  "common": {
-    "name": "proxmox",
-    "version": "2.0.2",
-    "news": {
-      "2.0.2": {
-        "en": "Added option for disk information\nCheck type of disk wearout\nCatch exception when requesting disk information",
-        "de": "Option für Festplatteninformationen hinzugefügt\nÜberprüfen Sie die Art der Scheibenverschleiß\nFangausnahme bei der Anforderung von Datenträgern",
-        "ru": "Добавлена опция для информации о диске\nПроверить тип вывода диска\nИсключение Catch при запросе информации о диске",
-        "pt": "Opção adicionada para informações de disco\nTipo de verificação do desgaste do disco\nPegar exceção ao solicitar informações de disco",
-        "nl": "Optie voor disk informatie\nControle type disk slijtage\nVang uitzondering als verzoek om informatie over disk",
-        "fr": "Option ajoutée pour l'information sur le disque\nVérifier le type d'usure du disque\nAttrapez l'exception lorsque vous demandez des informations sur le disque",
-        "it": "Aggiunta opzione per informazioni su disco\nControllare il tipo di usura del disco\nPrendere l'eccezione quando si richiede informazioni su disco",
-        "es": "Opción adicional para la información de disco\nTipo de registro de disco\nExtracción de excepción al solicitar información en disco",
-        "pl": "Wstępna opcja dla informacji dyskowej\nOkładka\nCatch wyjątek po zażądzeniu informacji na dysku",
-        "uk": "Додано опцію для інформації про диск\nПеревірити тип диска\nВиняток кішки при запитуванні інформації про диск",
-        "zh-cn": "增加资料的选择\nD. 穿过失的检查类型\n要求不了解资料的例外情况"
-      },
-      "2.0.1": {
-        "en": "Added node disks (heals, wearout)",
-        "de": "Knotenscheiben hinzugefügt (Hälse, Verschleiß)",
-        "ru": "Добавлены диски node (здоровья, износ)",
-        "pt": "Discos de nó adicionados (calças, desgaste)",
-        "nl": "Toegevoegd node disks (helft)",
-        "fr": "Ajout de disques node (chiffres, usure)",
-        "it": "Aggiunto nodo dischi (guari, usura)",
-        "es": "Discos de nodo añadidos (sanación, desgaste)",
-        "pl": "Wyposażony dysk węzłowy (heals, wearout)",
-        "uk": "Додано диски вершини (заготовки, знос)",
-        "zh-cn": "增加不成见(黑客,穿着)"
-      },
-      "2.0.0": {
-        "en": "* Updated admin instance configuration\n* Refactoring of adapter\n* Allow dots in resource names\n\n__Requires js-controller >= 3.3.22__\n__Requires admin >= 6.0.0__",
-        "de": "* Aktualisierte Admin-Instanz-Konfiguration\n* Refactoring des Adapters\n* Erlauben Sie Punkte in Ressourcennamen\n\n_Anforderungen js-controller >= 3.3.22_\n_Erfordert Admin >= 6.0.0_",
-        "ru": "* Обновленная настройка админ\n* Рефакторинг адаптера\n* Разрешить точки в именах ресурсов\n\n_ Требуется js-контроллер >= 3.7.22_\n_Требуется админ >= 6.0.0_",
-        "pt": "* Configuração de instância de administrador atualizada\n* Refactoring do adaptador\n* Permitir pontos em nomes de recursos\n\n_ Requer js-controller >= 3.3.22_\n_Requer admin >= 6.0.0_",
-        "nl": "♪ Verouderde administratie configu\n♪ Refactoring of adapter ♪\n♪ Vertaling:\n\nRequires-controller 3,3,22\nVertaling:",
-        "fr": "* Configuration d ' instance d ' administration actualisée\n* Refactoring of adaptateur\n* Autoriser les points dans les noms de ressources\n\n_ Nécessite js-controller 3.3.22_\n_ Nécessite l'administration >= 6.0.0_",
-        "it": "# Configurazione delle istanze admin aggiornata\n* Refactoring dell'adattatore\n# Consentire punti nei nomi delle risorse\n\n_Richiede js-controller >= 3.3.22_\n_ Richiede admin >= 6.0.0_",
-        "es": "* Configuración actualizada de instancias de administración\n* Refactorización del adaptador\n* Permitir puntos en nombres de recursos\n\n_Requiere js-controller 3.3.22_\n_Requiere administración= 6.0.0_",
-        "pl": "* Administracja\nRefaktor adaptatora\n* Allow dot\n\n_Requires js-controller >=== 3.3.2\n_Requires admin >= 6.0.0_",
-        "uk": "Ім'я * Оновлена конфігурація екземпляра адміністратора\n* Рефакторинг адаптера\nІм'я * Дозволити крапки в ресурсах\n\n_Вимагає js-controller >= 3.3.22_\n_Вимагає admin >= 6.0.0_",
-        "zh-cn": "* A/64/50。 最新专题组合\n* 重新定性\n* A/64/50。 资源的名称\n\n____________________3.3.22:\n__________"
-      },
-      "1.3.5": {
-        "en": "fixed warning if `max_cpu` is not in response",
-        "de": "feste warnung, wenn max_cpu nicht reagiert",
-        "ru": "фиксированное предупреждение, если max_cpu не находится в ответе",
-        "pt": "aviso fixo se max_cpu não estiver em resposta",
-        "nl": "vertaling:",
-        "fr": "avertissement fixe si max_cpu n'est pas en réponse",
-        "it": "avvertimento fisso se max_cpu non è in risposta",
-        "es": "advertencia fija si max_cpu no está en respuesta",
-        "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
-        "zh-cn": "如果不作出反应,定期警告",
-        "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
-      },
-      "1.3.4": {
-        "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
-        "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
-        "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
-        "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
-        "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
-        "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
-        "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
-        "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
-        "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
-        "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
-        "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
-      },
-      "1.3.3": {
-        "en": "we fixed some incorrect types",
-        "de": "Wir haben einige falsche Typen behoben",
-        "ru": "мы исправили некоторые неправильные типы",
-        "pt": "nós consertamos alguns tipos incorretos",
-        "nl": "we hebben enkele onjuiste typen gerepareerd",
-        "fr": "nous avons corrigé certains types incorrects",
-        "it": "abbiamo corretto alcuni tipi errati",
-        "es": "arreglamos algunos tipos incorrectos",
-        "pl": "naprawiliśmy niektóre nieprawidłowe typy",
-        "zh-cn": "我们修复了一些错误的类型",
-        "uk": "ми виправили деякі неправильні типи"
-      },
-      "1.3.2": {
-        "en": "status of vms is now a string instead of incorrectly a button",
-        "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
-        "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
-        "pt": "status de vms agora é uma string em vez de incorretamente um botão",
-        "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
-        "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
-        "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
-        "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
-        "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-        "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
-        "uk": "статус vms тепер є рядком, а не кнопкою"
-      }
-    },
-    "connectionType": "local",
-    "dataSource": "poll",
-    "titleLang": {
-      "en": "Proxmox",
-      "de": "Proxmox",
-      "ru": "Proxmox",
-      "pt": "Proxmox",
-      "nl": "Proxmox",
-      "fr": "Proxmox",
-      "it": "Proxmox",
-      "es": "Proxmox",
-      "pl": "Proxmox",
-      "zh-cn": "Proxmox",
-      "uk": "Проксмокс"
-    },
-    "desc": {
-      "en": "iobroker proxmox adapter",
-      "de": "iobroker Proxmox Adapter",
-      "ru": "iobroker proxmox adapter",
-      "pt": "adaptador proxmox iobroker",
-      "nl": "iobroker proxmox-adapter",
-      "fr": "adaptateur iobroker proxmox",
-      "it": "adattatore iobroker proxmox",
-      "es": "adaptador iobroker proxmox",
-      "pl": "Adapter iobroker proxmox",
-      "zh-cn": "iobroker proxmox适配器",
-      "uk": "адаптер iobroker proxmox"
-    },
-    "authors": [
-      "MeisterTR <meistertr.smarthome@gmail.com>",
-      "Matthias Kleine <info@haus-automatisierung.com>"
-    ],
-    "platform": "Javascript/Node.js",
-    "mode": "daemon",
-    "icon": "proxmox.png",
-    "compact": true,
-    "localLinks": {
-      "_default": "https://%ip%:%port%"
-    },
-    "enabled": false,
-    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
-    "license": "MIT",
-    "keywords": [
-      "proxmox",
-      "vm",
-      "virtual machine",
-      "lxc",
-      "container"
-    ],
-    "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
-    "loglevel": "info",
-    "type": "infrastructure",
-    "adminUI": {
-      "config": "json"
-    },
-    "docs": {
-      "en": [
-        "docs/en/README.md"
-      ],
-      "de": [
-        "docs/de/README.md"
-      ]
-    },
-    "restartAdapters": [],
-    "dependencies": [
-      {
-        "js-controller": ">=3.3.22"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=6.0.0"
-      }
-    ]
-  },
-  "protectedNative": [
-    "pwd",
-    "name"
-  ],
-  "encryptedNative": [
-    "pwd"
-  ],
-  "native": {
-    "ip": "192.000.000.000",
-    "port": 8006,
-    "requestInterval": 30,
-    "name": "root",
-    "pwd": "",
-    "server": "pam",
-    "requestDiskInformation": false
-  },
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Information",
-          "de": "Information",
-          "ru": "Информация",
-          "pt": "Em formação",
-          "nl": "Informatie",
-          "fr": "Informations",
-          "it": "Informazione",
-          "es": "Información",
-          "pl": "Informacja",
-          "zh-cn": "信息"
-        }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "name": {
-          "en": "Connected to LaMetric",
-          "de": "Verbindung mit LaMetric",
-          "ru": "При подключении к LaMetric",
-          "pt": "Se conectado ao LaMetric",
-          "nl": "Indien verbonden met LaMetric",
-          "fr": "Si connecté à LaMetric",
-          "it": "Se connesso a LaMetric",
-          "es": "Si está conectado a LaMetric",
-          "pl": "W przypadku połączenia z LaMetric",
-          "zh-cn": "如果连接到 LaMetric"
+    "common": {
+        "name": "proxmox",
+        "version": "2.0.2",
+        "news": {
+            "2.0.2": {
+                "en": "Added option for disk information\nCheck type of disk wearout\nCatch exception when requesting disk information",
+                "de": "Option für Festplatteninformationen hinzugefügt\nÜberprüfen Sie die Art der Scheibenverschleiß\nFangausnahme bei der Anforderung von Datenträgern",
+                "ru": "Добавлена опция для информации о диске\nПроверить тип вывода диска\nИсключение Catch при запросе информации о диске",
+                "pt": "Opção adicionada para informações de disco\nTipo de verificação do desgaste do disco\nPegar exceção ao solicitar informações de disco",
+                "nl": "Optie voor disk informatie\nControle type disk slijtage\nVang uitzondering als verzoek om informatie over disk",
+                "fr": "Option ajoutée pour l'information sur le disque\nVérifier le type d'usure du disque\nAttrapez l'exception lorsque vous demandez des informations sur le disque",
+                "it": "Aggiunta opzione per informazioni su disco\nControllare il tipo di usura del disco\nPrendere l'eccezione quando si richiede informazioni su disco",
+                "es": "Opción adicional para la información de disco\nTipo de registro de disco\nExtracción de excepción al solicitar información en disco",
+                "pl": "Wstępna opcja dla informacji dyskowej\nOkładka\nCatch wyjątek po zażądzeniu informacji na dysku",
+                "uk": "Додано опцію для інформації про диск\nПеревірити тип диска\nВиняток кішки при запитуванні інформації про диск",
+                "zh-cn": "增加资料的选择\nD. 穿过失的检查类型\n要求不了解资料的例外情况"
+            },
+            "2.0.1": {
+                "en": "Added node disks (heals, wearout)",
+                "de": "Knotenscheiben hinzugefügt (Hälse, Verschleiß)",
+                "ru": "Добавлены диски node (здоровья, износ)",
+                "pt": "Discos de nó adicionados (calças, desgaste)",
+                "nl": "Toegevoegd node disks (helft)",
+                "fr": "Ajout de disques node (chiffres, usure)",
+                "it": "Aggiunto nodo dischi (guari, usura)",
+                "es": "Discos de nodo añadidos (sanación, desgaste)",
+                "pl": "Wyposażony dysk węzłowy (heals, wearout)",
+                "uk": "Додано диски вершини (заготовки, знос)",
+                "zh-cn": "增加不成见(黑客,穿着)"
+            },
+            "2.0.0": {
+                "en": "* Updated admin instance configuration\n* Refactoring of adapter\n* Allow dots in resource names\n\n__Requires js-controller >= 3.3.22__\n__Requires admin >= 6.0.0__",
+                "de": "* Aktualisierte Admin-Instanz-Konfiguration\n* Refactoring des Adapters\n* Erlauben Sie Punkte in Ressourcennamen\n\n_Anforderungen js-controller >= 3.3.22_\n_Erfordert Admin >= 6.0.0_",
+                "ru": "* Обновленная настройка админ\n* Рефакторинг адаптера\n* Разрешить точки в именах ресурсов\n\n_ Требуется js-контроллер >= 3.7.22_\n_Требуется админ >= 6.0.0_",
+                "pt": "* Configuração de instância de administrador atualizada\n* Refactoring do adaptador\n* Permitir pontos em nomes de recursos\n\n_ Requer js-controller >= 3.3.22_\n_Requer admin >= 6.0.0_",
+                "nl": "♪ Verouderde administratie configu\n♪ Refactoring of adapter ♪\n♪ Vertaling:\n\nRequires-controller 3,3,22\nVertaling:",
+                "fr": "* Configuration d ' instance d ' administration actualisée\n* Refactoring of adaptateur\n* Autoriser les points dans les noms de ressources\n\n_ Nécessite js-controller 3.3.22_\n_ Nécessite l'administration >= 6.0.0_",
+                "it": "# Configurazione delle istanze admin aggiornata\n* Refactoring dell'adattatore\n# Consentire punti nei nomi delle risorse\n\n_Richiede js-controller >= 3.3.22_\n_ Richiede admin >= 6.0.0_",
+                "es": "* Configuración actualizada de instancias de administración\n* Refactorización del adaptador\n* Permitir puntos en nombres de recursos\n\n_Requiere js-controller 3.3.22_\n_Requiere administración= 6.0.0_",
+                "pl": "* Administracja\nRefaktor adaptatora\n* Allow dot\n\n_Requires js-controller >=== 3.3.2\n_Requires admin >= 6.0.0_",
+                "uk": "Ім'я * Оновлена конфігурація екземпляра адміністратора\n* Рефакторинг адаптера\nІм'я * Дозволити крапки в ресурсах\n\n_Вимагає js-controller >= 3.3.22_\n_Вимагає admin >= 6.0.0_",
+                "zh-cn": "* A/64/50。 最新专题组合\n* 重新定性\n* A/64/50。 资源的名称\n\n____________________3.3.22:\n__________"
+            },
+            "1.3.5": {
+                "en": "fixed warning if `max_cpu` is not in response",
+                "de": "feste warnung, wenn max_cpu nicht reagiert",
+                "ru": "фиксированное предупреждение, если max_cpu не находится в ответе",
+                "pt": "aviso fixo se max_cpu não estiver em resposta",
+                "nl": "vertaling:",
+                "fr": "avertissement fixe si max_cpu n'est pas en réponse",
+                "it": "avvertimento fisso se max_cpu non è in risposta",
+                "es": "advertencia fija si max_cpu no está en respuesta",
+                "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
+                "zh-cn": "如果不作出反应,定期警告",
+                "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
+            },
+            "1.3.4": {
+                "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
+                "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
+                "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
+                "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
+                "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
+                "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
+                "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
+                "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
+                "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
+                "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
+                "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
+            },
+            "1.3.3": {
+                "en": "we fixed some incorrect types",
+                "de": "Wir haben einige falsche Typen behoben",
+                "ru": "мы исправили некоторые неправильные типы",
+                "pt": "nós consertamos alguns tipos incorretos",
+                "nl": "we hebben enkele onjuiste typen gerepareerd",
+                "fr": "nous avons corrigé certains types incorrects",
+                "it": "abbiamo corretto alcuni tipi errati",
+                "es": "arreglamos algunos tipos incorrectos",
+                "pl": "naprawiliśmy niektóre nieprawidłowe typy",
+                "zh-cn": "我们修复了一些错误的类型",
+                "uk": "ми виправили деякі неправильні типи"
+            },
+            "1.3.2": {
+                "en": "status of vms is now a string instead of incorrectly a button",
+                "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
+                "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
+                "pt": "status de vms agora é uma string em vez de incorretamente um botão",
+                "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
+                "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
+                "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
+                "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
+                "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
+                "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
+                "uk": "статус vms тепер є рядком, а не кнопкою"
+            }
         },
-        "role": "indicator.reachable",
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    }
-  ],
-  "objects": []
+        "connectionType": "local",
+        "dataSource": "poll",
+        "titleLang": {
+            "en": "Proxmox",
+            "de": "Proxmox",
+            "ru": "Proxmox",
+            "pt": "Proxmox",
+            "nl": "Proxmox",
+            "fr": "Proxmox",
+            "it": "Proxmox",
+            "es": "Proxmox",
+            "pl": "Proxmox",
+            "zh-cn": "Proxmox",
+            "uk": "Проксмокс"
+        },
+        "desc": {
+            "en": "iobroker proxmox adapter",
+            "de": "iobroker Proxmox Adapter",
+            "ru": "iobroker proxmox adapter",
+            "pt": "adaptador proxmox iobroker",
+            "nl": "iobroker proxmox-adapter",
+            "fr": "adaptateur iobroker proxmox",
+            "it": "adattatore iobroker proxmox",
+            "es": "adaptador iobroker proxmox",
+            "pl": "Adapter iobroker proxmox",
+            "zh-cn": "iobroker proxmox适配器",
+            "uk": "адаптер iobroker proxmox"
+        },
+        "authors": [
+            "MeisterTR <meistertr.smarthome@gmail.com>",
+            "Matthias Kleine <info@haus-automatisierung.com>"
+        ],
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "proxmox.png",
+        "compact": true,
+        "localLinks": {
+            "_default": "https://%ip%:%port%"
+        },
+        "enabled": false,
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
+        "license": "MIT",
+        "keywords": [
+            "proxmox",
+            "vm",
+            "virtual machine",
+            "lxc",
+            "container"
+        ],
+        "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
+        "loglevel": "info",
+        "type": "infrastructure",
+        "adminUI": {
+            "config": "json"
+        },
+        "docs": {
+            "en": [
+                "docs/en/README.md"
+            ],
+            "de": [
+                "docs/de/README.md"
+            ]
+        },
+        "restartAdapters": [],
+        "dependencies": [
+            {
+                "js-controller": ">=3.3.22"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=6.0.0"
+            }
+        ]
+    },
+    "protectedNative": [
+        "pwd",
+        "name"
+    ],
+    "encryptedNative": [
+        "pwd"
+    ],
+    "native": {
+        "ip": "192.000.000.000",
+        "port": 8006,
+        "requestInterval": 30,
+        "name": "root",
+        "pwd": "",
+        "server": "pam",
+        "requestDiskInformation": false,
+        "requestCephInformation": false,
+        "newTreeStructure": false,
+        "requestHAInformation": false
+    },
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Information",
+                    "ru": "Информация",
+                    "pt": "Em formação",
+                    "nl": "Informatie",
+                    "fr": "Informations",
+                    "it": "Informazione",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "zh-cn": "信息"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Connected to LaMetric",
+                    "de": "Verbindung mit LaMetric",
+                    "ru": "При подключении к LaMetric",
+                    "pt": "Se conectado ao LaMetric",
+                    "nl": "Indien verbonden met LaMetric",
+                    "fr": "Si connecté à LaMetric",
+                    "it": "Se connesso a LaMetric",
+                    "es": "Si está conectado a LaMetric",
+                    "pl": "W przypadku połączenia z LaMetric",
+                    "zh-cn": "如果连接到 LaMetric"
+                },
+                "role": "indicator.reachable",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ],
+    "objects": []
 }
