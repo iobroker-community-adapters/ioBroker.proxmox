@@ -1160,8 +1160,6 @@ class Proxmox extends utils.Adapter {
                             this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
                         }
                     }
-                } else {
-                   await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
                 }
             }
         } catch (err) {
