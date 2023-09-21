@@ -502,6 +502,10 @@ class Proxmox extends utils.Adapter {
         }
     }
 
+    /**
+     * Create CEPH
+     * @private
+     */
     async createHA() {
         const haid = `${this.namespace}.ha`;
 
@@ -580,8 +584,6 @@ class Proxmox extends utils.Adapter {
                         continue;
                     }
 
-                    lpEntry2 = lpEntry2.replace(/:/g, '_');
-
                     await this.extendObjectAsync(`${cephid}.${lpEntry}.${lpEntry2}`, {
                         type: 'state',
                         common: {
@@ -596,8 +598,6 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                 }
             } else {
-            
-                lpEntry = lpEntry.replace(/:/g, '_');
                 await this.extendObjectAsync(`${cephid}.${lpEntry}`, {
                     type: 'state',
                     common: {
@@ -891,12 +891,13 @@ class Proxmox extends utils.Adapter {
                 return void this.restart();
             }
 
+            await this.setStateChangedAsync(`${sid}.status`, {val: node.status, ack: true});
+
             if (node.status !== 'offline') {
                 await this.setStateChangedAsync(`${sid}.cpu`, {val: parseInt(node.cpu * 10000) / 100, ack: true});
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, {val: node.maxcpu, ack: true});
                 }
-                await this.setStateChangedAsync(`${sid}.status`, {val: node.status, ack: true});
 
                 this.log.debug(`Requesting states for node ${node.node}`);
                 try {
@@ -1070,12 +1071,9 @@ class Proxmox extends utils.Adapter {
                         if (lpType2   == 'object') {
                             continue;
                         }
-                        
-                        lpEntry2 = lpEntry2.replace(/:/g, '_');
                         await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                     }
                 } else {
-                    lpEntry = lpEntry.replace(/:/g, '_');
                     await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
                 }
             }
