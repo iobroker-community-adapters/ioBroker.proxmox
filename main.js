@@ -1135,9 +1135,13 @@ class Proxmox extends utils.Adapter {
                         res.status = 'offline';
                     }
 
-                    if (resName == 'undefined') {   // überspringe maschiene falls kontoen offline und diese auf dem knoten liegt
+                    if (resName == 'undefined') {   // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
+                        offlineMachines[res.id] = 'offline';
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
+
+
+
                         continue;
                     }
 
@@ -1206,7 +1210,7 @@ class Proxmox extends utils.Adapter {
                 result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
             } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
                 result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
-            } else if (key === 'content' || key === 'type' || key === 'status') {
+            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'vmid') {
                 result.push([sid, key, 'text', value]);
             }
         }

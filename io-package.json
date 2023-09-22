@@ -236,16 +236,17 @@
       "type": "state",
       "common": {
         "name": {
-          "en": "offline",
-          "de": "offline",
-          "ru": "offline",
-          "pt": "offline",
-          "nl": "offline",
-          "fr": "offline",
-          "it": "offline",
-          "es": "offline",
-          "pl": "offline",
-          "zh-cn": "offline"
+          "en": "string for offline Machines",
+          "de": "string für Offline-Maschinen",
+          "ru": "string для оффлайн машин",
+          "pt": "string para máquinas off-line",
+          "nl": "vertaling:",
+          "fr": "chaîne pour machines hors ligne",
+          "it": "stringa per macchine offline",
+          "es": "cadena para máquinas sin conexión",
+          "pl": "offline Machine",
+          "uk": "рядок для автономних машин",
+          "zh-cn": "a. 通 束"
         },
         "role": "state",
         "type": "string",
