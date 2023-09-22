@@ -1134,7 +1134,7 @@ class Proxmox extends utils.Adapter {
                     }
 
                     if (resName == 'undefined') {   // überspringe maschiene falls kontoen offline und diese auf dem knoten liegt
-                        offlineMachines[res.id, res.status]++;
+                        offlineMachines[res.id]++;
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
                         continue;
                     }
