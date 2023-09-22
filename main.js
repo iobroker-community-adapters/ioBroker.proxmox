@@ -1117,6 +1117,8 @@ class Proxmox extends utils.Adapter {
             const knownObjIds = Object.keys(this.objects);
             let offlineMachines = {};
 
+            this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
+
             for (const res of resources) {
                 let sid = '';
 
