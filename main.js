@@ -1115,6 +1115,7 @@ class Proxmox extends utils.Adapter {
         try {
             const resources = await this.proxmox?.getClusterResources();
             const knownObjIds = Object.keys(this.objects);
+            let offlineMachines = {};
 
             for (const res of resources) {
                 let sid = '';
@@ -1126,6 +1127,16 @@ class Proxmox extends utils.Adapter {
                         sid = `${this.namespace}.${res.type}.${resName}`;
                     } else {
                         sid = `${this.namespace}.${res.type}_${resName}`;
+                    }
+
+                    if (res.status == 'unknown') {
+                        res.status = 'offline';
+                    }
+
+                    if (resName == 'undefined') {   // überspringe maschiene falls kontoen offline und diese auf dem knoten liegt
+                        offlineMachines[res.id, res.status]++;
+                        this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
+                        continue;
                     }
 
                     await this.setStateChangedAsync(`${sid}.status`, {val: res.status, ack: true});
