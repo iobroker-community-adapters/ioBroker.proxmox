@@ -1059,22 +1059,26 @@ class Proxmox extends utils.Adapter {
     async setCeph() {
         try {
             const cephid = `${this.namespace}.ceph`;
+
+
             const cephInformation = await this.proxmox?.getCephInformation();
 
-            for (let lpEntry in cephInformation.data) {
-                const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
-                const lpData = cephInformation.data[lpEntry];
-                if (lpType == 'object') {
-                    for (let lpEntry2 in cephInformation.data[lpEntry]) {
-                        const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
-                        const lpData2 = cephInformation.data[lpEntry][lpEntry2];
-                        if (lpType2   == 'object') {
-                            continue;
+            if (cephInformation !== null) {
+                for (let lpEntry in cephInformation.data) {
+                    const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+                    const lpData = cephInformation.data[lpEntry];
+                    if (lpType == 'object') {
+                        for (let lpEntry2 in cephInformation.data[lpEntry]) {
+                            const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
+                            const lpData2 = cephInformation.data[lpEntry][lpEntry2];
+                            if (lpType2 == 'object') {
+                                continue;
+                            }
+                            await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                         }
-                        await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
+                    } else {
+                        await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
                     }
-                } else {
-                    await this.setStateChangedAsync(`${cephid}.${lpEntry}`, lpData, true);
                 }
             }
         } catch (err) {
@@ -1139,9 +1143,6 @@ class Proxmox extends utils.Adapter {
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
-
-
-
                         continue;
                     }
 
@@ -1167,10 +1168,13 @@ class Proxmox extends utils.Adapter {
                     if (res.status !== 'unknown') {
                         try {
                             const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-                     //       sid = this.namespace + '.' + type + '_' + res.storage;
                             await this.findState(sid, storageStatus, async (states) => {
                                 for (const element of states) {
-                                    await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                                    if (element[0] == '') {
+                                        continue;
+                                    } else {
+                                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                                    }
                                 }
                             });
                         } catch (err) {
