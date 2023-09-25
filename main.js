@@ -241,10 +241,9 @@ class Proxmox extends utils.Adapter {
      * @private
      */
     async createNodes(nodes) {
-        let nodesAll = Object.keys(this.objects)
+        const nodesAll = Object.keys(this.objects)
             .map(this.removeNamespace.bind(this))
             .filter((id) => id.startsWith('node_'));
-
 
         const nodesKeep = [];
 
@@ -270,11 +269,11 @@ class Proxmox extends utils.Adapter {
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
 
-//            if (this.config.newTreeStructure) {
-//                nodesKeep.push(`node.${nodeName}`);
-//            } else {
-                nodesKeep.push(`node_${nodeName}`);
-//            }
+            //            if (this.config.newTreeStructure) {
+            //                nodesKeep.push(`node.${nodeName}`);
+            //            } else {
+            nodesKeep.push(`node_${nodeName}`);
+            //            }
 
             const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
@@ -376,9 +375,10 @@ class Proxmox extends utils.Adapter {
                 native: {},
             });
 
-            await this.setStateChangedAsync(`${sid}.status`, {val: node.status, ack: true});
+            await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
-            if (node.status == 'online') {   // node is offline no infomration available
+            if (node.status == 'online') {
+                // node is offline no infomration available
                 if (node.cpu) {
                     await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu * 10000) / 100);
                 }
@@ -491,7 +491,6 @@ class Proxmox extends utils.Adapter {
 
         await this.createVM();
 
-
         // Delete non existent nodes
         for (const node of nodesAll) {
             if (!nodesKeep.includes(node)) {
@@ -519,12 +518,12 @@ class Proxmox extends utils.Adapter {
 
         const haInformation = await this.proxmox?.getHAStatusInformation();
 
-        for (let lpEntry in haInformation.data) {
-            let lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+        for (const lpEntry in haInformation.data) {
+            const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
             const lpData = haInformation.data[lpEntry];
             if (lpType == 'object') {
-                for (let lpEntry2 in lpData) {
-                    let lpType2 = typeof lpData[lpEntry2];
+                for (const lpEntry2 in lpData) {
+                    const lpType2 = typeof lpData[lpEntry2];
                     const lpData2 = lpData[lpEntry2];
                     let lpData2Id = lpData.id;
 
@@ -551,7 +550,6 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-
     async createCeph() {
         const cephid = `${this.namespace}.ceph`;
 
@@ -565,8 +563,8 @@ class Proxmox extends utils.Adapter {
 
         const cephInformation = await this.proxmox?.getCephInformation();
 
-        for (let lpEntry in cephInformation.data) {
-            let lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+        for (const lpEntry in cephInformation.data) {
+            const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
             const lpData = cephInformation.data[lpEntry];
             if (lpType == 'object') {
                 await this.setObjectNotExistsAsync(`${cephid}.${lpEntry}`, {
@@ -577,8 +575,8 @@ class Proxmox extends utils.Adapter {
                     native: {},
                 });
 
-                for (let lpEntry2 in cephInformation.data[lpEntry]) {
-                    let lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
+                for (const lpEntry2 in cephInformation.data[lpEntry]) {
+                    const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
                     const lpData2 = cephInformation.data[lpEntry][lpEntry2];
                     if (lpType2 == 'object') {
                         continue;
@@ -625,7 +623,8 @@ class Proxmox extends utils.Adapter {
             for (const res of resources) {
                 let sid = '';
 
-                if (res.status !== 'unknown' && (res.type === 'qemu' || res.type === 'lxc')) {   // if status offline or stopped no infos available
+                if (res.status !== 'unknown' && (res.type === 'qemu' || res.type === 'lxc')) {
+                    // if status offline or stopped no infos available
                     const type = res.type;
 
                     const resName = this.prepareNameForId(res.name);
@@ -797,7 +796,7 @@ class Proxmox extends utils.Adapter {
                         native: {},
                     });
 
-                    await this.setStateChangedAsync(`${sid}.status`, {val: res.status, ack: true});
+                    await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
                     if (res.status === 'running') {
                         const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
@@ -891,12 +890,12 @@ class Proxmox extends utils.Adapter {
                 return void this.restart();
             }
 
-            await this.setStateChangedAsync(`${sid}.status`, {val: node.status, ack: true});
+            await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status !== 'offline') {
-                await this.setStateChangedAsync(`${sid}.cpu`, {val: parseInt(node.cpu * 10000) / 100, ack: true});
+                await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
                 if (node.maxcpu) {
-                    await this.setStateChangedAsync(`${sid}.cpu_max`, {val: node.maxcpu, ack: true});
+                    await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
                 }
 
                 this.log.debug(`Requesting states for node ${node.node}`);
@@ -904,92 +903,89 @@ class Proxmox extends utils.Adapter {
                     const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
                     if (nodeStatus) {
                         if (nodeStatus.uptime !== undefined) {
-                            await this.setStateChangedAsync(sid + '.uptime', {val: nodeStatus.uptime, ack: true});
+                            await this.setStateChangedAsync(sid + '.uptime', { val: nodeStatus.uptime, ack: true });
                         }
                         if (nodeStatus.wait !== undefined) {
                             await this.setStateChangedAsync(sid + '.iowait', {
                                 val: parseInt(nodeStatus.wait * 10000) / 100,
-                                ack: true
+                                ack: true,
                             });
                         }
 
                         if (nodeStatus.memory.used !== undefined) {
                             await this.setStateChangedAsync(sid + '.memory.used', {
                                 val: BtoMb(nodeStatus.memory.used),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.memory.used !== undefined) {
                             await this.setStateChangedAsync(sid + '.memory.used_lev', {
                                 val: p(nodeStatus.memory.used, nodeStatus.memory.total),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.memory.total !== undefined) {
                             await this.setStateChangedAsync(sid + '.memory.total', {
                                 val: BtoMb(nodeStatus.memory.total),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.memory.free !== undefined) {
                             await this.setStateChangedAsync(sid + '.memory.free', {
                                 val: BtoMb(nodeStatus.memory.free),
-                                ack: true
+                                ack: true,
                             });
                         }
 
                         if (nodeStatus.loadavg[0] !== undefined) {
                             await this.setStateChangedAsync(sid + '.loadavg.0', {
                                 val: parseFloat(nodeStatus.loadavg[0]),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.loadavg[1] !== undefined) {
                             await this.setStateChangedAsync(sid + '.loadavg.1', {
                                 val: parseFloat(nodeStatus.loadavg[1]),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.loadavg[2] !== undefined) {
                             await this.setStateChangedAsync(sid + '.loadavg.2', {
                                 val: parseFloat(nodeStatus.loadavg[2]),
-                                ack: true
+                                ack: true,
                             });
                         }
 
                         if (nodeStatus.swap.used !== undefined) {
                             await this.setStateChangedAsync(sid + '.swap.used', {
                                 val: BtoMb(nodeStatus.swap.used),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.swap.free !== undefined) {
                             await this.setStateChangedAsync(sid + '.swap.free', {
                                 val: BtoMb(nodeStatus.swap.free),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.swap.total !== undefined) {
                             await this.setStateChangedAsync(sid + '.swap.total', {
                                 val: BtoMb(nodeStatus.swap.total),
-                                ack: true
+                                ack: true,
                             });
                         }
                         if (nodeStatus.swap.used !== undefined && nodeStatus.swap.total !== undefined) {
                             await this.setStateChangedAsync(sid + '.swap.used_lev', {
                                 val: p(nodeStatus.swap.used, nodeStatus.swap.total),
-                                ack: true
+                                ack: true,
                             });
                         }
-
-
                     }
-
                 } catch (err) {
                     this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
                 }
             } else {
-                await this.setStateChangedAsync(`${sid}.status`, {val: 'offline', ack: true});
+                await this.setStateChangedAsync(`${sid}.status`, { val: 'offline', ack: true });
             }
 
             if (this.config.requestDiskInformation) {
@@ -1002,31 +998,31 @@ class Proxmox extends utils.Adapter {
                                 if (disk.type !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.type`, {
                                         val: disk.type,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                                 if (disk.size !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.size`, {
                                         val: disk.size,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                                 if (disk.health !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.health`, {
                                         val: disk.health,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.wearout`, {
                                         val: disk.wearout,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                                 if (disk.model !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.model`, {
                                         val: disk.model,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
 
@@ -1034,7 +1030,7 @@ class Proxmox extends utils.Adapter {
                                 if (nodeDiskSmart?.data?.text) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
                                         val: nodeDiskSmart.data.text,
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                             }
@@ -1060,15 +1056,14 @@ class Proxmox extends utils.Adapter {
         try {
             const cephid = `${this.namespace}.ceph`;
 
-
             const cephInformation = await this.proxmox?.getCephInformation();
 
             if (cephInformation !== null) {
-                for (let lpEntry in cephInformation.data) {
+                for (const lpEntry in cephInformation.data) {
                     const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
                     const lpData = cephInformation.data[lpEntry];
                     if (lpType == 'object') {
-                        for (let lpEntry2 in cephInformation.data[lpEntry]) {
+                        for (const lpEntry2 in cephInformation.data[lpEntry]) {
                             const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
                             const lpData2 = cephInformation.data[lpEntry][lpEntry2];
                             if (lpType2 == 'object') {
@@ -1091,12 +1086,12 @@ class Proxmox extends utils.Adapter {
             const haid = `${this.namespace}.ha`;
             const haInformation = await this.proxmox?.getHAStatusInformation();
 
-            for (let lpEntry in haInformation.data) {
-                let lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
+            for (const lpEntry in haInformation.data) {
+                const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
                 const lpData = haInformation.data[lpEntry];
                 if (lpType == 'object') {
-                    for (let lpEntry2 in lpData) {
-                        let lpType2 = typeof lpData[lpEntry2];
+                    for (const lpEntry2 in lpData) {
+                        const lpType2 = typeof lpData[lpEntry2];
                         const lpData2 = lpData[lpEntry2];
                         let lpData2Id = lpData.id;
 
@@ -1119,14 +1114,15 @@ class Proxmox extends utils.Adapter {
         try {
             const resources = await this.proxmox?.getClusterResources();
             const knownObjIds = Object.keys(this.objects);
-            let offlineMachines = {};
+            const offlineMachines = {};
 
             this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
 
             for (const res of resources) {
                 let sid = '';
 
-                if (res.type === 'qemu' || res.type === 'lxc') {   // if status unknown then no infos available
+                if (res.type === 'qemu' || res.type === 'lxc') {
+                    // if status unknown then no infos available
                     const resName = this.prepareNameForId(res.name);
 
                     if (this.config.newTreeStructure) {
@@ -1139,14 +1135,15 @@ class Proxmox extends utils.Adapter {
                         res.status = 'offline';
                     }
 
-                    if (resName == 'undefined') {   // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
+                    if (resName == 'undefined') {
+                        // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
                         continue;
                     }
 
-                    await this.setStateChangedAsync(`${sid}.status`, {val: res.status, ack: true});
+                    await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
                     if (res.status === 'running') {
                         const type = res.type;
@@ -1163,7 +1160,7 @@ class Proxmox extends utils.Adapter {
                                 await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
                             }
                         });
-                        }
+                    }
                 } else if (res.type === 'storage') {
                     if (res.status !== 'unknown') {
                         try {
