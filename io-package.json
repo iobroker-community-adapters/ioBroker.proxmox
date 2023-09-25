@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "news": {
+      "2.1.0": {
+        "en": "Improved error handling\nAdded cluster adaptation",
+        "de": "Verbesserte Fehlerbehandlung\nHinzufügen von Cluster-Adaption",
+        "ru": "Улучшена обработка ошибок\nДобавлена адаптация кластера",
+        "pt": "Melhor manuseio de erros\nAdaptação de cluster adicionado",
+        "nl": "Improviserende fouten\nCluster aanpassing",
+        "fr": "Amélioration de la manipulation des erreurs\nAjout d ' un groupe d ' adaptation",
+        "it": "Miglioramento della gestione degli errori\nAdattamento cluster aggiunto",
+        "es": "Mejor manejo de errores\nAdaptación a grupos temáticos",
+        "pl": "Poprawiona obsługa błędów\nAdded cluster adaptation",
+        "uk": "Поліпшення обробки помилок\nДодано адаптацію кластеру",
+        "zh-cn": "改进错误处理\n增加集群适应"
+      },
       "2.0.2": {
         "en": "Added option for disk information\nCheck type of disk wearout\nCatch exception when requesting disk information",
         "de": "Option für Festplatteninformationen hinzugefügt\nÜberprüfen Sie die Art der Scheibenverschleiß\nFangausnahme bei der Anforderung von Datenträgern",
@@ -80,19 +93,6 @@
         "pl": "naprawiliśmy niektóre nieprawidłowe typy",
         "zh-cn": "我们修复了一些错误的类型",
         "uk": "ми виправили деякі неправильні типи"
-      },
-      "1.3.2": {
-        "en": "status of vms is now a string instead of incorrectly a button",
-        "de": "Der Status von vms ist jetzt eine Zeichenfolge anstelle einer falschen Schaltfläche",
-        "ru": "статус vms теперь является строкой, а не ошибочно кнопкой",
-        "pt": "status de vms agora é uma string em vez de incorretamente um botão",
-        "nl": "status van vms is nu een string in plaats van ten onrechte een knop",
-        "fr": "l'état de vms est maintenant une chaîne au lieu d'un bouton incorrectement",
-        "it": "lo stato di vms ora è una stringa invece che erroneamente un pulsante",
-        "es": "el estado de vms ahora es una cadena en lugar de incorrectamente un botón",
-        "pl": "status vms jest teraz ciągiem znaków zamiast niepoprawnie przyciskiem",
-        "zh-cn": "vms的状态现在是一个字符串，而不是一个错误的按钮",
-        "uk": "статус vms тепер є рядком, а не кнопкою"
       }
     },
     "connectionType": "local",
