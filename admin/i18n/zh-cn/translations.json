@@ -7,5 +7,8 @@
     "Password": "密码",
     "Realm": "领域",
     "Additional information": "附加信息",
-    "Request disk information": "请求磁盘信息"
+    "Request disk information": "请求磁盘信息",
+    "Request Ceph information": "请求资料",
+    "Request HA information": "请求人道协调厅提供资料",
+    "new tree structure": "新树结构"
 }

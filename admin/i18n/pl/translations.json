@@ -1,11 +1,14 @@
 {
     "Options": "Opcje",
-    "IP Aaddress": "Adres IP",
+    "IP Aaddress": "Adresy IP",
     "Port": "Port",
     "Request Interval": "Interwał żądania",
     "User name": "Nazwa użytkownika",
     "Password": "Hasło",
-    "Realm": "Królestwo",
+    "Realm": "Realm",
     "Additional information": "Dodatkowe informacje",
-    "Request disk information": "Poproś o informacje o dysku"
+    "Request disk information": "informacje o dysku",
+    "Request Ceph information": "informacje o Ceph",
+    "Request HA information": "informacje o HA",
+    "new tree structure": "nowa struktura"
 }

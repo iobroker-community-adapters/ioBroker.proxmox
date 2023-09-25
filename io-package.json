@@ -168,7 +168,8 @@
       {
         "admin": ">=6.0.0"
       }
-    ]
+    ],
+    "installedFrom": "iobroker-community-adapters/ioBroker.proxmox#4444513cc28cbbe60377f31ec85057b6ee597390"
   },
   "protectedNative": [
     "pwd",
@@ -211,15 +212,15 @@
       "type": "state",
       "common": {
         "name": {
-          "en": "Connected to LaMetric",
-          "de": "Verbindung mit LaMetric",
-          "ru": "При подключении к LaMetric",
-          "pt": "Se conectado ao LaMetric",
-          "nl": "Indien verbonden met LaMetric",
-          "fr": "Si connecté à LaMetric",
-          "it": "Se connesso a LaMetric",
-          "es": "Si está conectado a LaMetric",
-          "pl": "W przypadku połączenia z LaMetric",
+          "en": "Connected to Proxmox",
+          "de": "Verbindung mit Proxmox",
+          "ru": "При подключении к Proxmox",
+          "pt": "Se conectado ao Proxmox",
+          "nl": "Indien verbonden met Proxmox",
+          "fr": "Si connecté à Proxmox",
+          "it": "Se connesso a Proxmox",
+          "es": "Si está conectado a Proxmox",
+          "pl": "W przypadku połączenia z Proxmox",
           "zh-cn": "如果连接到 LaMetric"
         },
         "role": "indicator.reachable",
@@ -227,6 +228,30 @@
         "read": true,
         "write": false,
         "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.offlineMachines",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "string for offline Machines",
+          "de": "string für Offline-Maschinen",
+          "ru": "string для оффлайн машин",
+          "pt": "string para máquinas off-line",
+          "nl": "vertaling:",
+          "fr": "chaîne pour machines hors ligne",
+          "it": "stringa per macchine offline",
+          "es": "cadena para máquinas sin conexión",
+          "pl": "offline Machine",
+          "uk": "рядок для автономних машин",
+          "zh-cn": "a. 通 束"
+        },
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": false
       },
       "native": {}
     }
