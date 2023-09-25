@@ -31,14 +31,15 @@ Control and use data from your Proxmox VE
 ## Changelog
 <!--
 	Placeholder for the next version (at the beginning of the line):
-	### __WORK IN PROGRESS__
+	### **WORK IN PROGRESS**
 -->
-### __WORK IN PROGRESS__
+### **WORK IN PROGRESS**
 * (klein0r) Improved error handling
+* (arteck) Added cluster adaptation
 
 ### 2.0.2 (2023-09-08)
 * (klein0r) Added option for disk information
-* (klein0r) Check type of disk wearout
+* (klein0r) Check a type of disk wear out
 * (klein0r) Catch exception when requesting disk information
 
 ### 2.0.1 (2023-09-07)
@@ -73,9 +74,9 @@ __Requires js-controller >= 2.2.8__
 
 ### 1.2.0 (2020-01-24)
 * (foxriver76) Created info connection state + channel
-* (foxriver76) status is a string and not a boolean, so set obj type correctly
+* (foxriver76) status is a string and not a boolean, so set an obj type correctly
 * (foxriver76) fix bug which resulted in not all nodes objects being created during a single execution of the adapter
-* (foxriver76) password can now only be read by own instance if controller version is new enough
+* (foxriver76) password can now only be read by own instance if a controller version is new enough
 
 __js-controller v2  or above required__
 __node v10 or above required__

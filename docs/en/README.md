@@ -3,7 +3,6 @@
 # ioBroker.proxmox
 
 ## Anforderungen
-
-- nodejs 16 (or later)
+- Node.js 16 (or later)
 - js-controller 3.3.22 (or later)
 - Admin Adapter 6.0.0 (or later)
