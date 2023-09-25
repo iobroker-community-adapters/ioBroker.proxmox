@@ -377,7 +377,7 @@ class Proxmox extends utils.Adapter {
 
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
-            if (node.status == 'online') {
+            if (node.status === 'online') {
                 // node is offline no infomration available
                 if (node.cpu) {
                     await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu * 10000) / 100);
@@ -442,7 +442,7 @@ class Proxmox extends utils.Adapter {
                         const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
                         if (nodeDisks) {
                             for (const disk of nodeDisks) {
-                                const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
+                                const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
 
                                 await this.setObjectNotExistsAsync(`${sid}.${diskPath}`, {
                                     type: 'folder',
@@ -521,13 +521,13 @@ class Proxmox extends utils.Adapter {
         for (const lpEntry in haInformation.data) {
             const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
             const lpData = haInformation.data[lpEntry];
-            if (lpType == 'object') {
+            if (lpType === 'object') {
                 for (const lpEntry2 in lpData) {
                     const lpType2 = typeof lpData[lpEntry2];
                     const lpData2 = lpData[lpEntry2];
                     let lpData2Id = lpData.id;
 
-                    if (lpEntry2 == 'id') {
+                    if (lpEntry2 === 'id') {
                         continue;
                     }
 
@@ -566,7 +566,7 @@ class Proxmox extends utils.Adapter {
         for (const lpEntry in cephInformation.data) {
             const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
             const lpData = cephInformation.data[lpEntry];
-            if (lpType == 'object') {
+            if (lpType === 'object') {
                 await this.setObjectNotExistsAsync(`${cephid}.${lpEntry}`, {
                     type: 'folder',
                     common: {
@@ -578,7 +578,7 @@ class Proxmox extends utils.Adapter {
                 for (const lpEntry2 in cephInformation.data[lpEntry]) {
                     const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
                     const lpData2 = cephInformation.data[lpEntry][lpEntry2];
-                    if (lpType2 == 'object') {
+                    if (lpType2 === 'object') {
                         continue;
                     }
 
@@ -884,7 +884,7 @@ class Proxmox extends utils.Adapter {
 
             // check if the item is already in RAM - if not it's newly created
 
-            if (!knownObjIds.includes(sid) && node.status == 'online') {
+            if (!knownObjIds.includes(sid) && node.status === 'online') {
                 // new node restart adapter to create objects
                 this.log.info(`Detected new node "${node.node}" - restarting instance`);
                 return void this.restart();
@@ -903,79 +903,79 @@ class Proxmox extends utils.Adapter {
                     const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
                     if (nodeStatus) {
                         if (nodeStatus.uptime !== undefined) {
-                            await this.setStateChangedAsync(sid + '.uptime', { val: nodeStatus.uptime, ack: true });
+                            await this.setStateChangedAsync(`${sid}.uptime`, { val: nodeStatus.uptime, ack: true });
                         }
                         if (nodeStatus.wait !== undefined) {
-                            await this.setStateChangedAsync(sid + '.iowait', {
+                            await this.setStateChangedAsync(`${sid}.iowait`, {
                                 val: parseInt(nodeStatus.wait * 10000) / 100,
                                 ack: true,
                             });
                         }
 
                         if (nodeStatus.memory.used !== undefined) {
-                            await this.setStateChangedAsync(sid + '.memory.used', {
+                            await this.setStateChangedAsync(`${sid}.memory.used`, {
                                 val: BtoMb(nodeStatus.memory.used),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.used !== undefined) {
-                            await this.setStateChangedAsync(sid + '.memory.used_lev', {
+                            await this.setStateChangedAsync(`${sid}.memory.used_lev`, {
                                 val: p(nodeStatus.memory.used, nodeStatus.memory.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.total !== undefined) {
-                            await this.setStateChangedAsync(sid + '.memory.total', {
+                            await this.setStateChangedAsync(`${sid}.memory.total`, {
                                 val: BtoMb(nodeStatus.memory.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.free !== undefined) {
-                            await this.setStateChangedAsync(sid + '.memory.free', {
+                            await this.setStateChangedAsync(`${sid}.memory.free`, {
                                 val: BtoMb(nodeStatus.memory.free),
                                 ack: true,
                             });
                         }
 
                         if (nodeStatus.loadavg[0] !== undefined) {
-                            await this.setStateChangedAsync(sid + '.loadavg.0', {
+                            await this.setStateChangedAsync(`${sid}.loadavg.0`, {
                                 val: parseFloat(nodeStatus.loadavg[0]),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.loadavg[1] !== undefined) {
-                            await this.setStateChangedAsync(sid + '.loadavg.1', {
+                            await this.setStateChangedAsync(`${sid}.loadavg.1`, {
                                 val: parseFloat(nodeStatus.loadavg[1]),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.loadavg[2] !== undefined) {
-                            await this.setStateChangedAsync(sid + '.loadavg.2', {
+                            await this.setStateChangedAsync(`${sid}.loadavg.2`, {
                                 val: parseFloat(nodeStatus.loadavg[2]),
                                 ack: true,
                             });
                         }
 
                         if (nodeStatus.swap.used !== undefined) {
-                            await this.setStateChangedAsync(sid + '.swap.used', {
+                            await this.setStateChangedAsync(`${sid}.swap.used`, {
                                 val: BtoMb(nodeStatus.swap.used),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.free !== undefined) {
-                            await this.setStateChangedAsync(sid + '.swap.free', {
+                            await this.setStateChangedAsync(`${sid}.swap.free`, {
                                 val: BtoMb(nodeStatus.swap.free),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.total !== undefined) {
-                            await this.setStateChangedAsync(sid + '.swap.total', {
+                            await this.setStateChangedAsync(`${sid}.swap.total`, {
                                 val: BtoMb(nodeStatus.swap.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.used !== undefined && nodeStatus.swap.total !== undefined) {
-                            await this.setStateChangedAsync(sid + '.swap.used_lev', {
+                            await this.setStateChangedAsync(`${sid}.swap.used_lev`, {
                                 val: p(nodeStatus.swap.used, nodeStatus.swap.total),
                                 ack: true,
                             });
@@ -994,7 +994,7 @@ class Proxmox extends utils.Adapter {
                         const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
                         if (nodeDisks) {
                             for (const disk of nodeDisks) {
-                                const diskPath = 'disk_' + String(disk.devpath).replace('/dev/', '');
+                                const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
                                 if (disk.type !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.type`, {
                                         val: disk.type,
@@ -1062,11 +1062,11 @@ class Proxmox extends utils.Adapter {
                 for (const lpEntry in cephInformation.data) {
                     const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
                     const lpData = cephInformation.data[lpEntry];
-                    if (lpType == 'object') {
+                    if (lpType === 'object') {
                         for (const lpEntry2 in cephInformation.data[lpEntry]) {
                             const lpType2 = typeof cephInformation.data[lpEntry][lpEntry2];
                             const lpData2 = cephInformation.data[lpEntry][lpEntry2];
-                            if (lpType2 == 'object') {
+                            if (lpType2 === 'object') {
                                 continue;
                             }
                             await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
@@ -1089,13 +1089,13 @@ class Proxmox extends utils.Adapter {
             for (const lpEntry in haInformation.data) {
                 const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
                 const lpData = haInformation.data[lpEntry];
-                if (lpType == 'object') {
+                if (lpType === 'object') {
                     for (const lpEntry2 in lpData) {
-                        const lpType2 = typeof lpData[lpEntry2];
+                        // const lpType2 = typeof lpData[lpEntry2];
                         const lpData2 = lpData[lpEntry2];
                         let lpData2Id = lpData.id;
 
-                        if (lpEntry2 == 'id') {
+                        if (lpEntry2 === 'id') {
                             continue;
                         }
 
@@ -1131,11 +1131,11 @@ class Proxmox extends utils.Adapter {
                         sid = `${this.namespace}.${res.type}_${resName}`;
                     }
 
-                    if (res.status == 'unknown') {
+                    if (res.status === 'unknown') {
                         res.status = 'offline';
                     }
 
-                    if (resName == 'undefined') {
+                    if (resName === 'undefined') {
                         // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
@@ -1157,7 +1157,7 @@ class Proxmox extends utils.Adapter {
 
                         await this.findState(sid, resourceStatus, async (states) => {
                             for (const element of states) {
-                                await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                                await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
                             }
                         });
                     }
@@ -1170,7 +1170,7 @@ class Proxmox extends utils.Adapter {
                                     if (element[0] == '') {
                                         continue;
                                     } else {
-                                        await this.setStateChangedAsync(element[0] + '.' + element[1], element[3], true);
+                                        await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
                                     }
                                 }
                             });
@@ -1193,13 +1193,13 @@ class Proxmox extends utils.Adapter {
             // this.log.debug(`search state "${key}": ${value}`);
 
             if (key === 'mem') {
-                result.push([sid, key + '_lev', 'level', p(states.mem, states.maxmem)]);
+                result.push([sid, `${key}_lev`, 'level', p(states.mem, states.maxmem)]);
             }
             if (key === 'disk') {
-                result.push([sid, key + '_lev', 'level', p(states.disk, states.maxdisk)]);
+                result.push([sid, `${key}_lev`, 'level', p(states.disk, states.maxdisk)]);
             }
             if (key === 'used') {
-                result.push([sid, key + '_lev', 'level', p(states.used, states.total)]);
+                result.push([sid, `${key}_lev`, 'level', p(states.used, states.total)]);
             }
             if (key === 'mem' || key === 'disk' || key === 'balloon_min' || key === 'maxdisk' || key === 'maxmem' || key === 'diskwrite' || key === 'used' || key === 'total' || key === 'avail') {
                 result.push([sid, key, 'size', BtoMb(value)]);
@@ -1216,7 +1216,7 @@ class Proxmox extends utils.Adapter {
             }
         }
 
-        this.log.debug('found states: ' + JSON.stringify(result));
+        this.log.debug(`found states: ${JSON.stringify(result)}`);
 
         await cb(result);
     }
@@ -1239,7 +1239,7 @@ class Proxmox extends utils.Adapter {
      *
      * @param {string} sid - state id w/o name
      * @param {string} name - name of the state
-     * @param {string} type - e.g. time
+     * @param {string} type - e.g., time
      * @param {any} val - state val
      * @return {Promise<void>}
      * @private
@@ -1340,7 +1340,7 @@ class Proxmox extends utils.Adapter {
     }
 
     removeNamespace(id) {
-        const re = new RegExp(this.namespace + '*\\.', 'g');
+        const re = new RegExp(`${this.namespace}*\\.`, 'g');
         return id.replace(re, '');
     }
 
