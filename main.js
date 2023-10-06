@@ -616,6 +616,7 @@ class Proxmox extends utils.Adapter {
         const resourcesAll = Object.keys(this.objects)
             .map(this.removeNamespace.bind(this))
             .filter((id) => id.startsWith('lxc_') || id.startsWith('qemu_') || id.startsWith('storage_'));
+
         const resourcesKeep = [];
 
         try {
@@ -817,46 +818,49 @@ class Proxmox extends utils.Adapter {
                     const type = res.type;
                     const storageName = this.prepareNameForId(res.storage);
 
-                    resourcesKeep.push(`${type}.${storageName}`);
+                    if (!resourcesKeep.includes(`${type}.${storageName}`)) {
 
-                    if (this.config.newTreeStructure) {
-                        sid = `${this.namespace}.${type}.${storageName}`;
-                    } else {
-                        sid = `${this.namespace}.${type}_${storageName}`;
-                    }
+                        resourcesKeep.push(`${type}.${storageName}`);
 
-                    if (!this.objects[sid]) {
-                        // add to objects in RAM
-                        this.objects[sid] = {
-                            type: 'channel',
-                            common: {
-                                name: res.storage,
-                            },
-                            native: {
-                                type,
-                            },
-                        };
-                        this.setObjectNotExists(sid, this.objects[sid]);
-                    }
-
-                    try {
-                        if (res.status !== 'unknown') {
-                            const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-
-                            this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
-
-                            await this.findState(sid, storageStatus, async (states) => {
-                                for (const s of states) {
-                                    try {
-                                        await this.createCustomState(s[0], s[1], s[2], s[3]);
-                                    } catch (e) {
-                                        this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                                    }
-                                }
-                            });
+                        if (this.config.newTreeStructure) {
+                            sid = `${this.namespace}.${type}.${storageName}`;
+                        } else {
+                            sid = `${this.namespace}.${type}_${storageName}`;
                         }
-                    } catch (err) {
-                        this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+
+                        if (!this.objects[sid]) {
+                            // add to objects in RAM
+                            this.objects[sid] = {
+                                type: 'channel',
+                                common: {
+                                    name: res.storage,
+                                },
+                                native: {
+                                    type,
+                                },
+                            };
+                            this.setObjectNotExists(sid, this.objects[sid]);
+                        }
+
+                        try {
+                            if (res.status !== 'unknown') {
+                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+
+                                this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
+
+                                await this.findState(sid, storageStatus, async (states) => {
+                                    for (const s of states) {
+                                        try {
+                                            await this.createCustomState(s[0], s[1], s[2], s[3]);
+                                        } catch (e) {
+                                            this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (err) {
+                            this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                        }
                     }
                 }
             }
@@ -893,6 +897,10 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status !== 'offline') {
+                if (this.config.requestCephInformation) {
+                    await this.setCeph();
+                }
+
                 await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
@@ -1042,10 +1050,6 @@ class Proxmox extends utils.Adapter {
             }
         }
 
-        if (this.config.requestCephInformation) {
-            await this.setCeph();
-        }
-
         if (this.config.requestHAInformation) {
             await this.setHA();
         }
@@ -1077,7 +1081,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.debug(`Unable to get Ceph resources: ${err.message} `);
+            this.log.error(`Unable to get Ceph resources: ${err.message} `);
         }
     }
 
@@ -1115,6 +1119,7 @@ class Proxmox extends utils.Adapter {
             const resources = await this.proxmox?.getClusterResources();
             const knownObjIds = Object.keys(this.objects);
             const offlineMachines = {};
+            const storageKeep = [];
 
             this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
 
@@ -1161,21 +1166,27 @@ class Proxmox extends utils.Adapter {
                             }
                         });
                     }
-                } else if (res.type === 'storage') {
-                    if (res.status !== 'unknown') {
-                        try {
-                            const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-                            await this.findState(sid, storageStatus, async (states) => {
-                                for (const element of states) {
-                                    if (element[0] == '') {
-                                        continue;
-                                    } else {
-                                        await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+                }
+
+                if (res.type === 'storage') {
+                    if (!storageKeep.includes(`${res.storage}`)) {
+                        storageKeep.push(`${res.storage}`);
+
+                        if (res.status !== 'unknown') {
+                            try {
+                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+                                await this.findState(sid, storageStatus, async (states) => {
+                                    for (const element of states) {
+                                        if (element[0] == '') {
+                                            continue;
+                                        } else {
+                                            await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+                                        }
                                     }
-                                }
-                            });
-                        } catch (err) {
-                            this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                                });
+                            } catch (err) {
+                                this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                            }
                         }
                     }
                 }
