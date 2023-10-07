@@ -22,6 +22,24 @@ class Proxmox extends utils.Adapter {
         this.proxmox;
         this.objects = {};
 
+        // reference for all offline container
+        this.offlineResourceStatus = {
+                'uptime': 0,
+                'disk': 0,
+                'netout': 0,
+                'netin': 0,
+                'diskread': 0,
+                'cpu': 0,
+                'diskwrite': 0,
+                'pid': 0,
+                'mem': 0,
+                'swap': 0,
+                'status': '',
+                'type': '',
+                'name': '',
+                'vmid': 0
+        };
+
         this.requestInterval = null;
 
         this.on('ready', this.onReady.bind(this));
@@ -247,33 +265,12 @@ class Proxmox extends utils.Adapter {
 
         const nodesKeep = [];
 
-        /**
-            {
-                "uptime": 4912093,
-                "id": "node/proxmox",
-                "node": "myname",
-                "maxcpu": 16,
-                "mem": 4394840064,
-                "level": "",
-                "maxdisk": 100861726720,
-                "status": "online",
-                "ssl_fingerprint": "8E:7E:...",
-                "maxmem": 16489639936,
-                "type": "node",
-                "cpu": 0.0126589945487583,
-                "disk": 12904448000
-            }
-        */
         for (const node of nodes) {
             const nodeName = this.prepareNameForId(node.node);
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
 
-            //            if (this.config.newTreeStructure) {
-            //                nodesKeep.push(`node.${nodeName}`);
-            //            } else {
             nodesKeep.push(`node_${nodeName}`);
-            //            }
 
             const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
@@ -616,6 +613,7 @@ class Proxmox extends utils.Adapter {
         const resourcesAll = Object.keys(this.objects)
             .map(this.removeNamespace.bind(this))
             .filter((id) => id.startsWith('lxc_') || id.startsWith('qemu_') || id.startsWith('storage_'));
+
         const resourcesKeep = [];
 
         try {
@@ -623,7 +621,11 @@ class Proxmox extends utils.Adapter {
             for (const res of resources) {
                 let sid = '';
 
-                if (res.status !== 'unknown' && (res.type === 'qemu' || res.type === 'lxc')) {
+                if (res.status == 'unknown') {
+                    res.status = 'offline';
+                }
+
+                if (res.type === 'qemu' || res.type === 'lxc') {
                     // if status offline or stopped no infos available
                     const type = res.type;
 
@@ -798,65 +800,77 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
+                    let resourceStatus;
+
                     if (res.status === 'running') {
-                        const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
-
+                        resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
                         this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
-
-                        await this.findState(sid, resourceStatus, async (states) => {
-                            for (const s of states) {
-                                try {
-                                    await this.createCustomState(s[0], s[1], s[2], s[3]);
-                                } catch (e) {
-                                    this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                                }
-                            }
-                        });
+                    } else {
+                        this.offlineResourceStatus.status = res.status;
+                        this.offlineResourceStatus.type   = res.type;
+                        this.offlineResourceStatus.name   = resName;
+                        this.offlineResourceStatus.vmid   = res.vmid;
+                        resourceStatus = this.offlineResourceStatus;
                     }
-                } else if (res.type === 'storage') {
+
+                    await this.findState(sid, resourceStatus, async (states) => {
+                        for (const s of states) {
+                            try {
+                                await this.createCustomState(s[0], s[1], s[2], s[3]);
+                            } catch (e) {
+                                this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                            }
+                        }
+                    });
+
+                }
+                if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
                     const storageName = this.prepareNameForId(res.storage);
 
-                    resourcesKeep.push(`${type}.${storageName}`);
+                    if (!resourcesKeep.includes(`${type}.${storageName}`)) {
 
-                    if (this.config.newTreeStructure) {
-                        sid = `${this.namespace}.${type}.${storageName}`;
-                    } else {
-                        sid = `${this.namespace}.${type}_${storageName}`;
-                    }
+                        resourcesKeep.push(`${type}.${storageName}`);
 
-                    if (!this.objects[sid]) {
-                        // add to objects in RAM
-                        this.objects[sid] = {
-                            type: 'channel',
-                            common: {
-                                name: res.storage,
-                            },
-                            native: {
-                                type,
-                            },
-                        };
-                        this.setObjectNotExists(sid, this.objects[sid]);
-                    }
-
-                    try {
-                        if (res.status !== 'unknown') {
-                            const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-
-                            this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
-
-                            await this.findState(sid, storageStatus, async (states) => {
-                                for (const s of states) {
-                                    try {
-                                        await this.createCustomState(s[0], s[1], s[2], s[3]);
-                                    } catch (e) {
-                                        this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                                    }
-                                }
-                            });
+                        if (this.config.newTreeStructure) {
+                            sid = `${this.namespace}.${type}.${storageName}`;
+                        } else {
+                            sid = `${this.namespace}.${type}_${storageName}`;
                         }
-                    } catch (err) {
-                        this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+
+                        if (!this.objects[sid]) {
+                            // add to objects in RAM
+                            this.objects[sid] = {
+                                type: 'channel',
+                                common: {
+                                    name: res.storage,
+                                },
+                                native: {
+                                    type,
+                                },
+                            };
+                            this.setObjectNotExists(sid, this.objects[sid]);
+                        }
+
+                        try {
+                            if (res.status !== 'unknown') {
+                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+
+                                this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
+
+                                await this.findState(sid, storageStatus, async (states) => {
+                                    for (const s of states) {
+                                        try {
+                                            await this.createCustomState(s[0], s[1], s[2], s[3]);
+                                        } catch (e) {
+                                            this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (err) {
+                            this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                        }
                     }
                 }
             }
@@ -893,6 +907,10 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status !== 'offline') {
+                if (this.config.requestCephInformation) {
+                    await this.setCeph();
+                }
+
                 await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
@@ -1042,10 +1060,6 @@ class Proxmox extends utils.Adapter {
             }
         }
 
-        if (this.config.requestCephInformation) {
-            await this.setCeph();
-        }
-
         if (this.config.requestHAInformation) {
             await this.setHA();
         }
@@ -1077,7 +1091,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.debug(`Unable to get Ceph resources: ${err.message} `);
+            this.log.error(`Unable to get Ceph resources: ${err.message} `);
         }
     }
 
@@ -1115,6 +1129,7 @@ class Proxmox extends utils.Adapter {
             const resources = await this.proxmox?.getClusterResources();
             const knownObjIds = Object.keys(this.objects);
             const offlineMachines = {};
+            const storageKeep = [];
 
             this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
 
@@ -1122,7 +1137,6 @@ class Proxmox extends utils.Adapter {
                 let sid = '';
 
                 if (res.type === 'qemu' || res.type === 'lxc') {
-                    // if status unknown then no infos available
                     const resName = this.prepareNameForId(res.name);
 
                     if (this.config.newTreeStructure) {
@@ -1136,7 +1150,7 @@ class Proxmox extends utils.Adapter {
                     }
 
                     if (resName === 'undefined') {
-                        // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
+                        // überspringe maschine falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
@@ -1145,37 +1159,50 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
-                    if (res.status === 'running') {
-                        const type = res.type;
-                        const resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid, true);
-
-                        if (!knownObjIds.includes(sid)) {
-                            // new node restart adapter to create objects
-                            this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
-                            return void this.restart();
-                        }
-
-                        await this.findState(sid, resourceStatus, async (states) => {
-                            for (const element of states) {
-                                await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
-                            }
-                        });
+                    if (!knownObjIds.includes(sid)) {
+                        // new node restart adapter to create objects
+                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
+                        return void this.restart();
                     }
-                } else if (res.type === 'storage') {
-                    if (res.status !== 'unknown') {
-                        try {
-                            const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
-                            await this.findState(sid, storageStatus, async (states) => {
-                                for (const element of states) {
-                                    if (element[0] == '') {
-                                        continue;
-                                    } else {
-                                        await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+
+                    let resourceStatus;
+
+                    if (res.status === 'running') {
+                        resourceStatus = await this.proxmox?.getResourceStatus(res.node, res.type, res.vmid, true);
+                    } else {
+                        this.offlineResourceStatus.status = res.status;
+                        this.offlineResourceStatus.type   = res.type;
+                        this.offlineResourceStatus.name   = resName;
+                        this.offlineResourceStatus.vmid   = res.vmid;
+                        resourceStatus = this.offlineResourceStatus;
+                    }
+
+                    await this.findState(sid, resourceStatus, async (states) => {
+                        for (const element of states) {
+                            await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+                        }
+                    });
+                }
+
+                if (res.type === 'storage' && this.config.requestStorageInformation) {
+                    if (!storageKeep.includes(`${res.storage}`)) {
+                        storageKeep.push(`${res.storage}`);
+
+                        if (res.status !== 'unknown') {
+                            try {
+                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+                                await this.findState(sid, storageStatus, async (states) => {
+                                    for (const element of states) {
+                                        if (element[0] == '') {
+                                            continue;
+                                        } else {
+                                            await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+                                        }
                                     }
-                                }
-                            });
-                        } catch (err) {
-                            this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                                });
+                            } catch (err) {
+                                this.log.error(`Storage: ${res.storage} on  ${res.id} not available`);
+                            }
                         }
                     }
                 }
@@ -1190,7 +1217,6 @@ class Proxmox extends utils.Adapter {
 
         for (const key of Object.keys(states)) {
             const value = states[key];
-            // this.log.debug(`search state "${key}": ${value}`);
 
             if (key === 'mem') {
                 result.push([sid, `${key}_lev`, 'level', p(states.mem, states.maxmem)]);
