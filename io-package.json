@@ -169,7 +169,7 @@
         "admin": ">=6.0.0"
       }
     ],
-    "installedFrom": "iobroker-community-adapters/ioBroker.proxmox#4444513cc28cbbe60377f31ec85057b6ee597390"
+    "installedFrom": "iobroker.proxmox@2.1.0"
   },
   "protectedNative": [
     "pwd",
@@ -185,7 +185,11 @@
     "name": "root",
     "pwd": "",
     "server": "pam",
-    "requestDiskInformation": false
+    "requestDiskInformation": false,
+    "newTreeStructure": false,
+    "requestHAInformation": false,
+    "requestCephInformation": false,
+    "requestStorageInformation": true
   },
   "instanceObjects": [
     {
