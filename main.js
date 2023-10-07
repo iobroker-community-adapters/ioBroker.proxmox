@@ -620,6 +620,14 @@ class Proxmox extends utils.Adapter {
             const resources = await this.proxmox?.getClusterResources();
             for (const res of resources) {
                 let sid = '';
+                const type = res.type;
+                const resName = this.prepareNameForId(res.name);
+
+                if (this.config.newTreeStructure) {
+                    sid = `${this.namespace}.${type}.${resName}`;
+                } else {
+                    sid = `${this.namespace}.${type}_${resName}`;
+                }
 
                 if (res.status == 'unknown') {
                     res.status = 'offline';
@@ -627,15 +635,7 @@ class Proxmox extends utils.Adapter {
 
                 if (res.type === 'qemu' || res.type === 'lxc') {
                     // if status offline or stopped no infos available
-                    const type = res.type;
 
-                    const resName = this.prepareNameForId(res.name);
-
-                    if (this.config.newTreeStructure) {
-                        sid = `${this.namespace}.${type}.${resName}`;
-                    } else {
-                        sid = `${this.namespace}.${type}_${resName}`;
-                    }
 
                     resourcesKeep.push(`${type}.${resName}`);
 
@@ -826,7 +826,14 @@ class Proxmox extends utils.Adapter {
                 }
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
-                    const storageName = this.prepareNameForId(res.storage);
+
+                    let storageName;
+
+                    if (res.shared == 0) {
+                        storageName = res.node + '_' + this.prepareNameForId(res.storage);
+                    } else {
+                        storageName = this.prepareNameForId(res.storage);
+                    }
 
                     if (!resourcesKeep.includes(`${type}.${storageName}`)) {
 
@@ -866,8 +873,37 @@ class Proxmox extends utils.Adapter {
                                             this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
                                         }
                                     }
+                                    if (this.config.requestStorageInformationBackup) {
+                                        await this.extendObjectAsync(`${sid}.backupJson`, {
+                                            type: 'state',
+                                            common: {
+                                                name: {
+                                                    en: 'Status',
+                                                    de: 'Status',
+                                                    ru: 'Статус',
+                                                    pt: 'Estado',
+                                                    nl: 'Status',
+                                                    fr: 'État',
+                                                    it: 'Stato',
+                                                    es: 'Situación',
+                                                    pl: 'Status',
+                                                    uk: 'Статус на сервери',
+                                                    'zh-cn': '现状',
+                                                },
+                                                type: 'string',
+                                                role: 'indicator.status',
+                                                read: true,
+                                                write: false,
+                                            },
+                                            native: {},
+                                        });
+
+                                        await this.setStateChangedAsync(`${sid}.backupJson`, {val: '{}', ack: true});
+                                    }
                                 });
+
                             }
+
                         } catch (err) {
                             this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
                         }
@@ -1185,8 +1221,25 @@ class Proxmox extends utils.Adapter {
                 }
 
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
-                    if (!storageKeep.includes(`${res.storage}`)) {
-                        storageKeep.push(`${res.storage}`);
+
+                    let storageName;
+
+                    if (res.shared == 0) {
+                        storageName = res.node + '_' + this.prepareNameForId(res.storage);
+                    } else {
+                        storageName = this.prepareNameForId(res.storage);
+                    }
+
+                    if (!storageKeep.includes(`${storageName}`)) {
+                        storageKeep.push(`${storageName}`);
+
+                        const type = res.type;
+
+                        if (this.config.newTreeStructure) {
+                            sid = `${this.namespace}.${type}.${storageName}`;
+                        } else {
+                            sid = `${this.namespace}.${type}_${storageName}`;
+                        }
 
                         if (res.status !== 'unknown') {
                             try {
@@ -1200,6 +1253,23 @@ class Proxmox extends utils.Adapter {
                                         }
                                     }
                                 });
+
+                                if (this.config.requestStorageInformationBackup) {
+                                    const allBackupStatus = await this.proxmox?.getBackupStatus(res.node, res.storage);
+
+                                    let backupJson = {};
+
+                                    for (const backupStatus of allBackupStatus) {
+                                        const volid = backupStatus.volid;
+
+                                        backupJson[volid] = backupStatus;
+                                    }
+
+                                    await this.setStateChangedAsync(`${sid}.backupJson`, {
+                                        val: JSON.stringify(backupJson),
+                                        ack: true
+                                    });
+                                }
                             } catch (err) {
                                 this.log.error(`Storage: ${res.storage} on  ${res.id} not available`);
                             }
@@ -1229,7 +1299,7 @@ class Proxmox extends utils.Adapter {
             }
             if (key === 'mem' || key === 'disk' || key === 'balloon_min' || key === 'maxdisk' || key === 'maxmem' || key === 'diskwrite' || key === 'used' || key === 'total' || key === 'avail') {
                 result.push([sid, key, 'size', BtoMb(value)]);
-            } else if (key === 'uptime') {
+            } else if (key === 'uptime' || key === 'cttime') {
                 result.push([sid, key, 'time', value]);
             } else if (key === 'netin' || key === 'netout') {
                 result.push([sid, key, 'sizeb', value]);
@@ -1237,7 +1307,7 @@ class Proxmox extends utils.Adapter {
                 result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
             } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
                 result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
-            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'vmid') {
+            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'vmid' || key === 'volid' || key === 'parent' || key === 'format') {
                 result.push([sid, key, 'text', value]);
             }
         }
