@@ -823,7 +823,8 @@ class Proxmox extends utils.Adapter {
                         }
                     });
 
-                } else if (res.type === 'storage') {
+                }
+                if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
                     const storageName = this.prepareNameForId(res.storage);
 
@@ -1183,7 +1184,7 @@ class Proxmox extends utils.Adapter {
                     });
                 }
 
-                if (res.type === 'storage') {
+                if (res.type === 'storage' && this.config.requestStorageInformation) {
                     if (!storageKeep.includes(`${res.storage}`)) {
                         storageKeep.push(`${res.storage}`);
 
