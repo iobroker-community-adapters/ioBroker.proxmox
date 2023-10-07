@@ -107,6 +107,13 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 6
+                },
+                "requestStorageInformationBackup": {
+                    "type": "checkbox",
+                    "label": "Backup on Storage information",
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
                 }
             }
         }
