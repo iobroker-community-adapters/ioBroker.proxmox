@@ -1106,7 +1106,6 @@ class Proxmox extends utils.Adapter {
                 let sid = '';
 
                 if (res.type === 'qemu' || res.type === 'lxc') {
-                    // if status unknown then no infos available
                     const resName = this.prepareNameForId(res.name);
 
                     if (this.config.newTreeStructure) {
@@ -1144,6 +1143,9 @@ class Proxmox extends utils.Adapter {
                                 await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
                             }
                         });
+                    } else {
+                        await this.setStateChangedAsync(`${sid}.cpu`, { val: 0, ack: true });
+                        await this.setStateChangedAsync(`${sid}.uptime`, { val: 0, ack: true });
                     }
                 }
 
@@ -1164,7 +1166,7 @@ class Proxmox extends utils.Adapter {
                                     }
                                 });
                             } catch (err) {
-                                this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                                this.log.error(`Storage: ${res.storage} on  ${res.id} not available`);
                             }
                         }
                     }
