@@ -24,20 +24,20 @@ class Proxmox extends utils.Adapter {
 
         // reference for all offline container
         this.offlineResourceStatus = {
-                "uptime": 0,
-                "disk": 0,
-                "netout": 0,
-                "netin": 0,
-                "diskread": 0,
-                "cpu": 0,
-                "diskwrite": 0,
-                "pid": 0,
-                "mem": 0,
-                "swap": 0,
-                "status": "",
-                "type": "",
-                "name": "",
-                "vmid": 0
+                'uptime': 0,
+                'disk': 0,
+                'netout': 0,
+                'netin': 0,
+                'diskread': 0,
+                'cpu': 0,
+                'diskwrite': 0,
+                'pid': 0,
+                'mem': 0,
+                'swap': 0,
+                'status': '',
+                'type': '',
+                'name': '',
+                'vmid': 0
         };
 
         this.requestInterval = null;
