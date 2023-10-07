@@ -247,33 +247,12 @@ class Proxmox extends utils.Adapter {
 
         const nodesKeep = [];
 
-        /**
-            {
-                "uptime": 4912093,
-                "id": "node/proxmox",
-                "node": "myname",
-                "maxcpu": 16,
-                "mem": 4394840064,
-                "level": "",
-                "maxdisk": 100861726720,
-                "status": "online",
-                "ssl_fingerprint": "8E:7E:...",
-                "maxmem": 16489639936,
-                "type": "node",
-                "cpu": 0.0126589945487583,
-                "disk": 12904448000
-            }
-        */
         for (const node of nodes) {
             const nodeName = this.prepareNameForId(node.node);
 
             this.log.debug(`Node: ${JSON.stringify(node)}`);
 
-            //            if (this.config.newTreeStructure) {
-            //                nodesKeep.push(`node.${nodeName}`);
-            //            } else {
             nodesKeep.push(`node_${nodeName}`);
-            //            }
 
             const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
@@ -1141,7 +1120,7 @@ class Proxmox extends utils.Adapter {
                     }
 
                     if (resName === 'undefined') {
-                        // überspringe maschiene falls knoten offline und diese auf dem knoten liegt
+                        // überspringe maschine falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
                         this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
