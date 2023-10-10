@@ -24,20 +24,20 @@ class Proxmox extends utils.Adapter {
 
         // reference for all offline container
         this.offlineResourceStatus = {
-                'uptime': 0,
-                'disk': 0,
-                'netout': 0,
-                'netin': 0,
-                'diskread': 0,
-                'cpu': 0,
-                'diskwrite': 0,
-                'pid': 0,
-                'mem': 0,
-                'swap': 0,
-                'status': '',
-                'type': '',
-                'name': '',
-                'vmid': 0
+            uptime: 0,
+            disk: 0,
+            netout: 0,
+            netin: 0,
+            diskread: 0,
+            cpu: 0,
+            diskwrite: 0,
+            pid: 0,
+            mem: 0,
+            swap: 0,
+            status: '',
+            type: '',
+            name: '',
+            vmid: 0,
         };
 
         this.requestInterval = null;
@@ -636,7 +636,6 @@ class Proxmox extends utils.Adapter {
                 if (res.type === 'qemu' || res.type === 'lxc') {
                     // if status offline or stopped no infos available
 
-
                     resourcesKeep.push(`${type}.${resName}`);
 
                     if (!this.objects[sid]) {
@@ -807,9 +806,9 @@ class Proxmox extends utils.Adapter {
                         this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
                     } else {
                         this.offlineResourceStatus.status = res.status;
-                        this.offlineResourceStatus.type   = res.type;
-                        this.offlineResourceStatus.name   = resName;
-                        this.offlineResourceStatus.vmid   = res.vmid;
+                        this.offlineResourceStatus.type = res.type;
+                        this.offlineResourceStatus.name = resName;
+                        this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
                     }
 
@@ -822,7 +821,6 @@ class Proxmox extends utils.Adapter {
                             }
                         }
                     });
-
                 }
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
@@ -836,7 +834,6 @@ class Proxmox extends utils.Adapter {
                     }
 
                     if (!resourcesKeep.includes(`${type}.${storageName}`)) {
-
                         resourcesKeep.push(`${type}.${storageName}`);
 
                         if (this.config.newTreeStructure) {
@@ -898,12 +895,10 @@ class Proxmox extends utils.Adapter {
                                             native: {},
                                         });
 
-                                        await this.setStateChangedAsync(`${sid}.backupJson`, {val: '{}', ack: true});
+                                        await this.setStateChangedAsync(`${sid}.backupJson`, { val: '{}', ack: true });
                                     }
                                 });
-
                             }
-
                         } catch (err) {
                             this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
                         }
@@ -1207,9 +1202,9 @@ class Proxmox extends utils.Adapter {
                         resourceStatus = await this.proxmox?.getResourceStatus(res.node, res.type, res.vmid, true);
                     } else {
                         this.offlineResourceStatus.status = res.status;
-                        this.offlineResourceStatus.type   = res.type;
-                        this.offlineResourceStatus.name   = resName;
-                        this.offlineResourceStatus.vmid   = res.vmid;
+                        this.offlineResourceStatus.type = res.type;
+                        this.offlineResourceStatus.name = resName;
+                        this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
                     }
 
@@ -1221,7 +1216,6 @@ class Proxmox extends utils.Adapter {
                 }
 
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
-
                     let storageName;
 
                     if (res.shared == 0) {
@@ -1257,7 +1251,7 @@ class Proxmox extends utils.Adapter {
                                 if (this.config.requestStorageInformationBackup) {
                                     const allBackupStatus = await this.proxmox?.getBackupStatus(res.node, res.storage);
 
-                                    let backupJson = {};
+                                    const backupJson = {};
 
                                     for (const backupStatus of allBackupStatus) {
                                         const volid = backupStatus.volid;
@@ -1267,7 +1261,7 @@ class Proxmox extends utils.Adapter {
 
                                     await this.setStateChangedAsync(`${sid}.backupJson`, {
                                         val: JSON.stringify(backupJson),
-                                        ack: true
+                                        ack: true,
                                     });
                                 }
                             } catch (err) {
