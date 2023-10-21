@@ -33,7 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### 2.2.0-alpha.0 (2023-10-21)
+### **WORK IN PROGRESS**
 * (arteck) new Object tree structure (selectable)
 * (arteck) added HA Information
 * (arteck) Storage info is selectable
