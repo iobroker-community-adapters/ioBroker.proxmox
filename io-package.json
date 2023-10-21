@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.1.0",
+    "version": "2.2.0-alpha.0",
     "news": {
+      "2.2.0-alpha.0": {
+        "en": "new Object tree structure (selectable)\nadded HA Information\nStorage info is selectable\nBackup info are under Storage info as Object backupJson\ncorr info for offline container\naxios timout is now 5 sec.",
+        "de": "neue Objektstruktur (wählbar)\nHA Informationen hinzugefügt\nSpeicherinfo ist wählbar\nBackup-Infos sind unter Storage-Info als Objekt backupJson\ncorr info für offline-container\naxios timout ist jetzt 5 sec.",
+        "ru": "новый Структура дерева объекта (выборная)\nдобавлена информация HA\nИнформация о хранении подбирается\nBackup информация находится в информации о хранении как Object backup Джсон\nинформация о корре для оффлайн контейнера\naxios timout теперь 5 сек.",
+        "pt": "novo novo Estrutura de árvore de objetos (selecionável)\nadicionado HA Informação\nA informação de armazenamento é selecionável\nAs informações de backup estão em Informações de armazenamento como backup de objetos Json\ninfo corr para recipiente offline\naxios timout é agora 5 seg.",
+        "nl": "nieuw nieuw Object boomstructuur (selectable)\nvertaling:\nStorage informatie is geselecteerd\nVersterkingsinformatie onder Storage info als Object back-up JJ\ncorr info voor offline container\naxios timout is nu vijf seconden.",
+        "fr": "nouveau Structure de l'arbre objet (sélectionnable)\na ajouté HA Information\nLes informations de stockage sont sélectables\nLes informations de sauvegarde sont sous Informations de stockage comme Sauvegarde d'objet Json\ncorr info for offline container\naxios timout est maintenant 5 sec.",
+        "it": "nuovo Struttura dell'albero dell'oggetto (selezionabile)\naggiunto HA Informazioni\nLe informazioni di archiviazione sono selezionabili\nLe informazioni di backup sono sotto Storage info come backup degli oggetti Json\ncorr info per container offline\naxios timout è ora 5 sec.",
+        "es": "nuevo Estructura del árbol de objetos (seleccionable)\ninformación de HA\nInformación de almacenamiento es seleccionable\nInformación de respaldo está bajo información de almacenamiento como copia de seguridad de objetos Json\ninformación de corr para contenedores sin conexión\naxios timout es ahora 5 segundos.",
+        "pl": "nowy Object tree structure (ang.)\nhA Informacja\nInfo jest wybierany\nInformacje te są podane przez Storage'a. Json\nkorinfo dla kontenerów offline\naxios timout wynosi obecnie 5 sekund.",
+        "uk": "новини Структура дерева об'єкта (вибірково)\nдодано інформацію HA\nІнформація про зберігання вибір\nІнформація про резервну копію об'єкта Жсон\nкорр інформація для контейнера в автономному режимі\naxios timout тепер 5 сек.",
+        "zh-cn": "新的 目标树结构(可选择)\n增加人道协调厅信息\n导 言\n泡沫中的包装作为目的后盾 Json\nb. 集装箱的包装\na 目前有5名受害者。."
+      },
       "2.1.0": {
         "en": "Improved error handling\nAdded cluster adaptation",
         "de": "Verbesserte Fehlerbehandlung\nHinzufügen von Cluster-Adaption",
@@ -80,19 +93,6 @@
         "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
         "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
         "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
-      },
-      "1.3.3": {
-        "en": "we fixed some incorrect types",
-        "de": "Wir haben einige falsche Typen behoben",
-        "ru": "мы исправили некоторые неправильные типы",
-        "pt": "nós consertamos alguns tipos incorretos",
-        "nl": "we hebben enkele onjuiste typen gerepareerd",
-        "fr": "nous avons corrigé certains types incorrects",
-        "it": "abbiamo corretto alcuni tipi errati",
-        "es": "arreglamos algunos tipos incorrectos",
-        "pl": "naprawiliśmy niektóre nieprawidłowe typy",
-        "zh-cn": "我们修复了一些错误的类型",
-        "uk": "ми виправили деякі неправильні типи"
       }
     },
     "connectionType": "local",
