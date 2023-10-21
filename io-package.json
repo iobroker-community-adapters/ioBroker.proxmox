@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.2.0-alpha.0",
+    "version": "2.2.0",
     "news": {
-      "2.2.0-alpha.0": {
+      "2.2.0": {
         "en": "new Object tree structure (selectable)\nadded HA Information\nStorage info is selectable\nBackup info are under Storage info as Object backupJson\ncorr info for offline container\naxios timout is now 5 sec.",
         "de": "neue Objektstruktur (wählbar)\nHA Informationen hinzugefügt\nSpeicherinfo ist wählbar\nBackup-Infos sind unter Storage-Info als Objekt backupJson\ncorr info für offline-container\naxios timout ist jetzt 5 sec.",
         "ru": "новый Структура дерева объекта (выборная)\nдобавлена информация HA\nИнформация о хранении подбирается\nBackup информация находится в информации о хранении как Object backup Джсон\nинформация о корре для оффлайн контейнера\naxios timout теперь 5 сек.",
@@ -80,19 +80,6 @@
         "pl": "bezpośrednie ostrzeżenie, jeśli max_cpu nie jest w odpowiedzi",
         "zh-cn": "如果不作出反应,定期警告",
         "uk": "виправлено попередження, якщо `max_cpu` не відповідає"
-      },
-      "1.3.4": {
-        "en": "add dataSource and connectionType\nadd compact mode (closes #12, closes #49)",
-        "de": "Fügen Sie dataSource und connectionType hinzu\nKompaktmodus hinzufügen (schließt # 12, schließt # 49)",
-        "ru": "добавить dataSource и connectionType\nдобавить компактный режим (закрывает # 12, закрывает # 49)",
-        "pt": "adicionar dataSource e connectionType\nadicionar modo compacto (fecha # 12, fecha # 49)",
-        "nl": "voeg dataSource en connectionType toe\nvoeg compacte modus toe (sluit # 12, sluit # 49)",
-        "fr": "ajouter dataSource et connectionType\najouter le mode compact (ferme # 12, ferme # 49)",
-        "it": "aggiungi dataSource e connectionType\naggiungi la modalità compatta (chiude # 12, chiude # 49)",
-        "es": "agregar dataSource y connectionType\nagregar modo compacto (cierra # 12, cierra # 49)",
-        "pl": "dodaj dataSource i connectionType\ndodaj tryb kompaktowy (zamyka # 12, zamyka # 49)",
-        "zh-cn": "添加dataSource和connectionType\n添加紧凑模式（关闭＃12，关闭＃49）",
-        "uk": "додати dataSource і connectionType\nдодати компактний режим (закриває #12, закриває #49)"
       }
     },
     "connectionType": "local",
