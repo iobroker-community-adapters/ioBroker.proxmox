@@ -34,7 +34,7 @@ Control and use data from your Proxmox VE
 	### **WORK IN PROGRESS**
 -->
 
-### next Version
+### **WORK IN PROGRESS**
 * (arteck) new Object tree structure (selectable)
 * (arteck) added HA Information
 * (arteck) Storage info is selectable
