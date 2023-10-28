@@ -33,6 +33,11 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.2.1 (2023-10-28)
+* (arteck) machines delete after restart corr
+* (arteck) vmid type corr
+* (arteck) corstorage error message
+
 ### 2.2.0 (2023-10-21)
 * (arteck) new Object tree structure (selectable)
 * (arteck) added HA Information
@@ -52,15 +57,6 @@ Control and use data from your Proxmox VE
 
 ### 2.0.1 (2023-09-07)
 * (klein0r) Added node disks (heals, wearout)
-
-### 2.0.0 (2023-09-07)
-
-* (klein0r) Updated admin instance configuration
-* (klein0r) Refactoring of adapter
-* (klein0r) Allow dots in resource names
-
-__Requires js-controller >= 3.3.22__
-__Requires admin >= 6.0.0__
 
 ## License
 

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "news": {
+      "2.2.1": {
+        "en": "machines delete after restart corr\nvmid type corr\ncorstorage error message",
+        "de": "maschinen löschen nach neustart corr\ngeflechtsart\nkorstorage fehlermeldung",
+        "ru": "машины удаляют после перезапуска корр\nvmid тип корр\nсообщение об ошибке",
+        "pt": "máquinas apagar após o corr\ntipo vmid corrija\nmensagem de erro de corstorage",
+        "nl": "machines gewist na de herstart\nvmid type corr\ncorstorage fout",
+        "fr": "machines à supprimer après le redémarrage corr\nvmid type corr\nmessage d'erreur corstorage",
+        "it": "macchine eliminare dopo riavviare corr\nvmid tipo corno\nmessaggio di errore corstorage",
+        "es": "máquinas eliminar después del corr\nvmid type corr\nmensaje de error de corstorage",
+        "pl": "maszyna usunięta po restartie korcorr\nvmid typ kor\nkorporacja błędów",
+        "uk": "машинне видалення після перезавантаження\nvmid тип кор\nповідомлення про помилку",
+        "zh-cn": "机器在重新包装之后删除\na. 过类型\n密封错误信息"
+      },
       "2.2.0": {
         "en": "new Object tree structure (selectable)\nadded HA Information\nStorage info is selectable\nBackup info are under Storage info as Object backupJson\ncorr info for offline container\naxios timout is now 5 sec.",
         "de": "neue Objektstruktur (wählbar)\nHA Informationen hinzugefügt\nSpeicherinfo ist wählbar\nBackup-Infos sind unter Storage-Info als Objekt backupJson\ncorr info für offline-container\naxios timout ist jetzt 5 sec.",

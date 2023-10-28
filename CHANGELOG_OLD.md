@@ -1,4 +1,13 @@
 # Older changes
+## 2.0.0 (2023-09-07)
+
+* (klein0r) Updated admin instance configuration
+* (klein0r) Refactoring of adapter
+* (klein0r) Allow dots in resource names
+
+__Requires js-controller >= 3.3.22__
+__Requires admin >= 6.0.0__
+
 ## 1.3.5 (2022-08-11)
 * (foxriver76) fixed warning if `max_cpu` is not in response
 
