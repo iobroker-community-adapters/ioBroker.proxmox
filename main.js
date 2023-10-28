@@ -636,7 +636,7 @@ class Proxmox extends utils.Adapter {
                 if (res.type === 'qemu' || res.type === 'lxc') {
                     // if status offline or stopped no infos available
 
-                    resourcesKeep.push(`${type}.${resName}`);
+                    resourcesKeep.push(`${type}_${resName}`);
 
                     if (!this.objects[sid]) {
                         // add to objects in RAM
@@ -833,8 +833,8 @@ class Proxmox extends utils.Adapter {
                         storageName = this.prepareNameForId(res.storage);
                     }
 
-                    if (!resourcesKeep.includes(`${type}.${storageName}`)) {
-                        resourcesKeep.push(`${type}.${storageName}`);
+                    if (!resourcesKeep.includes(`${type}_${storageName}`)) {
+                        resourcesKeep.push(`${type}_${storageName}`);
 
                         if (this.config.newTreeStructure) {
                             sid = `${this.namespace}.${type}.${storageName}`;
