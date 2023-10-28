@@ -33,15 +33,13 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### next Version
+### 2.2.0 (2023-10-21)
 * (arteck) new Object tree structure (selectable)
 * (arteck) added HA Information
 * (arteck) Storage info is selectable
 * (arteck) Backup info are under Storage info as Object backupJson
 * (arteck) corr info for offline container
 * (arteck) axios timout is now 5 sec.
-
 
 ### 2.1.0 (2023-09-25)
 * (klein0r) Improved error handling
@@ -63,9 +61,6 @@ Control and use data from your Proxmox VE
 
 __Requires js-controller >= 3.3.22__
 __Requires admin >= 6.0.0__
-
-### 1.3.5 (2022-08-11)
-* (foxriver76) fixed warning if `max_cpu` is not in response
 
 ## License
 

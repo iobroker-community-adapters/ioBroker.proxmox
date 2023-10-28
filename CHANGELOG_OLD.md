@@ -1,4 +1,7 @@
 # Older changes
+## 1.3.5 (2022-08-11)
+* (foxriver76) fixed warning if `max_cpu` is not in response
+
 ## 1.3.4 (2021-05-07)
 * (foxriver76) add dataSource and connectionType
 * (foxriver76) add compact mode (closes #12, closes #49)
