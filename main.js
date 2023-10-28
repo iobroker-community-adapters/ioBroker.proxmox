@@ -1299,9 +1299,9 @@ class Proxmox extends utils.Adapter {
                 result.push([sid, key, 'sizeb', value]);
             } else if (key === 'cpu') {
                 result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
-            } else if (key === 'pid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
+            } else if (key === 'pid' || key === 'vmid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
                 result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
-            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'vmid' || key === 'volid' || key === 'parent' || key === 'format') {
+            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'volid' || key === 'parent' || key === 'format') {
                 result.push([sid, key, 'text', value]);
             }
         }
