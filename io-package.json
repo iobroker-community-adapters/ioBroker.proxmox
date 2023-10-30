@@ -168,7 +168,7 @@
       {
         "admin": ">=6.0.0"
       }
-    ],   
+    ]   
   },
   "protectedNative": [
     "pwd",
