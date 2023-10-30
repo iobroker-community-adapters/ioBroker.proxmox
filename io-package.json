@@ -168,8 +168,7 @@
       {
         "admin": ">=6.0.0"
       }
-    ],
-    "installedFrom": "iobroker.proxmox@2.1.0"
+    ],   
   },
   "protectedNative": [
     "pwd",
