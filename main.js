@@ -1279,7 +1279,7 @@ class Proxmox extends utils.Adapter {
     async findState(sid, states, cb) {
         const result = [];
 
-       for (const key of Object.keys(states)) {
+        for (const key of Object.keys(states)) {
             const value = states[key];
 
             if (key === 'mem') {
