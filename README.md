@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.2.2 (2023-11-06)
+* (arteck) storage message corr
+
 ### 2.2.1 (2023-10-28)
 * (arteck) machines delete after restart corr
 * (arteck) vmid type corr
@@ -54,9 +57,6 @@ Control and use data from your Proxmox VE
 * (klein0r) Added option for disk information
 * (klein0r) Check a type of disk wear out
 * (klein0r) Catch exception when requesting disk information
-
-### 2.0.1 (2023-09-07)
-* (klein0r) Added node disks (heals, wearout)
 
 ## License
 
