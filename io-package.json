@@ -257,7 +257,7 @@
         "write": false
       },
       "native": {}
-    }
+    },
     {
       "_id": "info.lastUpdate",
       "type": "state",
