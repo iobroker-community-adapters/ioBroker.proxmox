@@ -258,6 +258,30 @@
       },
       "native": {}
     }
+    {
+      "_id": "info.lastUpdate",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Last information update",
+          "de": "Letzte Aktualisierung der Informationen",
+          "ru": "Последнее обновление информации",
+          "pt": "Última atualização de informação",
+          "nl": "Laatste informatie",
+          "fr": "Dernière mise à jour",
+          "it": "Aggiornamento delle ultime informazioni",
+          "es": "Última actualización de la información",
+          "pl": "Aktualizacja",
+          "uk": "Останнє оновлення інформації",
+          "zh-cn": "最新资料"
+        },
+        "role": "value.time",
+        "type": "number",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    }
   ],
   "objects": []
 }
