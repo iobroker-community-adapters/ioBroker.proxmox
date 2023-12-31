@@ -216,6 +216,7 @@ class Proxmox extends utils.Adapter {
     }
 
     sendRequest(nextRunTimeout) {
+        this.setState('info.lastUpdate', { val: Date.now(), ack: true });
         this.requestInterval && this.clearTimeout(this.requestInterval);
         this.requestInterval = this.setTimeout(
             async () => {
