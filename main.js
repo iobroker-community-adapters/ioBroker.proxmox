@@ -800,10 +800,24 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
+                    await this.extendObjectAsync(`${sid}.available`, {
+                        type: 'state',
+                        common: {
+                            name: 'Available',
+                            type: 'boolean',
+                            role: 'state',
+                            read: true,
+                            write: false,
+                        },
+                        native: {},
+                    });
+
+                    let available = false;
                     let resourceStatus;
 
                     if (res.status === 'running') {
                         resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
+                        available = true;
                         this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
                     } else {
                         this.offlineResourceStatus.status = res.status;
@@ -812,6 +826,8 @@ class Proxmox extends utils.Adapter {
                         this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
                     }
+
+                    await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
 
                     await this.findState(sid, resourceStatus, async (states) => {
                         for (const s of states) {
@@ -1197,10 +1213,12 @@ class Proxmox extends utils.Adapter {
                         return void this.restart();
                     }
 
+                    let available = false;
                     let resourceStatus;
 
                     if (res.status === 'running') {
                         resourceStatus = await this.proxmox?.getResourceStatus(res.node, res.type, res.vmid, true);
+                        available = true;
                     } else {
                         this.offlineResourceStatus.status = res.status;
                         this.offlineResourceStatus.type = res.type;
@@ -1208,6 +1226,8 @@ class Proxmox extends utils.Adapter {
                         this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
                     }
+
+                    await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
 
                     await this.findState(sid, resourceStatus, async (states) => {
                         for (const element of states) {

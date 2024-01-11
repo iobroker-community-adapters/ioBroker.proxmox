@@ -109,6 +109,7 @@
                     "lg": 6
                 },
                 "requestStorageInformationBackup": {
+                    "hidden": "!data.requestStorageInformation",
                     "type": "checkbox",
                     "label": "Backup on Storage information",
                     "sm": 12,
