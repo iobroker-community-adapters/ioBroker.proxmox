@@ -33,6 +33,11 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (arteck) add icon status available for lxc and vm
+* (arteck) settings adjustment
+
 ### 2.2.2 (2023-11-06)
 * (arteck) storage message corr
 

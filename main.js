@@ -645,6 +645,9 @@ class Proxmox extends utils.Adapter {
                             type: 'channel',
                             common: {
                                 name: res.name,
+                                statusStates: {
+                                    onlineId: `${sid}.available`
+                                }
                             },
                             native: {
                                 type: type,
