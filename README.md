@@ -33,8 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 2.2.3 (2024-02-01)
 * (arteck) add icon status available for lxc and vm
 * (arteck) settings adjustment
 
@@ -57,11 +56,6 @@ Control and use data from your Proxmox VE
 ### 2.1.0 (2023-09-25)
 * (klein0r) Improved error handling
 * (arteck) Added cluster adaptation
-
-### 2.0.2 (2023-09-08)
-* (klein0r) Added option for disk information
-* (klein0r) Check a type of disk wear out
-* (klein0r) Catch exception when requesting disk information
 
 ## License
 

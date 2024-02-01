@@ -1,4 +1,9 @@
 # Older changes
+## 2.0.2 (2023-09-08)
+* (klein0r) Added option for disk information
+* (klein0r) Check a type of disk wear out
+* (klein0r) Catch exception when requesting disk information
+
 ## 2.0.1 (2023-09-07)
 * (klein0r) Added node disks (heals, wearout)
 

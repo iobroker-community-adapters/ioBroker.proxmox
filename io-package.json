@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.2.2",
+    "version": "2.2.3",
     "news": {
+      "2.2.3": {
+        "en": "add icon status available for lxc and vm\nsettings adjustment",
+        "de": "icon-status für lxc und vm hinzufügen\neinstellungen",
+        "ru": "добавить статус значка доступен для lxc и vm\nнастройки",
+        "pt": "adicionar status de ícone disponível para lxc e vm\najuste de configurações",
+        "nl": "pictogramstatus beschikbaar voor lxc en vm toevoegen\ninstelling",
+        "fr": "ajouter le statut d'icône disponible pour lxc et vm\nréglage des paramètres",
+        "it": "aggiungere lo stato dell'icona disponibile per lxc e vm\nregolazione delle impostazioni",
+        "es": "añadir el estado de icono disponible para lxc y vm\najuste",
+        "pl": "dodaj status ikon dostępny dla lxc i vm\nregulacja ustawień",
+        "uk": "додати статус іконки, доступний для lxc і vm\nналаштування параметрів",
+        "zh-cn": "添加 lxc 和 vm 可用的图标状态\n设置调整"
+      },
       "2.2.2": {
         "en": "storage message corr",
         "de": "speichernachricht corr",
@@ -80,19 +93,6 @@
         "pl": "Wyposażony dysk węzłowy (heals, wearout)",
         "uk": "Додано диски вершини (заготовки, знос)",
         "zh-cn": "增加不成见(黑客,穿着)"
-      },
-      "2.0.0": {
-        "en": "* Updated admin instance configuration\n* Refactoring of adapter\n* Allow dots in resource names\n\n__Requires js-controller >= 3.3.22__\n__Requires admin >= 6.0.0__",
-        "de": "* Aktualisierte Admin-Instanz-Konfiguration\n* Refactoring des Adapters\n* Erlauben Sie Punkte in Ressourcennamen\n\n_Anforderungen js-controller >= 3.3.22_\n_Erfordert Admin >= 6.0.0_",
-        "ru": "* Обновленная настройка админ\n* Рефакторинг адаптера\n* Разрешить точки в именах ресурсов\n\n_ Требуется js-контроллер >= 3.7.22_\n_Требуется админ >= 6.0.0_",
-        "pt": "* Configuração de instância de administrador atualizada\n* Refactoring do adaptador\n* Permitir pontos em nomes de recursos\n\n_ Requer js-controller >= 3.3.22_\n_Requer admin >= 6.0.0_",
-        "nl": "♪ Verouderde administratie configu\n♪ Refactoring of adapter ♪\n♪ Vertaling:\n\nRequires-controller 3,3,22\nVertaling:",
-        "fr": "* Configuration d ' instance d ' administration actualisée\n* Refactoring of adaptateur\n* Autoriser les points dans les noms de ressources\n\n_ Nécessite js-controller 3.3.22_\n_ Nécessite l'administration >= 6.0.0_",
-        "it": "# Configurazione delle istanze admin aggiornata\n* Refactoring dell'adattatore\n# Consentire punti nei nomi delle risorse\n\n_Richiede js-controller >= 3.3.22_\n_ Richiede admin >= 6.0.0_",
-        "es": "* Configuración actualizada de instancias de administración\n* Refactorización del adaptador\n* Permitir puntos en nombres de recursos\n\n_Requiere js-controller 3.3.22_\n_Requiere administración= 6.0.0_",
-        "pl": "* Administracja\nRefaktor adaptatora\n* Allow dot\n\n_Requires js-controller >=== 3.3.2\n_Requires admin >= 6.0.0_",
-        "uk": "Ім'я * Оновлена конфігурація екземпляра адміністратора\n* Рефакторинг адаптера\nІм'я * Дозволити крапки в ресурсах\n\n_Вимагає js-controller >= 3.3.22_\n_Вимагає admin >= 6.0.0_",
-        "zh-cn": "* A/64/50。 最新专题组合\n* 重新定性\n* A/64/50。 资源的名称\n\n____________________3.3.22:\n__________"
       }
     },
     "connectionType": "local",
