@@ -507,7 +507,7 @@ class Proxmox extends utils.Adapter {
         const haid = `${this.namespace}.ha`;
 
         await this.setObjectNotExistsAsync(`${haid}`, {
-            type: 'chanel',
+            type: 'channel',
             common: {
                 name: 'ha',
             },
@@ -552,7 +552,7 @@ class Proxmox extends utils.Adapter {
         const cephid = `${this.namespace}.ceph`;
 
         await this.setObjectNotExistsAsync(`${cephid}`, {
-            type: 'chanel',
+            type: 'channel',
             common: {
                 name: 'ceph',
             },
