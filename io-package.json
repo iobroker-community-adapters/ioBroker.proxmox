@@ -149,7 +149,7 @@
     ],
     "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
     "loglevel": "info",
-    "tiers": 2,
+    "tier": 2,
     "type": "infrastructure",
     "adminUI": {
       "config": "json"
