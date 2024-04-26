@@ -136,7 +136,10 @@
     },
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
-    "license": "MIT",
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "keywords": [
       "proxmox",
       "vm",
@@ -146,6 +149,7 @@
     ],
     "readme": "https://github.com/iobroker-community-adapters/ioBroker.proxmox/blob/master/README.md",
     "loglevel": "info",
+    "tiers": 2,
     "type": "infrastructure",
     "adminUI": {
       "config": "json"
@@ -161,12 +165,12 @@
     "restartAdapters": [],
     "dependencies": [
       {
-        "js-controller": ">=3.3.22"
+        "js-controller": ">=5.0.19"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=6.0.0"
+        "admin": ">=6.13.16"
       }
     ]
   },
