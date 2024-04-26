@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.2.3",
+    "version": "2.3.0",
     "news": {
+      "2.3.0": {
+        "en": "Adapter requires node.js >= 18 and js-controller >= 5 now\nfixed ha and ceph object type\nDependencies have been updated",
+        "de": "Adapter benötigt node.js >= 18 und js-controller >= 5 jetzt\nha und ceph objekttyp wurden gefixed\nAbhängigkeiten wurden aktualisiert",
+        "ru": "Адаптер требует node.js >= 18 и js-контроллер >= 5 сейчас\nфиксирует тип объекта и цефа\nЗависимость обновлена",
+        "pt": "Adapter requer node.js >= 18 e js-controller >= 5 agora\ncorrigir ha e tipo de objeto ceph\nAs dependências foram atualizadas",
+        "nl": "Voor adaptor zijn node.js < 18 en js-controller > Nu 5\nfix ha en ceph object type\nAfhankelijkheden zijn bijgewerkt",
+        "fr": "L'adaptateur nécessite node.js >= 18 et js-controller >= 5 maintenant\nfixer le type d'objet ha et ceph\nLes dépendances ont été actualisées",
+        "it": "Adattatore richiede node.js >= 18 e js-controller >= 5 ora\nfix ha e ceph tipo di oggetto\nLe dipendenze sono state aggiornate",
+        "es": "Adaptador requiere node.js √≥= 18 y js-controller 5 ahora\nfijar el tipo de objeto ha y ceph\nSe han actualizado las dependencias",
+        "pl": "Adapter wymaga node.js > = 18 i kontroler js- > = 5 teraz\nfix ha i typ obiektu ceph\nZaktualizowano zależności",
+        "uk": "Адаптер вимагає node.js >= 18 і js-controller >= 5 тепер\nфіксувати тип об'єкта ha і ceph\nЗалежність було оновлено",
+        "zh-cn": "适配器需要节点.js QQ18和js控制器 QQ 现在5号\n固定 ha 和 ceph 对象类型\n依赖关系已更新"
+      },
       "2.2.3": {
         "en": "add icon status available for lxc and vm\nsettings adjustment",
         "de": "icon-status für lxc und vm hinzufügen\neinstellungen",
@@ -80,19 +93,6 @@
         "pl": "Wstępna opcja dla informacji dyskowej\nOkładka\nCatch wyjątek po zażądzeniu informacji na dysku",
         "uk": "Додано опцію для інформації про диск\nПеревірити тип диска\nВиняток кішки при запитуванні інформації про диск",
         "zh-cn": "增加资料的选择\nD. 穿过失的检查类型\n要求不了解资料的例外情况"
-      },
-      "2.0.1": {
-        "en": "Added node disks (heals, wearout)",
-        "de": "Knotenscheiben hinzugefügt (Hälse, Verschleiß)",
-        "ru": "Добавлены диски node (здоровья, износ)",
-        "pt": "Discos de nó adicionados (calças, desgaste)",
-        "nl": "Toegevoegd node disks (helft)",
-        "fr": "Ajout de disques node (chiffres, usure)",
-        "it": "Aggiunto nodo dischi (guari, usura)",
-        "es": "Discos de nodo añadidos (sanación, desgaste)",
-        "pl": "Wyposażony dysk węzłowy (heals, wearout)",
-        "uk": "Додано диски вершини (заготовки, знос)",
-        "zh-cn": "增加不成见(黑客,穿着)"
       }
     },
     "connectionType": "local",

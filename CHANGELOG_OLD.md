@@ -1,4 +1,8 @@
 # Older changes
+## 2.1.0 (2023-09-25)
+* (klein0r) Improved error handling
+* (arteck) Added cluster adaptation
+
 ## 2.0.2 (2023-09-08)
 * (klein0r) Added option for disk information
 * (klein0r) Check a type of disk wear out
