@@ -453,28 +453,39 @@ class Proxmox extends utils.Adapter {
 
                                 if (disk.type !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
+                                }else{
+                                    this.log.debug(`disk ${disk.devpath} get type for node ${node.node} undefined`);
                                 }
                                 if (disk.size !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
+                                }else{
+                                    this.log.debug(`disk ${disk.devpath} get size for node ${node.node} undefined`);
                                 }
                                 if (disk.health !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
+                                }else{
+                                    this.log.debug(`disk ${disk.devpath} get health for node ${node.node} undefined`);
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
+                                }else{
+                                    this.log.debug(`disk ${disk.devpath} get wearout for node ${node.node} undefined`);
                                 }
                                 if (disk.model !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
+                                }else{
+                                    this.log.debug(`disk ${disk.devpath} get model for node ${node.node} undefined`);
                                 }
-
                                 const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                if (nodeDiskSmart !== null && nodeDiskSmart.data !== null && nodeDiskSmart.data.text) {
-                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
+                                this.log.debug('resolve getNodeDisksSmart => ' + JSON.stringify(nodeDiskSmart.data));
+                                //if (nodeDiskSmart?.data?.text) {
+                                if (nodeDiskSmart.data !== undefined) {
+                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.attributes);
                                 }
                             }
                         }
                     } catch (err) {
-                        this.log.warn(`new struck Unable to get disk for node ${node.node}: ${err}`);
+                        this.log.warn(`"function createNodes" Unable to get disk for node ${node.node}: ${err}`);
                     }
                 }
             }
@@ -1097,9 +1108,12 @@ class Proxmox extends utils.Adapter {
                                 }
 
                                 const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                if (nodeDiskSmart?.data?.text) {
+                                this.log.debug(`getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
+                                // if (nodeDiskSmart?.data?.text) {
+                                if (nodeDiskSmart.data !== undefined){
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
-                                        val: nodeDiskSmart.data.text,
+                                        // val: nodeDiskSmart.data.text,
+                                        val: nodeDiskSmart.data.attributes,
                                         ack: true,
                                     });
                                 }
@@ -1107,7 +1121,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
+                    this.log.warn(`"function setNodes" Unable to get disk for node ${node.node}: ${err}`);
                 }
             }
         }
