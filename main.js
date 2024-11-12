@@ -218,12 +218,12 @@ class Proxmox extends utils.Adapter {
 
     sendRequest(nextRunTimeout) {
         this.setState('info.lastUpdate', { val: Date.now(), ack: true });
-        
+
         if (this.clearTimeout) {
-          this.clearTimeout(this.requestInterval);
-          this.requestInterval = null;
-        } 
-        
+            this.clearTimeout(this.requestInterval);
+            this.requestInterval = null;
+        }
+
         this.requestInterval = this.setTimeout(
             async () => {
                 if (this.proxmox) {
