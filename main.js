@@ -480,7 +480,7 @@ class Proxmox extends utils.Adapter {
                                 this.log.debug('resolve getNodeDisksSmart => ' + JSON.stringify(nodeDiskSmart.data));
                                 //if (nodeDiskSmart?.data?.text) {
                                 if (nodeDiskSmart.data !== undefined) {
-                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.attributes);
+                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', JSON.stringify(nodeDiskSmart.data.attributes));
                                 }
                             }
                         }
@@ -1113,7 +1113,7 @@ class Proxmox extends utils.Adapter {
                                 if (nodeDiskSmart.data !== undefined){
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
                                         // val: nodeDiskSmart.data.text,
-                                        val: nodeDiskSmart.data.attributes,
+                                        val: JSON.stringify(nodeDiskSmart.data.attributes),
                                         ack: true,
                                     });
                                 }
