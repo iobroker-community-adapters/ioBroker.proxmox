@@ -1212,13 +1212,6 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
                     let resourceStatus;
-
-                    if (!knownObjIds.includes(sid)) {
-                        // new node restart adapter to create objects
-                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
-                        return void this.restart();
-                    }
-
                     let available = false;
 
                     if (res.status === 'running') {
@@ -1230,6 +1223,12 @@ class Proxmox extends utils.Adapter {
                         this.offlineResourceStatus.name = resName;
                         this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
+                    }
+
+                    if (!knownObjIds.includes(sid)) {
+                        // new node restart adapter to create objects
+                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
+                        return void this.restart();
                     }
 
                     await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
