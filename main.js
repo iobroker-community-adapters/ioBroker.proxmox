@@ -217,11 +217,14 @@ class Proxmox extends utils.Adapter {
 
     sendRequest(nextRunTimeout) {
         this.setState('info.lastUpdate', { val: Date.now(), ack: true });
-        this.requestInterval && this.clearTimeout(this.requestInterval);
+        
+        if (this.clearTimeout) {
+          this.clearTimeout(this.requestInterval);
+          this.requestInterval = null;
+        } 
+        
         this.requestInterval = this.setTimeout(
             async () => {
-                this.requestInterval = null;
-
                 if (this.proxmox) {
                     this.log.debug('sendRequest interval started');
                     this.proxmox.resetResponseCache(); // Clear cache to start fresh
@@ -237,8 +240,7 @@ class Proxmox extends utils.Adapter {
                 }
 
                 this.sendRequest();
-            },
-            nextRunTimeout || this.config.requestInterval * 1000,
+            }, nextRunTimeout || this.config.requestInterval * 1000,
         );
     }
 
