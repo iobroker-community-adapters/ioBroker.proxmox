@@ -192,7 +192,8 @@
     "newTreeStructure": false,
     "requestHAInformation": false,
     "requestCephInformation": false,
-    "requestStorageInformation": true
+    "requestStorageInformation": true,
+    "requestStorageInformationBackup":false
   },
   "instanceObjects": [
     {
