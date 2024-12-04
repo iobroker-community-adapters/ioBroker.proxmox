@@ -248,7 +248,7 @@ class Proxmox extends utils.Adapter {
     async getNodes() {
         try {
             const nodes = await this.proxmox?.getNodes();
-            this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+            this.log.debug(`[getNodes] Nodes: ${JSON.stringify(nodes)}`);
 
             await this.createNodes(nodes);
         } catch (e) {
@@ -272,7 +272,7 @@ class Proxmox extends utils.Adapter {
         for (const node of nodes) {
             const nodeName = this.prepareNameForId(node.node);
 
-            this.log.debug(`Node: ${JSON.stringify(node)}`);
+            this.log.debug(`[createNodes] Node: ${JSON.stringify(node)}`);
 
             nodesKeep.push(`node_${nodeName}`);
 
@@ -387,7 +387,7 @@ class Proxmox extends utils.Adapter {
                     await this.createCustomState(sid, 'cpu_max', 'default_num', node.maxcpu);
                 }
 
-                this.log.debug(`Requesting states for node ${node.node}`);
+                this.log.debug(`[createNodes] Requesting states for node ${node.node}`);
                 try {
                     const nodeStatus = await this.proxmox?.getNodeStatus(node.node);
                     if (nodeStatus) {
@@ -435,7 +435,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
+                    this.log.warn(`[createNodes] Unable to get status of node ${node.node}: ${err}`);
                 }
 
                 if (this.config.requestDiskInformation) {
@@ -456,30 +456,30 @@ class Proxmox extends utils.Adapter {
                                 if (disk.type !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
                                 }else{
-                                    this.log.debug(`disk ${disk.devpath} get type for node ${node.node} undefined`);
+                                    this.log.debug(`[createNodes] disk ${disk.devpath} get type for node ${node.node} undefined`);
                                 }
                                 if (disk.size !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
                                 }else{
-                                    this.log.debug(`disk ${disk.devpath} get size for node ${node.node} undefined`);
+                                    this.log.debug(`[createNodes] disk ${disk.devpath} get size for node ${node.node} undefined`);
                                 }
                                 if (disk.health !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
                                 }else{
-                                    this.log.debug(`disk ${disk.devpath} get health for node ${node.node} undefined`);
+                                    this.log.debug(`[createNodes] disk ${disk.devpath} get health for node ${node.node} undefined`);
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
                                 }else{
-                                    this.log.debug(`disk ${disk.devpath} get wearout for node ${node.node} undefined`);
+                                    this.log.debug(`[createNodes] disk ${disk.devpath} get wearout for node ${node.node} undefined`);
                                 }
                                 if (disk.model !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
                                 }else{
-                                    this.log.debug(`disk ${disk.devpath} get model for node ${node.node} undefined`);
+                                    this.log.debug(`[createNodes] disk ${disk.devpath} get model for node ${node.node} undefined`);
                                 }
                                 const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug('resolve getNodeDisksSmart => ' + JSON.stringify(nodeDiskSmart.data));
+                                this.log.debug(`[createNodes] resolve getNodeDisksSmart => JSON.stringify(nodeDiskSmart.data)`);
                                 //if (nodeDiskSmart?.data?.text) {
                                 if (nodeDiskSmart.data !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.smart`, 'text', JSON.stringify(nodeDiskSmart.data.attributes));
@@ -487,7 +487,7 @@ class Proxmox extends utils.Adapter {
                             }
                         }
                     } catch (err) {
-                        this.log.warn(`"function createNodes" Unable to get disk for node ${node.node}: ${err}`);
+                        this.log.warn(`[createNodes] Unable to get disk for node ${node.node}: ${err}`);
                     }
                 }
             }
@@ -835,7 +835,7 @@ class Proxmox extends utils.Adapter {
                     if (res.status === 'running') {
                         resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
                         available = true;
-                        this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
+                        this.log.debug(`[createVM] new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
                     } else {
                         this.offlineResourceStatus.status = res.status;
                         this.offlineResourceStatus.type = res.type;
@@ -894,7 +894,7 @@ class Proxmox extends utils.Adapter {
                             if (res.status !== 'unknown') {
                                 const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
 
-                                this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
+                                this.log.debug(`[createVM] new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
                                 await this.findState(sid, storageStatus, async (states) => {
                                     for (const s of states) {
@@ -949,7 +949,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.debug(`Unable to get cluster resources: ${err}`);
+            this.log.debug(`[createVM] Unable to get cluster resources: ${err}`);
         }
     }
 
@@ -957,7 +957,7 @@ class Proxmox extends utils.Adapter {
         const knownObjIds = Object.keys(this.objects);
 
         for (const node of nodes) {
-            this.log.debug(`Node: ${JSON.stringify(node)}`);
+            this.log.debug(`[setnodes] Node: ${JSON.stringify(node)}`);
 
             const sid = `${this.namespace}.${node.type}_${node.node}`;
 
@@ -981,7 +981,7 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
                 }
 
-                this.log.debug(`Requesting states for node ${node.node}`);
+                this.log.debug(`[setnodes] Requesting states for node ${node.node}`);
                 try {
                     const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
                     if (nodeStatus) {
@@ -1065,7 +1065,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`Unable to get status of node ${node.node}: ${err}`);
+                    this.log.warn(`[setNodes] Unable to get status of node ${node.node}: ${err}`);
                 }
             } else {
                 await this.setStateChangedAsync(`${sid}.status`, { val: 'offline', ack: true });
@@ -1110,7 +1110,7 @@ class Proxmox extends utils.Adapter {
                                 }
 
                                 const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug(`getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
+                                this.log.debug(`[setnodes] getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
                                 // if (nodeDiskSmart?.data?.text) {
                                 if (nodeDiskSmart.data !== undefined){
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
@@ -1123,7 +1123,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`"function setNodes" Unable to get disk for node ${node.node}: ${err}`);
+                    this.log.warn(`[setNodes] Unable to get disk for node ${node.node}: ${err}`);
                 }
             }
         }
@@ -1188,7 +1188,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.debug(`Unable to get HA resources: ${err.message} `);
+            this.log.debug(`[setHA] Unable to get HA resources: ${err.message} `);
         }
     }
 
@@ -1313,7 +1313,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.debug(`Unable to get cluster resources: ${err.message} `);
+            this.log.debug(`[setVM] Unable to get cluster resources: ${err.message} `);
         }
     }
 
