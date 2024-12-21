@@ -1251,6 +1251,7 @@ class Proxmox extends utils.Adapter {
 
                     await this.findState(sid, resourceStatus, async (states) => {
                         for (const element of states) {
+                            this.log.debug(`[setVM] ${element[0]}.${element[1]}: ${element[3]}`);
                             await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
                         }
                     });
@@ -1339,7 +1340,9 @@ class Proxmox extends utils.Adapter {
             } else if (key === 'netin' || key === 'netout') {
                 result.push([sid, key, 'sizeb', value]);
             } else if (key === 'cpu') {
-                result.push([sid, key, 'level', parseInt(value) * 10000 / 100]);
+                this.log.debug(`[findState] cpu: ${value}, parseFloat berechnet: ${parseFloat(value) * 10000 / 100}, parseFloat: ${parseFloat(value)}`);
+                this.log.debug(`[findState] cpu: ${value}, parseInt berechnet: ${parseInt(value) * 10000 / 100}, parseInt: ${parseInt(value)}`);
+                result.push([sid, key, 'level', parseFloat(value) * 10000 / 100]);
             } else if (key === 'pid' || key === 'vmid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
                 result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
             } else if (key === 'content' || key === 'type' || key === 'status' || key === 'volid' || key === 'parent' || key === 'format') {
