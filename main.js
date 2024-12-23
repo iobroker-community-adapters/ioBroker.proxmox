@@ -381,7 +381,7 @@ class Proxmox extends utils.Adapter {
             if (node.status === 'online') {
                 // node is offline no infomration available
                 if (node.cpu) {
-                    await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu) * 10000 / 100);
+                    await this.createCustomState(sid, 'cpu', 'level', parseFloat(node.cpu) * 10000 / 100);
                 }
                 if (node.maxcpu) {
                     await this.createCustomState(sid, 'cpu_max', 'default_num', node.maxcpu);
@@ -395,7 +395,7 @@ class Proxmox extends utils.Adapter {
                             await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
                         }
                         if (nodeStatus.wait !== undefined) {
-                            await this.createCustomState(sid, 'iowait', 'level', parseInt(nodeStatus.wait) * 10000 / 100);
+                            await this.createCustomState(sid, 'iowait', 'level', parseFloat(nodeStatus.wait) * 10000 / 100);
                         }
 
                         if (nodeStatus.memory.used !== undefined) {
@@ -976,7 +976,7 @@ class Proxmox extends utils.Adapter {
                     await this.setCeph();
                 }
 
-                await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu) * 10000 / 100, ack: true });
+                await this.setStateChangedAsync(`${sid}.cpu`, { val: parseFloat(node.cpu) * 10000 / 100, ack: true });
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
                 }
@@ -990,7 +990,7 @@ class Proxmox extends utils.Adapter {
                         }
                         if (nodeStatus.wait !== undefined) {
                             await this.setStateChangedAsync(`${sid}.iowait`, {
-                                val: parseInt(nodeStatus.wait) * 10000 / 100,
+                                val: parseFloat(nodeStatus.wait) * 10000 / 100,
                                 ack: true,
                             });
                         }
