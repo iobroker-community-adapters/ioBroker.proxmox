@@ -1,6 +1,9 @@
 {
     "i18n": true,
     "type": "tabs",
+    "tabsStyle": {
+        "width": "calc(100% - 100px)"
+    },
     "items": {
         "_options": {
             "type": "panel",
@@ -9,42 +12,52 @@
                 "ip": {
                     "type": "text",
                     "label": "IP Address",
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
-                    "lg": 4
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
                 },
                 "port": {
                     "type": "number",
                     "min": 1,
                     "max": 65535,
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
+                    "md": 6,
                     "lg": 4,
+                    "xl": 4,
                     "label": "Port"
                 },
                 "requestInterval": {
                     "type": "number",
                     "min": 5,
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
+                    "md": 6,
                     "lg": 4,
+                    "xl": 4,
                     "label": "Request Interval"
                 },
                 "name": {
                     "newLine": true,
                     "type": "text",
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
+                    "md": 6,
                     "lg": 4,
+                    "xl": 4,
                     "label": "User name"
                 },
                 "pwd": {
                     "type": "password",
                     "repeat": false,
                     "visible": true,
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
+                    "md": 6,
                     "lg": 4,
+                    "xl": 4,
                     "label": "Password"
                 },
                 "server": {
@@ -59,9 +72,11 @@
                             "value": "pve"
                         }
                     ],
+                    "xs": 12,
                     "sm": 12,
-                    "md": 4,
+                    "md": 6,
                     "lg": 4,
+                    "xl": 4,
                     "label": "Realm"
                 },
                 "_additionalInformationHeader": {
@@ -69,52 +84,66 @@
                     "type": "header",
                     "text": "Additional information",
                     "size": 3,
+                    "xs": 12,
                     "sm": 12,
-                    "md": 12,
-                    "lg": 12
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
                 },
                 "requestDiskInformation": {
                     "type": "checkbox",
                     "label": "Request disk information",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 46
                 },
                 "requestCephInformation": {
                     "type": "checkbox",
                     "label": "Request Ceph information",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 4
                 },
                 "requestHAInformation": {
                     "type": "checkbox",
                     "label": "Request HA information",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 4
                 },
                 "newTreeStructure": {
                     "type": "checkbox",
                     "label": "new tree structure",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 4
                 },
                 "requestStorageInformation": {
                     "type": "checkbox",
                     "label": "Storage information",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 4
                 },
                 "requestStorageInformationBackup": {
                     "hidden": "!data.requestStorageInformation",
                     "type": "checkbox",
                     "label": "Backup on Storage information",
+                    "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 4,
+                    "xl": 4
                 }
             }
         }
