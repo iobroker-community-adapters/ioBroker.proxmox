@@ -12,7 +12,7 @@
 ![Option](../pictures/option.png)  
   
 ### IP Adresse 
-Die IP Adresse des Proxmox Server bzw. den Servernamen.  
+Die IP Adresse des Proxmox Server bzw. der Servername.  
   
 ### Port  
 Standard ist der Port 8006, wenn bei der Installation ein anderer Port eingestell wurde, muss dieser hier auch geändert.  
@@ -28,11 +28,11 @@ Passwort vom root bzw. vom neu erstellten User.
 
 ### Realm
 Auswahl zwischen `Standard Authentifizierung` und dem `Proxmox Authentifizierungsserver`.  
-als Standard sollte hier der selbe dienst gewählt werden wie im Login auf der Weboberfläche.  
+Als Standard sollte hier der selbe Dienst gewählt werden, wie im Login auf der Weboberfläche.  
 ![proxmox login](../pictures/proxmox_login.png)  
   
 ### Festplatten Informationen
-bei Auswahl werden in den Objekten diese Datenpunkte angelegt, diese können je nach Festplattentyp unterscheiden.  
+Bei der Auswahl werden in den Objekten diese Datenpunkte angelegt, diese können sich je nach Festplattentyp unterscheiden.  
 ![disk info](../pictures/disk_info.png)  
   
 ### HA informationen  
@@ -42,7 +42,7 @@ in Arbeit
 in Arbeit  
 
 ### neue Baumstruktur  
-bei der neuen Baumstruktur werden LXC Container und VM unter einen Hauptordner gesammelt.  
+Bei der neuen Baumstruktur werden `LXC Container` und `VM` unter einen Hauptordner gesammelt.  
   
 alte Struktur  
 ![object strcture](<../pictures/object_structure.png>)  
