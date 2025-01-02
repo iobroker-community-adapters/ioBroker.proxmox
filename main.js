@@ -56,8 +56,7 @@ class Proxmox extends utils.Adapter {
 
         this.proxmox = new ProxmoxUtils(this);
 
-        // this.config.requestInterval ist schon vom typ number
-        //this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
+        this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
 
         if (this.config.requestInterval < 5) {
             this.log.info('Intervall configured < 5s, setting to 5s');
@@ -75,10 +74,10 @@ class Proxmox extends utils.Adapter {
 
                 this.sendRequest(); // start interval
 
-                await this.setState('info.connection', { val: true, ack: true });
+                await this.setStateAsync('info.connection', { val: true, ack: true });
             });
         } catch (err) {
-            await this.setState('info.connection', { val: false, ack: true });
+            await this.setStateAsync('info.connection', { val: false, ack: true });
 
             this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
@@ -218,14 +217,11 @@ class Proxmox extends utils.Adapter {
 
     sendRequest(nextRunTimeout) {
         this.setState('info.lastUpdate', { val: Date.now(), ack: true });
-
-        if (this.clearTimeout) {
-            this.clearTimeout(this.requestInterval);
-            this.requestInterval = null;
-        }
-
+        this.requestInterval && this.clearTimeout(this.requestInterval);
         this.requestInterval = this.setTimeout(
             async () => {
+                this.requestInterval = null;
+
                 if (this.proxmox) {
                     this.log.debug('sendRequest interval started');
                     this.proxmox.resetResponseCache(); // Clear cache to start fresh
@@ -241,13 +237,14 @@ class Proxmox extends utils.Adapter {
                 }
 
                 this.sendRequest();
-            }, nextRunTimeout || this.config.requestInterval * 1000,
+            },
+            nextRunTimeout || this.config.requestInterval * 1000,
         );
     }
 
     async getNodes() {
         try {
-            const nodes = await this.proxmox?.getNodes();
+            const nodes = await this.proxmox.getNodes();
             this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
 
             await this.createNodes(nodes);
@@ -293,7 +290,7 @@ class Proxmox extends utils.Adapter {
                 await this.setObjectNotExistsAsync(sid, this.objects[sid]);
             }
 
-            await this.extendObject(`${sid}.shutdown`, {
+            await this.extendObjectAsync(`${sid}.shutdown`, {
                 type: 'state',
                 common: {
                     name: {
@@ -322,7 +319,7 @@ class Proxmox extends utils.Adapter {
 
             this.subscribeForeignStates(`${sid}.shutdown`);
 
-            await this.extendObject(`${sid}.reboot`, {
+            await this.extendObjectAsync(`${sid}.reboot`, {
                 type: 'state',
                 common: {
                     name: {
@@ -352,7 +349,7 @@ class Proxmox extends utils.Adapter {
             this.subscribeForeignStates(`${sid}.reboot`);
 
             // type has changed so extend no matter if yet exists
-            await this.extendObject(`${sid}.status`, {
+            await this.extendObjectAsync(`${sid}.status`, {
                 type: 'state',
                 common: {
                     name: {
@@ -381,7 +378,7 @@ class Proxmox extends utils.Adapter {
             if (node.status === 'online') {
                 // node is offline no infomration available
                 if (node.cpu) {
-                    await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu) * 10000 / 100);
+                    await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu * 10000) / 100);
                 }
                 if (node.maxcpu) {
                     await this.createCustomState(sid, 'cpu_max', 'default_num', node.maxcpu);
@@ -389,13 +386,13 @@ class Proxmox extends utils.Adapter {
 
                 this.log.debug(`Requesting states for node ${node.node}`);
                 try {
-                    const nodeStatus = await this.proxmox?.getNodeStatus(node.node);
+                    const nodeStatus = await this.proxmox.getNodeStatus(node.node);
                     if (nodeStatus) {
                         if (nodeStatus.uptime !== undefined) {
                             await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
                         }
                         if (nodeStatus.wait !== undefined) {
-                            await this.createCustomState(sid, 'iowait', 'level', parseInt(nodeStatus.wait) * 10000 / 100);
+                            await this.createCustomState(sid, 'iowait', 'level', parseInt(nodeStatus.wait * 10000) / 100);
                         }
 
                         if (nodeStatus.memory.used !== undefined) {
@@ -440,7 +437,7 @@ class Proxmox extends utils.Adapter {
 
                 if (this.config.requestDiskInformation) {
                     try {
-                        const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
+                        const nodeDisks = await this.proxmox.getNodeDisks(node.node);
                         if (nodeDisks) {
                             for (const disk of nodeDisks) {
                                 const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
@@ -455,39 +452,28 @@ class Proxmox extends utils.Adapter {
 
                                 if (disk.type !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
-                                }else{
-                                    this.log.debug(`disk ${disk.devpath} get type for node ${node.node} undefined`);
                                 }
                                 if (disk.size !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
-                                }else{
-                                    this.log.debug(`disk ${disk.devpath} get size for node ${node.node} undefined`);
                                 }
                                 if (disk.health !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
-                                }else{
-                                    this.log.debug(`disk ${disk.devpath} get health for node ${node.node} undefined`);
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
-                                }else{
-                                    this.log.debug(`disk ${disk.devpath} get wearout for node ${node.node} undefined`);
                                 }
                                 if (disk.model !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
-                                }else{
-                                    this.log.debug(`disk ${disk.devpath} get model for node ${node.node} undefined`);
                                 }
-                                const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug('resolve getNodeDisksSmart => ' + JSON.stringify(nodeDiskSmart.data));
-                                //if (nodeDiskSmart?.data?.text) {
-                                if (nodeDiskSmart.data !== undefined) {
-                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', JSON.stringify(nodeDiskSmart.data.attributes));
+
+                                const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
+                                if (nodeDiskSmart?.data?.text) {
+                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
                                 }
                             }
                         }
                     } catch (err) {
-                        this.log.warn(`"function createNodes" Unable to get disk for node ${node.node}: ${err}`);
+                        this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
                     }
                 }
             }
@@ -528,7 +514,7 @@ class Proxmox extends utils.Adapter {
             native: {},
         });
 
-        const haInformation = await this.proxmox?.getHAStatusInformation();
+        const haInformation = await this.proxmox.getHAStatusInformation();
 
         for (const lpEntry in haInformation.data) {
             const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
@@ -545,7 +531,7 @@ class Proxmox extends utils.Adapter {
 
                     lpData2Id = lpData2Id.replace(/:/g, '_');
 
-                    await this.extendObject(`${haid}.${lpData2Id}_${lpEntry2}`, {
+                    await this.extendObjectAsync(`${haid}.${lpData2Id}_${lpEntry2}`, {
                         type: 'state',
                         common: {
                             name: lpEntry2,
@@ -573,7 +559,7 @@ class Proxmox extends utils.Adapter {
             native: {},
         });
 
-        const cephInformation = await this.proxmox?.getCephInformation();
+        const cephInformation = await this.proxmox.getCephInformation();
 
         for (const lpEntry in cephInformation.data) {
             const lpType = typeof cephInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
@@ -594,7 +580,7 @@ class Proxmox extends utils.Adapter {
                         continue;
                     }
 
-                    await this.extendObject(`${cephid}.${lpEntry}.${lpEntry2}`, {
+                    await this.extendObjectAsync(`${cephid}.${lpEntry}.${lpEntry2}`, {
                         type: 'state',
                         common: {
                             name: lpEntry2,
@@ -608,7 +594,7 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${cephid}.${lpEntry}.${lpEntry2}`, lpData2, true);
                 }
             } else {
-                await this.extendObject(`${cephid}.${lpEntry}`, {
+                await this.extendObjectAsync(`${cephid}.${lpEntry}`, {
                     type: 'state',
                     common: {
                         name: lpEntry,
@@ -632,7 +618,7 @@ class Proxmox extends utils.Adapter {
         const resourcesKeep = [];
 
         try {
-            const resources = await this.proxmox?.getClusterResources();
+            const resources = await this.proxmox.getClusterResources();
             for (const res of resources) {
                 let sid = '';
                 const type = res.type;
@@ -671,7 +657,7 @@ class Proxmox extends utils.Adapter {
                         await this.setObjectNotExistsAsync(sid, this.objects[sid]);
                     }
 
-                    await this.extendObject(`${sid}.start`, {
+                    await this.extendObjectAsync(`${sid}.start`, {
                         type: 'state',
                         common: {
                             name: {
@@ -701,7 +687,7 @@ class Proxmox extends utils.Adapter {
 
                     this.subscribeForeignStates(`${sid}.start`);
 
-                    await this.extendObject(`${sid}.stop`, {
+                    await this.extendObjectAsync(`${sid}.stop`, {
                         type: 'state',
                         common: {
                             name: {
@@ -731,7 +717,7 @@ class Proxmox extends utils.Adapter {
 
                     this.subscribeForeignStates(`${sid}.stop`);
 
-                    await this.extendObject(`${sid}.shutdown`, {
+                    await this.extendObjectAsync(`${sid}.shutdown`, {
                         type: 'state',
                         common: {
                             name: {
@@ -761,7 +747,7 @@ class Proxmox extends utils.Adapter {
 
                     this.subscribeForeignStates(`${sid}.shutdown`);
 
-                    await this.extendObject(`${sid}.reboot`, {
+                    await this.extendObjectAsync(`${sid}.reboot`, {
                         type: 'state',
                         common: {
                             name: {
@@ -791,7 +777,7 @@ class Proxmox extends utils.Adapter {
 
                     this.subscribeForeignStates(`.${sid}.reboot`);
                     // type was boolean but has been corrected to string -> extend
-                    await this.extendObject(`${sid}.status`, {
+                    await this.extendObjectAsync(`${sid}.status`, {
                         type: 'state',
                         common: {
                             name: {
@@ -817,7 +803,7 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
-                    await this.extendObject(`${sid}.available`, {
+                    await this.extendObjectAsync(`${sid}.available`, {
                         type: 'state',
                         common: {
                             name: 'Available',
@@ -833,7 +819,7 @@ class Proxmox extends utils.Adapter {
                     let resourceStatus;
 
                     if (res.status === 'running') {
-                        resourceStatus = await this.proxmox?.getResourceStatus(res.node, type, res.vmid);
+                        resourceStatus = await this.proxmox.getResourceStatus(res.node, type, res.vmid);
                         available = true;
                         this.log.debug(`new ${type}: ${resourceStatus.name} - ${JSON.stringify(resourceStatus)}`);
                     } else {
@@ -892,7 +878,7 @@ class Proxmox extends utils.Adapter {
 
                         try {
                             if (res.status !== 'unknown') {
-                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+                                const storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
 
                                 this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
@@ -905,7 +891,7 @@ class Proxmox extends utils.Adapter {
                                         }
                                     }
                                     if (this.config.requestStorageInformationBackup) {
-                                        await this.extendObject(`${sid}.backupJson`, {
+                                        await this.extendObjectAsync(`${sid}.backupJson`, {
                                             type: 'state',
                                             common: {
                                                 name: {
@@ -976,21 +962,21 @@ class Proxmox extends utils.Adapter {
                     await this.setCeph();
                 }
 
-                await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu) * 10000 / 100, ack: true });
+                await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
                 }
 
                 this.log.debug(`Requesting states for node ${node.node}`);
                 try {
-                    const nodeStatus = await this.proxmox?.getNodeStatus(node.node, true);
+                    const nodeStatus = await this.proxmox.getNodeStatus(node.node, true);
                     if (nodeStatus) {
                         if (nodeStatus.uptime !== undefined) {
                             await this.setStateChangedAsync(`${sid}.uptime`, { val: nodeStatus.uptime, ack: true });
                         }
                         if (nodeStatus.wait !== undefined) {
                             await this.setStateChangedAsync(`${sid}.iowait`, {
-                                val: parseInt(nodeStatus.wait) * 10000 / 100,
+                                val: parseInt(nodeStatus.wait * 10000) / 100,
                                 ack: true,
                             });
                         }
@@ -1074,7 +1060,7 @@ class Proxmox extends utils.Adapter {
             if (this.config.requestDiskInformation) {
                 try {
                     if (node.status !== 'offline') {
-                        const nodeDisks = await this.proxmox?.getNodeDisks(node.node);
+                        const nodeDisks = await this.proxmox.getNodeDisks(node.node);
                         if (nodeDisks) {
                             for (const disk of nodeDisks) {
                                 const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
@@ -1109,13 +1095,10 @@ class Proxmox extends utils.Adapter {
                                     });
                                 }
 
-                                const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug(`getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
-                                // if (nodeDiskSmart?.data?.text) {
-                                if (nodeDiskSmart.data !== undefined){
+                                const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
+                                if (nodeDiskSmart?.data?.text) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
-                                        // val: nodeDiskSmart.data.text,
-                                        val: JSON.stringify(nodeDiskSmart.data.attributes),
+                                        val: nodeDiskSmart.data.text,
                                         ack: true,
                                     });
                                 }
@@ -1123,7 +1106,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`"function setNodes" Unable to get disk for node ${node.node}: ${err}`);
+                    this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
                 }
             }
         }
@@ -1138,7 +1121,7 @@ class Proxmox extends utils.Adapter {
         try {
             const cephid = `${this.namespace}.ceph`;
 
-            const cephInformation = await this.proxmox?.getCephInformation();
+            const cephInformation = await this.proxmox.getCephInformation();
 
             if (cephInformation !== null) {
                 for (const lpEntry in cephInformation.data) {
@@ -1166,7 +1149,7 @@ class Proxmox extends utils.Adapter {
     async setHA() {
         try {
             const haid = `${this.namespace}.ha`;
-            const haInformation = await this.proxmox?.getHAStatusInformation();
+            const haInformation = await this.proxmox.getHAStatusInformation();
 
             for (const lpEntry in haInformation.data) {
                 const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
@@ -1194,12 +1177,12 @@ class Proxmox extends utils.Adapter {
 
     async setVM() {
         try {
-            const resources = await this.proxmox?.getClusterResources();
+            const resources = await this.proxmox.getClusterResources();
             const knownObjIds = Object.keys(this.objects);
             const offlineMachines = {};
             const storageKeep = [];
 
-            this.setState(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
+            this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
 
             for (const res of resources) {
                 let sid = '';
@@ -1221,17 +1204,23 @@ class Proxmox extends utils.Adapter {
                         // überspringe maschine falls knoten offline und diese auf dem knoten liegt
                         offlineMachines[res.id]++;
                         offlineMachines[res.id] = 'offline';
-                        this.setState(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
+                        this.setStateAsync(`info.offlineMachines`, JSON.stringify(offlineMachines), true);
                         continue;
                     }
 
                     await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
-                    let resourceStatus;
+                    if (!knownObjIds.includes(sid)) {
+                        // new node restart adapter to create objects
+                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
+                        return void this.restart();
+                    }
+
                     let available = false;
+                    let resourceStatus;
 
                     if (res.status === 'running') {
-                        resourceStatus = await this.proxmox?.getResourceStatus(res.node, res.type, res.vmid, true);
+                        resourceStatus = await this.proxmox.getResourceStatus(res.node, res.type, res.vmid, true);
                         available = true;
                     } else {
                         this.offlineResourceStatus.status = res.status;
@@ -1239,12 +1228,6 @@ class Proxmox extends utils.Adapter {
                         this.offlineResourceStatus.name = resName;
                         this.offlineResourceStatus.vmid = res.vmid;
                         resourceStatus = this.offlineResourceStatus;
-                    }
-
-                    if (!knownObjIds.includes(sid)) {
-                        // new node restart adapter to create objects
-                        this.log.info(`Detected new VM/storage "${resourceStatus.name}" (${resName}) - restarting instance`);
-                        return void this.restart();
                     }
 
                     await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
@@ -1278,7 +1261,7 @@ class Proxmox extends utils.Adapter {
 
                         if (res.status !== 'unknown') {
                             try {
-                                const storageStatus = await this.proxmox?.getStorageStatus(res.node, res.storage, !!res.shared);
+                                const storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
                                 await this.findState(sid, storageStatus, async (states) => {
                                     for (const element of states) {
                                         if (element[0] == '') {
@@ -1290,7 +1273,7 @@ class Proxmox extends utils.Adapter {
                                 });
 
                                 if (this.config.requestStorageInformationBackup) {
-                                    const allBackupStatus = await this.proxmox?.getBackupStatus(res.node, res.storage);
+                                    const allBackupStatus = await this.proxmox.getBackupStatus(res.node, res.storage);
 
                                     const backupJson = {};
 
@@ -1339,7 +1322,7 @@ class Proxmox extends utils.Adapter {
             } else if (key === 'netin' || key === 'netout') {
                 result.push([sid, key, 'sizeb', value]);
             } else if (key === 'cpu') {
-                result.push([sid, key, 'level', parseInt(value) * 10000 / 100]);
+                result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
             } else if (key === 'pid' || key === 'vmid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
                 result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
             } else if (key === 'content' || key === 'type' || key === 'status' || key === 'volid' || key === 'parent' || key === 'format') {
