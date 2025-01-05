@@ -958,7 +958,7 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status !== 'offline') {
-                if (this.config.requestCephInformation) {
+                if (this.config.requestCephInformation && node.type === 'node') {
                     await this.setCeph();
                 }
 
