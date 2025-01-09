@@ -65,17 +65,17 @@ class Proxmox extends utils.Adapter {
 
         try {
             // Get a new ticket (login)
-            this.proxmox.ticket(async () => {
-                await this.readObjects();
-                await this.getNodes();
+            await this.proxmox.ticket();
+            await this.readObjects();
+            await this.getNodes();
 
-                // subscribe on all state changes
-                await this.subscribeStatesAsync('*');
+            // subscribe on all state changes
+            await this.subscribeStatesAsync('*');
 
-                this.sendRequest(); // start interval
+            this.sendRequest(); // start interval
 
-                await this.setStateAsync('info.connection', { val: true, ack: true });
-            });
+            await this.setStateAsync('info.connection', { val: true, ack: true });
+
         } catch (err) {
             await this.setStateAsync('info.connection', { val: false, ack: true });
 
@@ -958,10 +958,6 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status !== 'offline') {
-                if (this.config.requestCephInformation && node.type === 'node') {
-                    await this.setCeph();
-                }
-
                 await this.setStateChangedAsync(`${sid}.cpu`, { val: parseInt(node.cpu * 10000) / 100, ack: true });
                 if (node.maxcpu) {
                     await this.setStateChangedAsync(`${sid}.cpu_max`, { val: node.maxcpu, ack: true });
@@ -1111,6 +1107,10 @@ class Proxmox extends utils.Adapter {
             }
         }
 
+        if (this.config.requestCephInformation) {
+            await this.setCeph();
+        }
+
         if (this.config.requestHAInformation) {
             await this.setHA();
         }
@@ -1118,10 +1118,11 @@ class Proxmox extends utils.Adapter {
         await this.setVM();
     }
     async setCeph() {
+        const cephid = `${this.namespace}.ceph`;
         try {
-            const cephid = `${this.namespace}.ceph`;
-
             const cephInformation = await this.proxmox.getCephInformation();
+
+            this.log.debug('cephInformation: ' + JSON.stringify(cephInformation));
 
             if (cephInformation !== null) {
                 for (const lpEntry in cephInformation.data) {
@@ -1142,14 +1143,16 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.error(`Unable to get Ceph resources: ${err.message} `);
+            this.log.error('Unable to get Ceph resources: ' + JSON.stringify(err));
         }
     }
 
     async setHA() {
+        const haid = `${this.namespace}.ha`;
         try {
-            const haid = `${this.namespace}.ha`;
             const haInformation = await this.proxmox.getHAStatusInformation();
+
+            this.log.debug('haInformation: ' + JSON.stringify(haInformation));
 
             for (const lpEntry in haInformation.data) {
                 const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
