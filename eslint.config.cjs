@@ -49,6 +49,7 @@ module.exports = [
             'no-unsafe-finally': 'warn',
             'no-cond-assign': 'warn',
             'no-func-assign': 'warn',
+            'no-useless-catch': 'warn',
             'no-global-assign': 'warn',
             'no-self-assign': 'warn',
             'no-trailing-spaces': 'error',
