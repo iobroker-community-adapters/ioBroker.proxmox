@@ -1102,7 +1102,7 @@ class Proxmox extends utils.Adapter {
                         }
                     }
                 } catch (err) {
-                    this.log.warn(`Unable to get disk for node ${node.node}: ${err}`);
+                    this.log.warn(`Unable to get disk for node ${node.node}: ${JSON.stringify(err)}`);
                 }
             }
         }
