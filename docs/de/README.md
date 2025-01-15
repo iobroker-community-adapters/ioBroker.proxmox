@@ -12,7 +12,7 @@
 ![Option](../pictures/option.png)  
   
 ### IP Adresse 
-Die IP Adresse des Proxmox Server bzw. der Servername.  
+Die IP Adresse des Proxmox Server bzw. der Servername. Bei mehreren Servern, werden die IP`s mit Komma getrennt hier eingetragen. 
   
 ### Port  
 Standard ist der Port 8006, wenn bei der Installation ein anderer Port eingestell wurde, muss dieser hier auch geändert.  
