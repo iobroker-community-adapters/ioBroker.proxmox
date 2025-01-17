@@ -48,13 +48,15 @@ class Proxmox extends utils.Adapter {
     }
 
     async onReady() {
-        if (!this.config.ip || this.config.ip === '192.000.000.000') {
+        /* if (!this.config.ip || this.config.ip === '192.000.000.000') {
             this.log.error('Please set the IP of your Proxmox host.');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
             return;
+        } */
+        if (!this.checkConfig()) {
+            typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
+            return;
         }
-
-        this.proxmox = new ProxmoxUtils(this);
 
         this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
 
@@ -62,6 +64,8 @@ class Proxmox extends utils.Adapter {
             this.log.info('Intervall configured < 5s, setting to 5s');
             this.config.requestInterval = 5;
         }
+
+        this.proxmox = new ProxmoxUtils(this);
 
         try {
             // Get a new ticket (login)
@@ -212,6 +216,40 @@ class Proxmox extends utils.Adapter {
                     }
                 }
             }
+        }
+    }
+
+    checkConfig(){
+        if (!this.config.servers || this.config.servers.length === 0) {
+            this.log.warn('No servers defined in config');
+            return false;
+        }
+        if (this.config.servers) {
+            let checked = true
+            this.log.debug(`[checkConfig] Count of Servers: ${this.config.servers.length}`);
+            for (let i = 0; i < this.config.servers.length; i++) {
+                const server = this.config.servers[i];
+                if (!server.ip || server.ip === '192.000.000.000') {
+                    this.log.error(`[checkConfig] Please enter the IP of your Proxmox host in table row ${i + 1} of the configuration.`);
+                    checked = false;
+                }
+                if (!server.port || server.port === 0) {
+                    this.log.error(`[checkConfig] Please set the port of your Proxmox host in table row ${i + 1} of the configuration.`);
+                    checked = false;
+                }
+                if (!server.name || server.name === '') {
+                    this.log.error(`[checkConfig] Please set the user of your Proxmox host in table row ${i + 1} of the configuration.`);
+                    checked = false;
+                }
+                if (!server.pwd || server.pwd === '') {
+                    this.log.error(`[checkConfig] Please set the password of your Proxmox host in table row ${i + 1} of the configuration.`);
+                    checked = false;
+                }
+            }
+            if (!checked) {
+                return false
+            }
+            return true;
         }
     }
 

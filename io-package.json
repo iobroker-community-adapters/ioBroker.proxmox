@@ -182,12 +182,15 @@
     "pwd"
   ],
   "native": {
+    "servers":[
+      {
     "ip": "192.000.000.000",
     "port": 8006,
-    "requestInterval": 30,
     "name": "root",
     "pwd": "",
-    "server": "pam",
+    "server": "pam"
+      }],
+    "requestInterval": 30,
     "requestDiskInformation": false,
     "newTreeStructure": false,
     "requestHAInformation": false,
@@ -195,6 +198,7 @@
     "requestStorageInformation": true,
     "requestStorageInformationBackup":false
   },
+  
   "instanceObjects": [
     {
       "_id": "info",

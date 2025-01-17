@@ -9,25 +9,72 @@
             "type": "panel",
             "label": "Options",
             "items": {
-                "ip": {
-                    "type": "text",
-                    "label": "IP Address",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
+                "servers": {
+                    "type": "accordion",
+                    "xs":12,
+                    "sm":12,
+                    "md":12,
+                    "lg":12,
+                    "xl":12,
+                    "label": "Proxmox Server",
+                    "titleAttr": "servername",
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "servername",
+                            "label": "Servername",
+                            "default":"pve",
+                            "toolTip":"The name of the server (optional)"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "ip",
+                            "label": "IP Address",
+                            "default":"192.000.000.000"
+                        },
+                        {
+                            "type": "port",
+                            "attr":"port",
+                            "min": 1,
+                            "max": 65535,
+                            "label": "Serverport",
+                            "default": 8006
+                        },
+                        {
+                            "type": "text",
+                            "attr":"name",
+                            "label": "User name",
+                            "default": "root"
+                        },
+                        {
+                            "type": "password",
+                            "attr":"pwd",
+                            "label": "Password",
+                            "visible": true,
+                            "repeat": true,
+                            "default": ""
+                        },
+                        {
+                            "type": "select",
+                            "attr":"server",
+                            "label": "Realm",
+                            "options": [
+                                {
+                                    "label": "Linux PAM standard authentication",
+                                    "value": "pam"
+                                },
+                                {
+                                    "label": "Proxmox VE authentication server",
+                                    "value": "pve"
+                                }
+                            ],
+                            "default": "pam"
+                        }
+                    ]
                 },
-                "port": {
-                    "type": "number",
-                    "min": 1,
-                    "max": 65535,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Port"
+                "_divider": {
+                    "type": "divider",
+                    "color": "primary"
                 },
                 "requestInterval": {
                     "type": "number",
@@ -38,46 +85,6 @@
                     "lg": 4,
                     "xl": 4,
                     "label": "Request Interval"
-                },
-                "name": {
-                    "newLine": true,
-                    "type": "text",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "User name"
-                },
-                "pwd": {
-                    "type": "password",
-                    "repeat": false,
-                    "visible": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Password"
-                },
-                "server": {
-                    "type": "select",
-                    "options": [
-                        {
-                            "label": "Linux PAM standard authentication",
-                            "value": "pam"
-                        },
-                        {
-                            "label": "Proxmox VE authentication server",
-                            "value": "pve"
-                        }
-                    ],
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Realm"
                 },
                 "_additionalInformationHeader": {
                     "newLine": true,
@@ -146,6 +153,7 @@
                     "xl": 4
                 }
             }
+            
         }
     }
 }
