@@ -489,25 +489,28 @@ class Proxmox extends utils.Adapter {
                                 });
 
                                 if (disk.type !== undefined) {
-                                    await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
+                                    if (disk.type.toLowerCase() != 'unknown') {
+                                        await this.createCustomState(sid, `${diskPath}.type`, 'text', disk.type);
+                                    }
                                 }
                                 if (disk.size !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.size`, 'size', disk.size);
                                 }
                                 if (disk.health !== undefined) {
-                                    await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
+                                    if (disk.health.toLowerCase() != 'unknown') {
+                                        await this.createCustomState(sid, `${diskPath}.health`, 'text', disk.health);
+                                        const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
+                                        if (nodeDiskSmart?.data?.text) {
+                                            await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
+                                        }    
+                                    }
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
                                 }
                                 if (disk.model !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
-                                }
-
-                                const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
-                                if (nodeDiskSmart?.data?.text) {
-                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
-                                }
+                                }                                
                             }
                         }
                     } catch (err) {
@@ -1099,10 +1102,12 @@ class Proxmox extends utils.Adapter {
                             for (const disk of nodeDisks) {
                                 const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
                                 if (disk.type !== undefined) {
-                                    await this.setStateChangedAsync(`${sid}.${diskPath}.type`, {
-                                        val: disk.type,
-                                        ack: true,
-                                    });
+                                    if (disk.type.toLowerCase() != 'unknown') {
+                                        await this.setStateChangedAsync(`${sid}.${diskPath}.type`, {
+                                            val: disk.type,
+                                            ack: true,
+                                        });
+                                    }
                                 }
                                 if (disk.size !== undefined) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.size`, {
@@ -1111,10 +1116,19 @@ class Proxmox extends utils.Adapter {
                                     });
                                 }
                                 if (disk.health !== undefined) {
-                                    await this.setStateChangedAsync(`${sid}.${diskPath}.health`, {
-                                        val: disk.health,
-                                        ack: true,
-                                    });
+                                    if (disk.health.toLowerCase() != 'unknown') {
+                                        await this.setStateChangedAsync(`${sid}.${diskPath}.health`, {
+                                            val: disk.health,
+                                            ack: true,
+                                        });
+                                        const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
+                                        if (nodeDiskSmart?.data?.text) {
+                                            await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
+                                                val: nodeDiskSmart.data.text,
+                                                ack: true,
+                                            });
+                                        }                                        
+                                    }
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
                                     await this.setStateChangedAsync(`${sid}.${diskPath}.wearout`, {
@@ -1127,15 +1141,7 @@ class Proxmox extends utils.Adapter {
                                         val: disk.model,
                                         ack: true,
                                     });
-                                }
-
-                                const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
-                                if (nodeDiskSmart?.data?.text) {
-                                    await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
-                                        val: nodeDiskSmart.data.text,
-                                        ack: true,
-                                    });
-                                }
+                                }                                
                             }
                         }
                     }
