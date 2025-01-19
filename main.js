@@ -220,15 +220,15 @@ class Proxmox extends utils.Adapter {
     }
 
     checkConfig(){
-        if (!this.config.servers || this.config.servers.length === 0) {
-            this.log.warn('No servers defined in config');
+        if (!this.config.server || this.config.server.length === 0) {
+            this.log.warn('No server defined in config');
             return false;
         }
-        if (this.config.servers) {
+        if (this.config.server) {
             let checked = true
-            this.log.debug(`[checkConfig] Count of Servers: ${this.config.servers.length}`);
-            for (let i = 0; i < this.config.servers.length; i++) {
-                const server = this.config.servers[i];
+            this.log.debug(`[checkConfig] Count of server: ${this.config.server.length}`);
+            for (let i = 0; i < this.config.server.length; i++) {
+                const server = this.config.server[i];
                 if (!server.ip || server.ip === '192.000.000.000') {
                     this.log.error(`[checkConfig] Please enter the IP of your Proxmox host in table row ${i + 1} of the configuration.`);
                     checked = false;

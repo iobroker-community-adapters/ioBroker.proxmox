@@ -9,7 +9,7 @@
             "type": "panel",
             "label": "Server / Node Settings",
             "items": {
-                "servers": {
+                "server": {
                     "type": "accordion",
                     "xs":12,
                     "sm":12,

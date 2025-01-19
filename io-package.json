@@ -182,7 +182,7 @@
     "pwd"
   ],
   "native": {
-    "servers":[
+    "server":[
       {
     "ip": "192.000.000.000",
     "port": 8006,
