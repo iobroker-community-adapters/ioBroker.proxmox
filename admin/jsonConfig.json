@@ -5,9 +5,9 @@
         "width": "calc(100% - 100px)"
     },
     "items": {
-        "_options": {
+        "_settings": {
             "type": "panel",
-            "label": "Options",
+            "label": "Server / Node Settings",
             "items": {
                 "servers": {
                     "type": "accordion",
@@ -16,15 +16,14 @@
                     "md":12,
                     "lg":12,
                     "xl":12,
-                    "label": "Proxmox Server",
+                    "label": "Proxmox Server / Node",
                     "titleAttr": "servername",
                     "items": [
                         {
                             "type": "text",
                             "attr": "servername",
                             "label": "Servername",
-                            "default":"pve",
-                            "toolTip":"The name of the server (optional)"
+                            "default":"pve"
                         },
                         {
                             "type": "text",
@@ -71,11 +70,13 @@
                             "default": "pam"
                         }
                     ]
-                },
-                "_divider": {
-                    "type": "divider",
-                    "color": "primary"
-                },
+                }
+            }
+        },
+        "_options": {
+            "type": "panel",
+            "label": "Options",
+            "items": {
                 "requestInterval": {
                     "type": "number",
                     "min": 5,
@@ -91,6 +92,15 @@
                     "type": "header",
                     "text": "Additional information",
                     "size": 3,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "newTreeStructure": {
+                    "type": "checkbox",
+                    "label": "new tree structure",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -118,15 +128,6 @@
                 "requestHAInformation": {
                     "type": "checkbox",
                     "label": "Request HA information",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "newTreeStructure": {
-                    "type": "checkbox",
-                    "label": "new tree structure",
                     "xs": 12,
                     "sm": 12,
                     "md": 6,

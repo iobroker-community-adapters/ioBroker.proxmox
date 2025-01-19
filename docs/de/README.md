@@ -8,18 +8,23 @@
 - Admin Adapter 6.13.16 (oder neuer)  
   
 ***  
-## Einstellungen  
-![Option](../pictures/option.png)  
+## Server / Node Einstellungen 
+
+Für jeden Server / Node werden hier die Zugangsdaten erfasst.
+
+![Option](../pictures/server_settings.png)  
+
+Durch klick auf die Überschrift (Proxmox 1) bzw. den kleinen Pfeil ganz rechts, wird der Inhalt aufgeklappt. Mit den Pfeilen hoch / runter kann die Reihenfolge bestimmt werden. Der Mülleimer löscht die Daten wieder. Das Plus dient zum Anlgen eines neuen Server.
   
+### Servername
+kann frei gewählt werden und wird für die Unterscheidung der einzelnen abschitte genutzt (siehe proxmox 2)  
+    
 ### IP Adresse 
-Die IP Adresse des Proxmox Servers bzw. der Servername. Bei mehreren Servern, werden die IP`s mit Komma getrennt hier eingetragen. 
+Die IP Adresse des Proxmox Server bzw. der Servername.
   
 ### Port  
 Standard ist der Port 8006, wenn bei der Installation ein anderer Port eingestell wurde, muss dieser hier auch geändert.  
 
-### Anfrage-Intervall  
-Standard sind 30 Sekunden. Der kleinste Wert sind 5 Sekunden.  
-  
 ### Nutzername  
 Bei der Installation wird root als Standard eingestellt. Wenn ein neuer User für den Abruf der Daten in Proxmox erstellt wird, kommt hier sein Loginname rein.  
   
@@ -31,6 +36,13 @@ Auswahl zwischen `Standard Authentifizierung` und dem `Proxmox Authentifizierung
 Als Standard sollte hier der selbe Dienst gewählt werden, wie im Login auf der Weboberfläche.  
 ![proxmox login](../pictures/proxmox_login.png)  
   
+## Optionen  
+
+![option](../pictures/options.png)  
+
+### Anfrage-Intervall  
+Standard sind 30 Sekunden. Der kleinste Wert sind 5 Sekunden. 
+
 ### Festplatten Informationen
 Bei der Auswahl werden in den Objekten diese Datenpunkte angelegt, diese können sich je nach Festplattentyp unterscheiden.  
 ![disk info](../pictures/disk_info.png)  
