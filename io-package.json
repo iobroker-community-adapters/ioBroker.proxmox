@@ -192,7 +192,7 @@
       }],
     "requestInterval": 30,
     "requestDiskInformation": false,
-    "newTreeStructure": false,
+    "newTreeStructure": true,
     "requestHAInformation": false,
     "requestCephInformation": false,
     "requestStorageInformation": true,
