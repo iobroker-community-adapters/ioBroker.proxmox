@@ -70,6 +70,16 @@
                             "default": "pam"
                         }
                     ]
+                },
+                "webLink": {
+                    "type": "text",
+                    "hidde": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "default":"https://192.000.000.000:8006"
                 }
             }
         },

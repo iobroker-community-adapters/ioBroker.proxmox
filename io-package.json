@@ -132,7 +132,7 @@
     "icon": "proxmox.png",
     "compact": true,
     "localLinks": {
-      "_default": "https://%ip%:%port%"
+      "_default": "%webLink%"
     },
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
@@ -196,7 +196,8 @@
     "requestHAInformation": false,
     "requestCephInformation": false,
     "requestStorageInformation": true,
-    "requestStorageInformationBackup":false
+    "requestStorageInformationBackup":false,
+    "webLink":""
   },
   
   "instanceObjects": [

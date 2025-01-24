@@ -2,6 +2,7 @@
 
 const utils = require('@iobroker/adapter-core');
 const ProxmoxUtils = require('./lib/proxmox');
+const { link } = require('fs');
 const adapterName = require('./package.json').name.split('.').pop();
 
 function BtoMb(val) {
@@ -249,6 +250,18 @@ class Proxmox extends utils.Adapter {
             if (!checked) {
                 return false
             }
+            // Konfiguration der Adapterinstanz aktualisieren
+            this.extendForeignObject(`system.adapter.${this.name}.${this.instance}`, {
+                native: {
+                    'webLink': `https://${this.config.server[0].ip}:${this.config.server[0].port}`
+                }
+            }, (err) => {
+                if (err) {
+                    this.log.error(`Error updating config: ${err}`);
+                } else {
+                    this.log.info(`Config updated: webLink = https://${this.config.server[0].ip}:${this.config.server[0].port}`);
+                }
+            });
             return true;
         }
     }
