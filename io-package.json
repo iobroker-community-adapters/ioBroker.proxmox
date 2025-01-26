@@ -172,10 +172,7 @@
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "proxmox.png",
-    "compact": true,
-    "localLinks": {
-      "_default": "https://%ip%:%port%"
-    },
+    "compact": true,    
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
     "licenseInformation": {
