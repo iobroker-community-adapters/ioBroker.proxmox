@@ -9,25 +9,14 @@
             "type": "panel",
             "label": "Options",
             "items": {
-                "ip": {
-                    "type": "text",
-                    "label": "IP Address",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4
-                },
-                "port": {
-                    "type": "number",
-                    "min": 1,
-                    "max": 65535,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Port"
+                "header_Devices": {
+                    "type": "header",
+                    "text": "Nodes",
+                    "newLine": true,
+                    "size": 2,
+                    "style": {
+                        "marginTop": 20
+                    }
                 },
                 "requestInterval": {
                     "type": "number",
@@ -39,46 +28,88 @@
                     "xl": 4,
                     "label": "Request Interval"
                 },
-                "name": {
+                "text_DevicesInfo": {
+                    "type": "staticText",
+                    "label": "Add new devices by clicking the plus (+) symbol...",
                     "newLine": true,
-                    "type": "text",
+                    "style": {
+                        "fontSize": 16
+                    }
+                },
+                "tableDevices": {
+                    "type": "table",
                     "xs": 12,
                     "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "User name"
-                },
-                "pwd": {
-                    "type": "password",
-                    "repeat": false,
-                    "visible": true,
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Password"
-                },
-                "server": {
-                    "type": "select",
-                    "options": [
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
+                    "items": [
                         {
-                            "label": "Linux PAM standard authentication",
-                            "value": "pam"
+                            "type": "checkbox",
+                            "attr": "enabled",
+                            "width": "30px",
+                            "title": "Active",
+                            "default": true
                         },
                         {
-                            "label": "Proxmox VE authentication server",
-                            "value": "pve"
+                            "type": "text",
+                            "title": "IP Address",
+                            "attr": "realmIp",
+                            "maxLength": 15,
+                            "trim": true,
+                            "width": "20%",
+                            "validator": "data.realmIp != null && data.realmIp != undefined && data.realmIp.length > 5",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "number",
+                            "title": "Port",
+                            "attr": "realmPort",
+                            "min": 1,
+                            "max": 65535,
+                            "default": 8006,
+                            "width": "10%"
+                        },
+                        {
+                            "type": "text",
+                            "title": "Realm User",
+                            "attr": "realmUser",
+                            "maxLength": 50,
+                            "trim": false,
+                            "width": "25%",
+                            "filter": true,
+                            "sort": true,
+                            "validator": "data.realmUser.length > 1",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "password",
+                            "title": "RealmPassword",
+                            "attr": "realmPassword",
+                            "width": "15%",
+                            "validator": "data.realmPassword.length > 0",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "select",
+                            "title": "Realm",
+                            "attr": "realm",
+                            "default": "pam",
+                            "width": "10%",
+                            "options": [
+                                {
+                                    "label": "Linux PAM standard authentication",
+                                    "value": "pam"
+                                },
+                                {
+                                    "label": "Proxmox VE authentication server",
+                                    "value": "pve"
+                                }
+                            ]
                         }
-                    ],
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 6,
-                    "lg": 4,
-                    "xl": 4,
-                    "label": "Realm"
+                    ]
                 },
+
                 "_additionalInformationHeader": {
                     "newLine": true,
                     "type": "header",

@@ -3,14 +3,8 @@
 const utils = require('@iobroker/adapter-core');
 const ProxmoxUtils = require('./lib/proxmox');
 const adapterName = require('./package.json').name.split('.').pop();
+const _methods = require('./lib/methods');
 
-function BtoMb(val) {
-    return Math.round(val / 1048576);
-}
-
-function p(vala, valb) {
-    return Math.round((vala / valb) * 10000) / 100;
-}
 
 class Proxmox extends utils.Adapter {
     constructor(options) {
@@ -21,6 +15,7 @@ class Proxmox extends utils.Adapter {
 
         this.proxmox;
         this.objects = {};
+        this.nodesList = [];
 
         // reference for all offline container
         this.offlineResourceStatus = {
@@ -42,28 +37,29 @@ class Proxmox extends utils.Adapter {
 
         this.requestInterval = null;
 
+        this.used_level = _methods.used_level.bind(this);
+        this.bytetoMb = _methods.bytetoMb.bind(this);
+        this.removeNamespace = _methods.removeNamespace.bind(this);
+        this.prepareNameForId = _methods.prepareNameForId.bind(this);
+
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
         this.on('unload', this.onUnload.bind(this));
     }
 
     async onReady() {
-        if (!this.config.ip || this.config.ip === '192.000.000.000') {
-            this.log.error('Please set the IP of your Proxmox host.');
-            typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
-            return;
-        }
-
-        this.proxmox = new ProxmoxUtils(this);
-
-        this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
-
-        if (this.config.requestInterval < 5) {
-            this.log.info('Intervall configured < 5s, setting to 5s');
-            this.config.requestInterval = 5;
-        }
-
         try {
+            await this.setStateAsync('info.connection', { val: false, ack: true });
+
+            if (await this.initConfig()) {
+                this.log.debug(`Adapter settings successfully verified and initialized.`);
+            } else {
+                this.log.error(`Adapter settings initialization failed.  ---> Please check your adapter instance settings!`);
+                return;
+            }
+
+            this.proxmox = new ProxmoxUtils(this, this.nodesList);
+
             // Get a new ticket (login)
             await this.proxmox.ticket();
             await this.readObjects();
@@ -77,8 +73,6 @@ class Proxmox extends utils.Adapter {
             await this.setStateAsync('info.connection', { val: true, ack: true });
 
         } catch (err) {
-            await this.setStateAsync('info.connection', { val: false, ack: true });
-
             this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
         }
@@ -396,16 +390,16 @@ class Proxmox extends utils.Adapter {
                         }
 
                         if (nodeStatus.memory.used !== undefined) {
-                            await this.createCustomState(sid, 'memory.used', 'size', BtoMb(nodeStatus.memory.used));
+                            await this.createCustomState(sid, 'memory.used', 'size', this.bytetoMb(nodeStatus.memory.used));
                         }
                         if (nodeStatus.memory.used !== undefined) {
-                            await this.createCustomState(sid, 'memory.used_lev', 'level', p(nodeStatus.memory.used, nodeStatus.memory.total));
+                            await this.createCustomState(sid, 'memory.used_lev', 'level', this.used_level(nodeStatus.memory.used, nodeStatus.memory.total));
                         }
                         if (nodeStatus.memory.total !== undefined) {
-                            await this.createCustomState(sid, 'memory.total', 'size', BtoMb(nodeStatus.memory.total));
+                            await this.createCustomState(sid, 'memory.total', 'size', this.bytetoMb(nodeStatus.memory.total));
                         }
                         if (nodeStatus.memory.free !== undefined) {
-                            await this.createCustomState(sid, 'memory.free', 'size', BtoMb(nodeStatus.memory.free));
+                            await this.createCustomState(sid, 'memory.free', 'size', this.bytetoMb(nodeStatus.memory.free));
                         }
 
                         if (nodeStatus.loadavg[0] !== undefined) {
@@ -419,16 +413,16 @@ class Proxmox extends utils.Adapter {
                         }
 
                         if (nodeStatus.swap.used !== undefined) {
-                            await this.createCustomState(sid, 'swap.used', 'size', BtoMb(nodeStatus.swap.used));
+                            await this.createCustomState(sid, 'swap.used', 'size', this.bytetoMb(nodeStatus.swap.used));
                         }
                         if (nodeStatus.swap.free !== undefined) {
-                            await this.createCustomState(sid, 'swap.free', 'size', BtoMb(nodeStatus.swap.free));
+                            await this.createCustomState(sid, 'swap.free', 'size', this.bytetoMb(nodeStatus.swap.free));
                         }
                         if (nodeStatus.swap.total !== undefined) {
-                            await this.createCustomState(sid, 'swap.total', 'size', BtoMb(nodeStatus.swap.total));
+                            await this.createCustomState(sid, 'swap.total', 'size', this.bytetoMb(nodeStatus.swap.total));
                         }
                         if (nodeStatus.swap.free !== undefined && nodeStatus.swap.total !== undefined) {
-                            await this.createCustomState(sid, 'swap.used_lev', 'level', p(nodeStatus.swap.used, nodeStatus.swap.total));
+                            await this.createCustomState(sid, 'swap.used_lev', 'level', this.used_level(nodeStatus.swap.used, nodeStatus.swap.total));
                         }
                     }
                 } catch (err) {
@@ -464,7 +458,7 @@ class Proxmox extends utils.Adapter {
                                         const nodeDiskSmart = await this.proxmox.getNodeDisksSmart(node.node, disk.devpath);
                                         if (nodeDiskSmart?.data?.text) {
                                             await this.createCustomState(sid, `${diskPath}.smart`, 'text', nodeDiskSmart.data.text);
-                                        }    
+                                        }
                                     }
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
@@ -472,7 +466,7 @@ class Proxmox extends utils.Adapter {
                                 }
                                 if (disk.model !== undefined) {
                                     await this.createCustomState(sid, `${diskPath}.model`, 'text', disk.model);
-                                }                                
+                                }
                             }
                         }
                     } catch (err) {
@@ -982,25 +976,25 @@ class Proxmox extends utils.Adapter {
 
                         if (nodeStatus.memory.used !== undefined) {
                             await this.setStateChangedAsync(`${sid}.memory.used`, {
-                                val: BtoMb(nodeStatus.memory.used),
+                                val: this.bytetoMb(nodeStatus.memory.used),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.used !== undefined) {
                             await this.setStateChangedAsync(`${sid}.memory.used_lev`, {
-                                val: p(nodeStatus.memory.used, nodeStatus.memory.total),
+                                val: this.used_level(nodeStatus.memory.used, nodeStatus.memory.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.total !== undefined) {
                             await this.setStateChangedAsync(`${sid}.memory.total`, {
-                                val: BtoMb(nodeStatus.memory.total),
+                                val: this.bytetoMb(nodeStatus.memory.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.memory.free !== undefined) {
                             await this.setStateChangedAsync(`${sid}.memory.free`, {
-                                val: BtoMb(nodeStatus.memory.free),
+                                val: this.bytetoMb(nodeStatus.memory.free),
                                 ack: true,
                             });
                         }
@@ -1026,25 +1020,25 @@ class Proxmox extends utils.Adapter {
 
                         if (nodeStatus.swap.used !== undefined) {
                             await this.setStateChangedAsync(`${sid}.swap.used`, {
-                                val: BtoMb(nodeStatus.swap.used),
+                                val: this.bytetoMb(nodeStatus.swap.used),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.free !== undefined) {
                             await this.setStateChangedAsync(`${sid}.swap.free`, {
-                                val: BtoMb(nodeStatus.swap.free),
+                                val: this.bytetoMb(nodeStatus.swap.free),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.total !== undefined) {
                             await this.setStateChangedAsync(`${sid}.swap.total`, {
-                                val: BtoMb(nodeStatus.swap.total),
+                                val: this.bytetoMb(nodeStatus.swap.total),
                                 ack: true,
                             });
                         }
                         if (nodeStatus.swap.used !== undefined && nodeStatus.swap.total !== undefined) {
                             await this.setStateChangedAsync(`${sid}.swap.used_lev`, {
-                                val: p(nodeStatus.swap.used, nodeStatus.swap.total),
+                                val: this.used_level(nodeStatus.swap.used, nodeStatus.swap.total),
                                 ack: true,
                             });
                         }
@@ -1089,7 +1083,7 @@ class Proxmox extends utils.Adapter {
                                                 val: nodeDiskSmart.data.text,
                                                 ack: true,
                                             });
-                                        }                                        
+                                        }
                                     }
                                 }
                                 if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
@@ -1103,7 +1097,7 @@ class Proxmox extends utils.Adapter {
                                         val: disk.model,
                                         ack: true,
                                     });
-                                }                                
+                                }
                             }
                         }
                     }
@@ -1316,16 +1310,16 @@ class Proxmox extends utils.Adapter {
             const value = states[key];
 
             if (key === 'mem') {
-                result.push([sid, `${key}_lev`, 'level', p(states.mem, states.maxmem)]);
+                result.push([sid, `${key}_lev`, 'level', this.used_level(states.mem, states.maxmem)]);
             }
             if (key === 'disk') {
-                result.push([sid, `${key}_lev`, 'level', p(states.disk, states.maxdisk)]);
+                result.push([sid, `${key}_lev`, 'level', this.used_level(states.disk, states.maxdisk)]);
             }
             if (key === 'used') {
-                result.push([sid, `${key}_lev`, 'level', p(states.used, states.total)]);
+                result.push([sid, `${key}_lev`, 'level', this.used_level(states.used, states.total)]);
             }
             if (key === 'mem' || key === 'disk' || key === 'balloon_min' || key === 'maxdisk' || key === 'maxmem' || key === 'diskwrite' || key === 'used' || key === 'total' || key === 'avail') {
-                result.push([sid, key, 'size', BtoMb(value)]);
+                result.push([sid, key, 'size', this.bytetoMb(value)]);
             } else if (key === 'uptime' || key === 'cttime') {
                 result.push([sid, key, 'time', value]);
             } else if (key === 'netin' || key === 'netout') {
@@ -1462,14 +1456,35 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    removeNamespace(id) {
-        const re = new RegExp(`${this.namespace}*\\.`, 'g');
-        return id.replace(re, '');
+    async initConfig() {
+
+        if (this.config.tableDevices.length < 1) {
+            return false;
+        }
+
+        if (this.config.requestInterval < 5) {
+            this.log.info('Intervall configured < 5s, setting to 5s');
+            this.config.requestInterval = 5;
+        }
+
+        for (let i = 0; i < this.config.tableDevices.length; i++) {
+            const nodeDevice = this.config.tableDevices[i];
+
+            if (nodeDevice.enabled) {
+                const objNode = {
+                    'realmIp': nodeDevice.realmIp,
+                    'realmPort': nodeDevice.realmPort,
+                    'realmUser': nodeDevice.realmUser,
+                    'realmPassword': nodeDevice.realmPassword,
+                    'realm': nodeDevice.realm
+                }
+                this.nodesList.push(objNode);
+            }
+        }
+
+        return true;
     }
 
-    prepareNameForId(val) {
-        return String(val).replace('.', '-');
-    }
 
     /**
      * @param {() => void} callback

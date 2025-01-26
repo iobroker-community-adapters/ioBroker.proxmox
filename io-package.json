@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "news": {
+      "2.3.1": {
+        "en": "new settings structure\nfix storage request\nadd new eslint file\nfix node message\nrefactor",
+        "de": "neue einstellungen struktur\nanfrage zur aufbewahrung\nneue eslint datei hinzufügen\nfix-knoten\nrefactor",
+        "ru": "новая структура настроек\nдля хранения\nдобавить новый файл eslint\nисправить сообщение узла\nrefactor",
+        "pt": "nova estrutura de configurações\npedido de armazenamento de correção\nadicionar novo arquivo eslint\ncorrigir mensagem de nó\nrefator",
+        "nl": "nieuwe instellingenstructuur\nfix opslagverzoek\nnieuw eslint-bestand toevoegen\nknooppuntbericht herstellen\nrefactor",
+        "fr": "nouvelle structure de paramètres\nfixer la demande de stockage\najouter un nouveau fichier eslint\ncorrection du message de nœud\nnouveau facteur",
+        "it": "nuova struttura delle impostazioni\nfix richiesta di archiviazione\naggiungere nuovo file eslint\ncorrezione del messaggio del nodo\nrefattore",
+        "es": "nueva estructura de configuración\nsolicitud de almacenamiento\nañadir nuevo archivo eslint\nmensaje del nodo\nrefactor",
+        "pl": "nowa struktura ustawień\nustalić wniosek o przechowywanie\ndodaj nowy plik eslint\nnaprawić wiadomość węzła\nwspółczynnik",
+        "uk": "структура нових налаштувань\nфіксувати запит на зберігання\nдодати новий файл eslint\nвиправити повідомлення вузла\nрефактор",
+        "zh-cn": "新设置结构\n固定存储请求\n添加新的 eslint 文件\n修复节点消息\n重构"
+      },
       "2.3.0": {
         "en": "Adapter requires node.js >= 18 and js-controller >= 5 now\nfixed ha and ceph object type\nDependencies have been updated",
         "de": "Adapter benötigt node.js >= 18 und js-controller >= 5 jetzt\nha und ceph objekttyp wurden gefixed\nAbhängigkeiten wurden aktualisiert",
@@ -80,23 +93,52 @@
         "pl": "Poprawiona obsługa błędów\nAdded cluster adaptation",
         "uk": "Поліпшення обробки помилок\nДодано адаптацію кластеру",
         "zh-cn": "改进错误处理\n增加集群适应"
-      },
-      "2.0.2": {
-        "en": "Added option for disk information\nCheck type of disk wearout\nCatch exception when requesting disk information",
-        "de": "Option für Festplatteninformationen hinzugefügt\nÜberprüfen Sie die Art der Scheibenverschleiß\nFangausnahme bei der Anforderung von Datenträgern",
-        "ru": "Добавлена опция для информации о диске\nПроверить тип вывода диска\nИсключение Catch при запросе информации о диске",
-        "pt": "Opção adicionada para informações de disco\nTipo de verificação do desgaste do disco\nPegar exceção ao solicitar informações de disco",
-        "nl": "Optie voor disk informatie\nControle type disk slijtage\nVang uitzondering als verzoek om informatie over disk",
-        "fr": "Option ajoutée pour l'information sur le disque\nVérifier le type d'usure du disque\nAttrapez l'exception lorsque vous demandez des informations sur le disque",
-        "it": "Aggiunta opzione per informazioni su disco\nControllare il tipo di usura del disco\nPrendere l'eccezione quando si richiede informazioni su disco",
-        "es": "Opción adicional para la información de disco\nTipo de registro de disco\nExtracción de excepción al solicitar información en disco",
-        "pl": "Wstępna opcja dla informacji dyskowej\nOkładka\nCatch wyjątek po zażądzeniu informacji na dysku",
-        "uk": "Додано опцію для інформації про диск\nПеревірити тип диска\nВиняток кішки при запитуванні інформації про диск",
-        "zh-cn": "增加资料的选择\nD. 穿过失的检查类型\n要求不了解资料的例外情况"
       }
     },
     "connectionType": "local",
     "dataSource": "poll",
+    "messages": [
+      {
+        "condition": {
+          "operand": "and",
+          "rules": [
+            "oldVersion<2.3.0",
+            "newVersion>=2.3.1"
+          ]
+        },
+        "title": {
+          "en": "Important notice!",
+          "de": "Wichtiger Hinweis!",
+          "ru": "Важное замечание!",
+          "pt": "Notícia importante!",
+          "nl": "Belangrijke mededeling!",
+          "fr": "Avis important!",
+          "it": "Avviso IMPORTANTE!",
+          "es": "¡Noticia importante!",
+          "pl": "Ważna uwaga!",
+          "uk": "Важливе повідомлення!",
+          "zh-cn": "重要的提醒!"
+        },
+        "text": {
+          "en": "check adapter settings, for new settings structure",
+          "de": "Adaptereinstellungen prüfen, für neue Einstellungsstruktur",
+          "ru": "проверьте настройки адаптера, наличие новой структуры настроек",
+          "pt": "verificar as definições do adaptador, para a nova estrutura de definições",
+          "nl": "controleer adapterinstellingen, voor nieuwe instellingenstructuur",
+          "fr": "vérifier les réglages de l'adaptateur, pour une nouvelle structure de réglages",
+          "it": "controllare le impostazioni dell'adattatore, per la struttura delle nuove impostazioni",
+          "es": "compruebe los ajustes del adaptador, para la nueva estructura de ajustes",
+          "pl": "sprawdź ustawienia adaptera, dla nowej struktury ustawień",
+          "uk": "перевірте налаштування адаптера на наявність нової структури налаштувань",
+          "zh-cn": "check adapter settings, for new settings structure"
+        },
+        "level": "warn",
+        "buttons": [
+          "agree",
+          "cancel"
+        ]
+      }
+    ],
     "titleLang": {
       "en": "Proxmox",
       "de": "Proxmox",
@@ -182,18 +224,13 @@
     "pwd"
   ],
   "native": {
-    "ip": "192.000.000.000",
-    "port": 8006,
     "requestInterval": 30,
-    "name": "root",
-    "pwd": "",
-    "server": "pam",
     "requestDiskInformation": false,
     "newTreeStructure": false,
     "requestHAInformation": false,
     "requestCephInformation": false,
     "requestStorageInformation": true,
-    "requestStorageInformationBackup":false
+    "requestStorageInformationBackup": false
   },
   "instanceObjects": [
     {
