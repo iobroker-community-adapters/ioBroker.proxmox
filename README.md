@@ -34,6 +34,7 @@ Control and use data from your Proxmox VE
 	### **WORK IN PROGRESS**
 -->
 ### 2.3.1 (2025-01-26)
+* (mcm1957) BREAKING: you must enter your configuration data again at the config page.
 * (arteck) new settings structure
 * (arteck) fix storage request
 * (arteck) add new eslint file
