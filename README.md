@@ -33,8 +33,10 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### 2.3.1 (2025-01-26)
+### 2.4.0 (2025-01-27)
 * (mcm1957) BREAKING: you must enter your configuration data again at the config page.
+
+### 2.3.1 (2025-01-26)
 * (arteck) new settings structure
 * (arteck) fix storage request
 * (arteck) add new eslint file
@@ -52,11 +54,6 @@ Control and use data from your Proxmox VE
 
 ### 2.2.2 (2023-11-06)
 * (arteck) storage message corr
-
-### 2.2.1 (2023-10-28)
-* (arteck) machines delete after restart corr
-* (arteck) vmid type corr
-* (arteck) corstorage error message
 
 ## License
 

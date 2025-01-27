@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.3.1",
+    "version": "2.4.0",
     "news": {
+      "2.4.0": {
+        "en": "BREAKING: you must enter your configuration data again at the config page.",
+        "de": "BREAKING: Sie müssen Ihre Konfigurationsdaten auf der config-Seite erneut eingeben.",
+        "ru": "BREAKING: вы должны снова ввести данные конфигурации на странице настройки.",
+        "pt": "BREAKING: você deve inserir seus dados de configuração novamente na página de configuração.",
+        "nl": "BREAKING: u moet uw configuratiegegevens opnieuw invoeren op de configuratiepagina.",
+        "fr": "BREAKING: vous devez saisir à nouveau vos données de configuration à la page de configuration.",
+        "it": "BREAKING: è necessario inserire nuovamente i dati di configurazione nella pagina di configurazione.",
+        "es": "BREAKING: debe volver a introducir sus datos de configuración en la página de configuración.",
+        "pl": "BREAKING: musisz ponownie wprowadzić dane konfiguracyjne na stronie konfiguracyjnej.",
+        "uk": "BREAKING: Ви повинні ввести дані конфігурації знову на сторінці налаштування.",
+        "zh-cn": "您必须在配置页上再次输入配置数据 ."
+      },
       "2.3.1": {
         "en": "new settings structure\nfix storage request\nadd new eslint file\nfix node message\nrefactor",
         "de": "neue einstellungen struktur\nanfrage zur aufbewahrung\nneue eslint datei hinzufügen\nfix-knoten\nrefactor",
@@ -80,19 +93,6 @@
         "pl": "nowy Object tree structure (ang.)\nhA Informacja\nInfo jest wybierany\nInformacje te są podane przez Storage'a. Json\nkorinfo dla kontenerów offline\naxios timout wynosi obecnie 5 sekund.",
         "uk": "новини Структура дерева об'єкта (вибірково)\nдодано інформацію HA\nІнформація про зберігання вибір\nІнформація про резервну копію об'єкта Жсон\nкорр інформація для контейнера в автономному режимі\naxios timout тепер 5 сек.",
         "zh-cn": "新的 目标树结构(可选择)\n增加人道协调厅信息\n导 言\n泡沫中的包装作为目的后盾 Json\nb. 集装箱的包装\na 目前有5名受害者。."
-      },
-      "2.1.0": {
-        "en": "Improved error handling\nAdded cluster adaptation",
-        "de": "Verbesserte Fehlerbehandlung\nHinzufügen von Cluster-Adaption",
-        "ru": "Улучшена обработка ошибок\nДобавлена адаптация кластера",
-        "pt": "Melhor manuseio de erros\nAdaptação de cluster adicionado",
-        "nl": "Improviserende fouten\nCluster aanpassing",
-        "fr": "Amélioration de la manipulation des erreurs\nAjout d ' un groupe d ' adaptation",
-        "it": "Miglioramento della gestione degli errori\nAdattamento cluster aggiunto",
-        "es": "Mejor manejo de errores\nAdaptación a grupos temáticos",
-        "pl": "Poprawiona obsługa błędów\nAdded cluster adaptation",
-        "uk": "Поліпшення обробки помилок\nДодано адаптацію кластеру",
-        "zh-cn": "改进错误处理\n增加集群适应"
       }
     },
     "connectionType": "local",
@@ -172,7 +172,7 @@
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "proxmox.png",
-    "compact": true,    
+    "compact": true,
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
     "licenseInformation": {

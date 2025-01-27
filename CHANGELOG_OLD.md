@@ -1,4 +1,9 @@
 # Older changes
+## 2.2.1 (2023-10-28)
+* (arteck) machines delete after restart corr
+* (arteck) vmid type corr
+* (arteck) corstorage error message
+
 ## 2.2.0 (2023-10-21)
 * (arteck) new Object tree structure (selectable)
 * (arteck) added HA Information
