@@ -30,6 +30,11 @@
                 },
                 "text_DevicesInfo": {
                     "type": "staticText",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
                     "label": "Add new devices by clicking the plus (+) symbol...",
                     "newLine": true,
                     "style": {

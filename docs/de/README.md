@@ -8,18 +8,24 @@
 - Admin Adapter 6.13.16 (oder neuer)  
   
 ***  
-## Einstellungen  
-![Option](../pictures/option.png)  
+>Die Dokumentation basiert auf dem Stand der Version 2.4.0  
+Alle Bilder sind Beispiele und können je nach Systemkonfiguration abweichen.
+
+## Nodes
+
+![Option](../pictures/optionen.png)  
+  
+### Anfrage-Intervall  
+Standard sind 30 Sekunden. Der kleinste Wert sind 5 Sekunden.  
+  
+> Mit klicken auf das Plussymbol wird eine neue Zeile für ein Node hinzugefügt. in einer Insatnnz können alle Nodes eingetragen werden.  
   
 ### IP Adresse 
-Die IP Adresse des Proxmox Servers bzw. der Servername. Bei mehreren Servern, werden die IP`s mit Komma getrennt hier eingetragen. 
+Die IP Adresse des Proxmox Server bzw. der Servername.
   
 ### Port  
 Standard ist der Port 8006, wenn bei der Installation ein anderer Port eingestell wurde, muss dieser hier auch geändert.  
 
-### Anfrage-Intervall  
-Standard sind 30 Sekunden. Der kleinste Wert sind 5 Sekunden.  
-  
 ### Nutzername  
 Bei der Installation wird root als Standard eingestellt. Wenn ein neuer User für den Abruf der Daten in Proxmox erstellt wird, kommt hier sein Loginname rein.  
   
@@ -31,12 +37,16 @@ Auswahl zwischen `Standard Authentifizierung` und dem `Proxmox Authentifizierung
 Als Standard sollte hier der selbe Dienst gewählt werden, wie im Login auf der Weboberfläche.  
 ![proxmox login](../pictures/proxmox_login.png)  
   
+***
+## Weitere Informationen  
+    
 ### Festplatten Informationen
 Bei der Auswahl werden in den Objekten diese Datenpunkte angelegt, diese können sich je nach Festplattentyp unterscheiden.  
 ![disk info](../pictures/disk_info.png)  
   
 ### HA informationen  
-in Arbeit  
+Es werden alle Nodes des HA-Cluster aufgelistet. Welcher Node Master ist und welcher das Quorum übernimmt.  
+![HA Strucktur](../pictures/HA_structure.png)    
 
 ### Ceph Informationen  
 in Arbeit  
