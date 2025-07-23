@@ -35,7 +35,8 @@ Control and use data from your Proxmox VE
 -->
 
 ### **WORK IN PROGRESS**
-* (Scrounger) bug fix: check status of lxc / qemu before send command (#487)
+* (Scrounger) check status of lxc / qemu before send command (bug fix #487)
+* (Scrounger) bug fix json cyclic error
 
 ### 2.4.0 (2025-01-27)
 * (mcm1957) BREAKING: you must enter your configuration data again at the config page.
