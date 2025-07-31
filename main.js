@@ -99,28 +99,38 @@ class Proxmox extends utils.Adapter {
                 if (type === 'lxc' || type === 'qemu') {
                     const vmid = obj.native?.vmid;
 
+                    const res = await this.proxmox.getResourceStatus(node, type, vmid);
+
                     switch (command) {
                         case 'start':
-                            this.proxmox
-                                ?.qemuStart(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
+                            if (res.status === 'stopped') {
+                                this.proxmox
+                                    ?.qemuStart(node, type, vmid)
+                                    .then((data) => {
+                                        this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
+                                        this.sendRequest(10000);
+                                    })
+                                    .catch((err) => {
+                                        this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                    });
+                            } else {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": is already ${res.status}`);
+                            }
                             break;
                         case 'stop':
-                            this.proxmox
-                                ?.qemuStop(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
+                            if (res.status === 'running') {
+                                this.proxmox
+                                    ?.qemuStop(node, type, vmid)
+                                    .then((data) => {
+                                        this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
+                                        this.sendRequest(10000);
+                                    })
+                                    .catch((err) => {
+                                        this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                    });
+                            } else {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": is already ${res.status}`);
+                            }
                             break;
                         case 'reset':
                             this.proxmox
@@ -145,15 +155,19 @@ class Proxmox extends utils.Adapter {
                                 });
                             break;
                         case 'shutdown':
-                            this.proxmox
-                                ?.qemuShutdown(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
+                            if (res.status === 'running') {
+                                this.proxmox
+                                    ?.qemuShutdown(node, type, vmid)
+                                    .then((data) => {
+                                        this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
+                                        this.sendRequest(10000);
+                                    })
+                                    .catch((err) => {
+                                        this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                    });
+                            } else {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": is already ${res.status}`);
+                            }
                             break;
                         case 'suspend':
                             this.proxmox
@@ -167,15 +181,19 @@ class Proxmox extends utils.Adapter {
                                 });
                             break;
                         case 'reboot':
-                            this.proxmox
-                                ?.qemuReboot(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
+                            if (res.status === 'running') {
+                                this.proxmox
+                                    ?.qemuReboot(node, type, vmid)
+                                    .then((data) => {
+                                        this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
+                                        this.sendRequest(10000);
+                                    })
+                                    .catch((err) => {
+                                        this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                                    });
+                            } else {
+                                this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": is already ${res.status}`);
+                            }
                             break;
                     }
                 } else if (type === 'node') {
