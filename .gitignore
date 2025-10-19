@@ -15,3 +15,6 @@ admin/i18n/*/flat.txt
 
 # ioBroker dev-server
 .dev-server/
+
+#ignore .commitinfo created by ioBroker release script
+.commitinfo
