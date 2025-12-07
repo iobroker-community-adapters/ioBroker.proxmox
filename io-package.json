@@ -1,33 +1,20 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.2-alpha.0",
+    "version": "2.4.2",
     "news": {
-      "2.4.2-alpha.0": {
-        "en": "Adapter requires node.js >= 20 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
-        "de": "Adapter benötigt node.js >= 20 jetzt\neinige verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigrieren zu eslint 9",
-        "ru": "Адаптер требует node.js >= 20 сейчас\nнекоторые улучшения\nЗависимости были обновлены\nскачать eslint 9",
-        "pt": "Adaptador requer nod.js >= 20 agora\nalgumas melhorias\nAs dependências foram atualizadas\nmigrar para o eslint 9",
-        "nl": "Voor de adapter zijn node.js < 20 now\nenkele verbeteringen\nAfhankelijkheden zijn bijgewerkt\nmigreren naar eslint 9",
-        "fr": "Adaptateur nécessite node.js >= 20 maintenant\nquelques améliorations\nLes dépendances ont été actualisées\nmigrer vers l'île 9",
-        "it": "Adattatore richiede node.js >= 20 ora\nalcuni miglioramenti\nLe dipendenze sono state aggiornate\nmigrare a eslint 9",
-        "es": "Adaptador requiere node.js >= 20 ahora\nalgunas mejoras\nSe han actualizado las dependencias\nmigrar a eslint 9",
-        "pl": "Adapter wymaga node.js > = 20\npewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
-        "uk": "Адаптер вимагає node.js >= 20 тепер\nдеякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
-        "zh-cn": "适配器需要节点.js >= 20 现在\n一些改进\n依赖关系已更新\n迁移到 eslint 9"
-      },
-      "2.4.1": {
-        "en": "some improvements\nDependencies have been updated\nmigrate to eslint 9",
-        "de": "einige verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigrieren zu eslint 9",
-        "ru": "некоторые улучшения\nЗависимости были обновлены\nскачать eslint 9",
-        "pt": "algumas melhorias\nAs dependências foram atualizadas\nmigrar para o eslint 9",
-        "nl": "enkele verbeteringen\nAfhankelijkheden zijn bijgewerkt\nmigreren naar eslint 9",
-        "fr": "quelques améliorations\nLes dépendances ont été actualisées\nmigrer vers l'île 9",
-        "it": "alcuni miglioramenti\nLe dipendenze sono state aggiornate\nmigrare a eslint 9",
-        "es": "algunas mejoras\nSe han actualizado las dependencias\nmigrar a eslint 9",
-        "pl": "pewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
-        "uk": "деякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
-        "zh-cn": "一些改进\n依赖关系已更新\n迁移到 eslint 9"
+      "2.4.2": {
+        "en": "Adapter requires node.js >= 20, js-controller >= 6.0.11 and admin >= 7.6.17 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
+        "de": "Adapter benötigt node.js >= 20, js-controller >= 6.0.11 und admin >= 7.6.17 jetzt\neinige Verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigriert zu eslint 9",
+        "ru": "Адаптер требует node.js >= 20, js-контроллер >= 6.0.11 и админ >= 7.6.17 сейчас\nнекоторые улучшения\nЗависимости были обновлены\nскачать eslint 9",
+        "pt": "O adaptador necessita de nodo.js >= 20, js-controlador >= 6.0.11 e administrador >= 7.6.17 agora\nalgumas melhorias\nAs dependências foram atualizadas\nmigrar para o eslint 9",
+        "nl": "Voor adapters zijn node.js < 20, js-controller <= 6,0.11 en admin <= 7.6.17 nu vereist\nenkele verbeteringen\nAfhankelijkheden zijn bijgewerkt\nmigreren naar eslint 9",
+        "fr": "Adapter nécessite node.js >= 20, js-controller >= 6.0.11 et admin >= 7.6.17 maintenant\nquelques améliorations\nLes dépendances ont été actualisées\nmigrer vers l'île 9",
+        "it": "Adattatore richiede node.js >= 20, js-controller >= 6.0.11 e admin >= 7.6.17 ora\nalcuni miglioramenti\nLe dipendenze sono state aggiornate\nmigrare a eslint 9",
+        "es": "Adaptador requiere node.js ю= 20, js-controller √= 6.0.11 y admin= 7.6.17 ahora\nalgunas mejoras\nSe han actualizado las dependencias\nmigrar a eslint 9",
+        "pl": "Adapter wymaga node.js > = 20, kontroler js- i admin > = 7.6.17\npewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
+        "uk": "Адаптер вимагає node.js >= 20, js-controller >= 6.0.11 і admin >= 7.6.17 тепер\nдеякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
+        "zh-cn": "适配器需要节点.js >= 20,js控制器 >= 6.0.11和admin >= 7.6.17 现在\n一些改进\n依赖关系已更新\n迁移到 eslint 9"
       },
       "2.4.0": {
         "en": "BREAKING: you must enter your configuration data again at the config page.",
@@ -80,19 +67,6 @@
         "pl": "dodaj status ikon dostępny dla lxc i vm\nregulacja ustawień",
         "uk": "додати статус іконки, доступний для lxc і vm\nналаштування параметрів",
         "zh-cn": "添加 lxc 和 vm 可用的图标状态\n设置调整"
-      },
-      "2.2.2": {
-        "en": "storage message corr",
-        "de": "speichernachricht corr",
-        "ru": "хранение сообщение корр",
-        "pt": "mensagem de armazenamento",
-        "nl": "vertaling:",
-        "fr": "message de stockage corr",
-        "it": "messaggio di archiviazione corr",
-        "es": "mensaje de almacenamiento corr",
-        "pl": "przesyłka danych",
-        "uk": "код товару:",
-        "zh-cn": "储存信息"
       }
     },
     "connectionType": "local",
