@@ -34,6 +34,7 @@ Control and use data from your Proxmox VE
 	### **WORK IN PROGRESS**
 -->
 ### 2.4.1 (2025-12-07)
+* (arteck) Adapter requires node.js >= 20 now
 * (Scrounger) some improvements
 * (arteck) Dependencies have been updated
 * (arteck) migrate to eslint 9
@@ -80,4 +81,5 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+
 THE SOFTWARE.
