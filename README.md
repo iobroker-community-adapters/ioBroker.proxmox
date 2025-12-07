@@ -33,7 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.4.1 (2025-12-07)
 * (Scrounger) some improvements
 * (arteck) Dependencies have been updated
 * (arteck) migrate to eslint 9
@@ -56,9 +56,6 @@ Control and use data from your Proxmox VE
 ### 2.2.3 (2024-02-01)
 * (arteck) add icon status available for lxc and vm
 * (arteck) settings adjustment
-
-### 2.2.2 (2023-11-06)
-* (arteck) storage message corr
 
 ## License
 

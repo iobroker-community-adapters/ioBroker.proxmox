@@ -1,4 +1,7 @@
 # Older changes
+## 2.2.2 (2023-11-06)
+* (arteck) storage message corr
+
 ## 2.2.1 (2023-10-28)
 * (arteck) machines delete after restart corr
 * (arteck) vmid type corr
