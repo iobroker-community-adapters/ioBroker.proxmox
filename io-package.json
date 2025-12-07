@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.1",
+    "version": "2.4.2-alpha.0",
     "news": {
+      "2.4.2-alpha.0": {
+        "en": "Adapter requires node.js >= 20 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
+        "de": "Adapter benötigt node.js >= 20 jetzt\neinige verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigrieren zu eslint 9",
+        "ru": "Адаптер требует node.js >= 20 сейчас\nнекоторые улучшения\nЗависимости были обновлены\nскачать eslint 9",
+        "pt": "Adaptador requer nod.js >= 20 agora\nalgumas melhorias\nAs dependências foram atualizadas\nmigrar para o eslint 9",
+        "nl": "Voor de adapter zijn node.js < 20 now\nenkele verbeteringen\nAfhankelijkheden zijn bijgewerkt\nmigreren naar eslint 9",
+        "fr": "Adaptateur nécessite node.js >= 20 maintenant\nquelques améliorations\nLes dépendances ont été actualisées\nmigrer vers l'île 9",
+        "it": "Adattatore richiede node.js >= 20 ora\nalcuni miglioramenti\nLe dipendenze sono state aggiornate\nmigrare a eslint 9",
+        "es": "Adaptador requiere node.js >= 20 ahora\nalgunas mejoras\nSe han actualizado las dependencias\nmigrar a eslint 9",
+        "pl": "Adapter wymaga node.js > = 20\npewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
+        "uk": "Адаптер вимагає node.js >= 20 тепер\nдеякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
+        "zh-cn": "适配器需要节点.js >= 20 现在\n一些改进\n依赖关系已更新\n迁移到 eslint 9"
+      },
       "2.4.1": {
         "en": "some improvements\nDependencies have been updated\nmigrate to eslint 9",
         "de": "einige verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigrieren zu eslint 9",
@@ -80,19 +93,6 @@
         "pl": "przesyłka danych",
         "uk": "код товару:",
         "zh-cn": "储存信息"
-      },
-      "2.2.1": {
-        "en": "machines delete after restart corr\nvmid type corr\ncorstorage error message",
-        "de": "maschinen löschen nach neustart corr\ngeflechtsart\nkorstorage fehlermeldung",
-        "ru": "машины удаляют после перезапуска корр\nvmid тип корр\nсообщение об ошибке",
-        "pt": "máquinas apagar após o corr\ntipo vmid corrija\nmensagem de erro de corstorage",
-        "nl": "machines gewist na de herstart\nvmid type corr\ncorstorage fout",
-        "fr": "machines à supprimer après le redémarrage corr\nvmid type corr\nmessage d'erreur corstorage",
-        "it": "macchine eliminare dopo riavviare corr\nvmid tipo corno\nmessaggio di errore corstorage",
-        "es": "máquinas eliminar después del corr\nvmid type corr\nmensaje de error de corstorage",
-        "pl": "maszyna usunięta po restartie korcorr\nvmid typ kor\nkorporacja błędów",
-        "uk": "машинне видалення після перезавантаження\nvmid тип кор\nповідомлення про помилку",
-        "zh-cn": "机器在重新包装之后删除\na. 过类型\n密封错误信息"
       }
     },
     "connectionType": "local",
