@@ -33,7 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### 2.4.1 (2025-12-07)
+### **WORK IN PROGRESS**
 * (arteck) Adapter requires node.js >= 20 now
 * (Scrounger) some improvements
 * (arteck) Dependencies have been updated
