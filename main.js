@@ -5,7 +5,6 @@ const ProxmoxUtils = require('./lib/proxmox');
 const adapterName = require('./package.json').name.split('.').pop();
 const _methods = require('./lib/methods');
 
-
 class Proxmox extends utils.Adapter {
     constructor(options) {
         super({
@@ -71,7 +70,6 @@ class Proxmox extends utils.Adapter {
             this.sendRequest(); // start interval
 
             await this.setStateAsync('info.connection', { val: true, ack: true });
-
         } catch (err) {
             this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
@@ -249,9 +247,9 @@ class Proxmox extends utils.Adapter {
 
     /**
      * Create all node channels
+     *
      * @param {any[]} nodes - array of nodes
-     * @return {Promise<void>}
-     * @private
+     * @returns {Promise<void>}
      */
     async createNodes(nodes) {
         const nodesAll = Object.keys(this.objects)
@@ -498,7 +496,7 @@ class Proxmox extends utils.Adapter {
 
     /**
      * Create CEPH
-     * @private
+     *
      */
     async createHA() {
         const haid = `${this.namespace}.ha`;
@@ -643,8 +641,8 @@ class Proxmox extends utils.Adapter {
                             common: {
                                 name: res.name,
                                 statusStates: {
-                                    onlineId: `${sid}.available`
-                                }
+                                    onlineId: `${sid}.available`,
+                                },
                             },
                             native: {
                                 type: type,
@@ -845,7 +843,7 @@ class Proxmox extends utils.Adapter {
                     let storageName;
 
                     if (res.shared == 0) {
-                        storageName = res.node + '_' + this.prepareNameForId(res.storage);
+                        storageName = `${res.node}_${this.prepareNameForId(res.storage)}`;
                     } else {
                         storageName = this.prepareNameForId(res.storage);
                     }
@@ -1122,7 +1120,7 @@ class Proxmox extends utils.Adapter {
         try {
             const cephInformation = await this.proxmox.getCephInformation();
 
-            this.log.debug('cephInformation: ' + JSON.stringify(cephInformation));
+            this.log.debug(`cephInformation: ${JSON.stringify(cephInformation)}`);
 
             if (cephInformation !== null) {
                 for (const lpEntry in cephInformation.data) {
@@ -1143,7 +1141,7 @@ class Proxmox extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.log.error('Unable to get Ceph resources: ' + JSON.stringify(err));
+            this.log.error(`Unable to get Ceph resources: ${JSON.stringify(err)}`);
         }
     }
 
@@ -1152,7 +1150,7 @@ class Proxmox extends utils.Adapter {
         try {
             const haInformation = await this.proxmox.getHAStatusInformation();
 
-            this.log.debug('haInformation: ' + JSON.stringify(haInformation));
+            this.log.debug(`haInformation: ${JSON.stringify(haInformation)}`);
 
             for (const lpEntry in haInformation.data) {
                 const lpType = typeof haInformation.data[lpEntry]; // get Type of Variable as String, like string/number/boolean
@@ -1246,7 +1244,7 @@ class Proxmox extends utils.Adapter {
                     let storageName;
 
                     if (res.shared == 0) {
-                        storageName = res.node + '_' + this.prepareNameForId(res.storage);
+                        storageName = `${res.node}_${this.prepareNameForId(res.storage)}`;
                     } else {
                         storageName = this.prepareNameForId(res.storage);
                     }
@@ -1340,6 +1338,7 @@ class Proxmox extends utils.Adapter {
 
     /**
      * Reads all channel objects and saves them in RAM
+     *
      * @returns {Promise<void>}
      */
     async readObjects() {
@@ -1358,8 +1357,7 @@ class Proxmox extends utils.Adapter {
      * @param {string} name - name of the state
      * @param {string} type - e.g., time
      * @param {any} val - state val
-     * @return {Promise<void>}
-     * @private
+     * @returns {Promise<void>}
      */
     async createCustomState(sid, name, type, val) {
         // this.log.debug(`creating state: ${name}`);
@@ -1457,7 +1455,6 @@ class Proxmox extends utils.Adapter {
     }
 
     async initConfig() {
-
         if (this.config.tableDevices.length < 1) {
             return false;
         }
@@ -1472,19 +1469,18 @@ class Proxmox extends utils.Adapter {
 
             if (nodeDevice.enabled) {
                 const objNode = {
-                    'realmIp': nodeDevice.realmIp,
-                    'realmPort': nodeDevice.realmPort,
-                    'realmUser': nodeDevice.realmUser,
-                    'realmPassword': nodeDevice.realmPassword,
-                    'realm': nodeDevice.realm
-                }
+                    realmIp: nodeDevice.realmIp,
+                    realmPort: nodeDevice.realmPort,
+                    realmUser: nodeDevice.realmUser,
+                    realmPassword: nodeDevice.realmPassword,
+                    realm: nodeDevice.realm,
+                };
                 this.nodesList.push(objNode);
             }
         }
 
         return true;
     }
-
 
     /**
      * @param {() => void} callback
@@ -1505,11 +1501,10 @@ class Proxmox extends utils.Adapter {
     }
 }
 
-// @ts-ignore parent is a valid property on module
 if (module.parent) {
     // Export the constructor in compact mode
     /**
-     * @param {Partial<ioBroker.AdapterOptions>} [options={}]
+     * @param {Partial<ioBroker.AdapterOptions>} [options]
      */
     module.exports = (options) => new Proxmox(options);
 } else {
