@@ -39,7 +39,7 @@
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/eslint-config": "^2.1.0",
     "@iobroker/testing": "^5.2.2",
-    "@types/node": "^22.15.29",
+    "@types/node": "^25.0.3",
     "typescript": "~5.9.3"
   },
   "main": "main.js",
