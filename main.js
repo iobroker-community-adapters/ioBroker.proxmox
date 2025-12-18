@@ -827,15 +827,18 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
 
-                    await this.findState(sid, resourceStatus, async (states) => {
-                        for (const s of states) {
-                            try {
-                                await this.createCustomState(s[0], s[1], s[2], s[3]);
-                            } catch (e) {
-                                this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                            }
-                        }
-                    });
+                    const states = await this.findState(sid, resourceStatus);
+
+                    await Promise.all(
+                        states.map(([sid, id, role, val]) =>
+                            this.createCustomState(sid, id, role, val)
+                                .catch(e =>
+                                    this.log.error(
+                                        `Could not create state for ${sid}.${id}: ${e.message}`
+                                    )
+                                )
+                        )
+                    );
                 }
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
@@ -871,51 +874,58 @@ class Proxmox extends utils.Adapter {
                             this.setObjectNotExists(sid, this.objects[sid]);
                         }
 
+                        let storageStatus;
+
                         try {
                             if (res.status !== 'unknown') {
-                                const storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
+                                storageStatus = await this.proxmox.getStorageStatus(res.node, res.storage, !!res.shared);
 
                                 this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
-                                await this.findState(sid, storageStatus, async (states) => {
-                                    for (const s of states) {
-                                        try {
-                                            await this.createCustomState(s[0], s[1], s[2], s[3]);
-                                        } catch (e) {
-                                            this.log.error(`Could not create state for ${JSON.stringify(s)}: ${e.message}`);
-                                        }
-                                    }
-                                    if (this.config.requestStorageInformationBackup) {
-                                        await this.extendObjectAsync(`${sid}.backupJson`, {
-                                            type: 'state',
-                                            common: {
-                                                name: {
-                                                    en: 'Status',
-                                                    de: 'Status',
-                                                    ru: 'Статус',
-                                                    pt: 'Estado',
-                                                    nl: 'Status',
-                                                    fr: 'État',
-                                                    it: 'Stato',
-                                                    es: 'Situación',
-                                                    pl: 'Status',
-                                                    uk: 'Статус на сервери',
-                                                    'zh-cn': '现状',
-                                                },
-                                                type: 'string',
-                                                role: 'indicator.status',
-                                                read: true,
-                                                write: false,
-                                            },
-                                            native: {},
-                                        });
+                                const states = await this.findState(sid, storageStatus);
 
-                                        await this.setStateChangedAsync(`${sid}.backupJson`, { val: '{}', ack: true });
-                                    }
-                                });
+                                await Promise.all(
+                                    states.map(([sid, id, role, val]) =>
+                                        this.createCustomState(sid, id, role, val)
+                                            .catch(e =>
+                                                this.log.error(
+                                                    `Could not create state for ${sid}.${id}: ${e.message}`
+                                                )
+                                            )
+                                    )
+                                );
+
+                                if (this.config.requestStorageInformationBackup) {
+                                    await this.extendObjectAsync(`${sid}.backupJson`, {
+                                        type: 'state',
+                                        common: {
+                                            name: {
+                                                en: 'Status',
+                                                de: 'Status',
+                                                ru: 'Статус',
+                                                pt: 'Estado',
+                                                nl: 'Status',
+                                                fr: 'État',
+                                                it: 'Stato',
+                                                es: 'Situación',
+                                                pl: 'Status',
+                                                uk: 'Статус на сервери',
+                                                'zh-cn': '现状',
+                                            },
+                                            type: 'string',
+                                            role: 'indicator.status',
+                                            read: true,
+                                            write: false,
+                                        },
+                                        native: {},
+                                    });
+
+                                    await this.setStateChangedAsync(`${sid}.backupJson`, { val: '{}', ack: true });
+                                }
                             }
                         } catch (err) {
-                            this.log.error(`Storage: ${res.storage} on  ${res.storage} not available`);
+                            this.log.error(`Storageerror 1: ${res.storage} on  ${res.node} with status ${res.status}`);
+                            this.log.error(`Storageerror 2: ${res.storage} - ${JSON.stringify(storageStatus)}`);
                         }
                     }
                 }
@@ -1301,40 +1311,69 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    async findState(sid, states, cb) {
+    async findState(sid, states) {
         const result = [];
 
-        for (const key of Object.keys(states)) {
-            const value = states[key];
+        const sizeKeys = new Set([
+            'mem', 'disk', 'balloon_min', 'maxdisk', 'maxmem',
+            'diskwrite', 'used', 'total', 'avail'
+        ]);
 
+        const timeKeys  = new Set(['uptime', 'cttime']);
+        const sizebKeys = new Set(['netin', 'netout']);
+        const numKeys   = new Set(['pid', 'vmid', 'cpus', 'shared', 'enabled', 'active']);
+        const textKeys  = new Set(['content', 'type', 'status', 'volid', 'parent', 'format']);
+
+        for (const [key, value] of Object.entries(states)) {
+
+            // Level-Berechnungen
             if (key === 'mem') {
-                result.push([sid, `${key}_lev`, 'level', this.used_level(states.mem, states.maxmem)]);
+                result.push([
+                    sid,
+                    'mem_lev',
+                    'level',
+                    this.used_level(states.mem, states.maxmem)
+                ]);
             }
+
             if (key === 'disk') {
-                result.push([sid, `${key}_lev`, 'level', this.used_level(states.disk, states.maxdisk)]);
+                result.push([
+                    sid,
+                    'disk_lev',
+                    'level',
+                    this.used_level(states.disk, states.maxdisk)
+                ]);
             }
+
             if (key === 'used') {
-                result.push([sid, `${key}_lev`, 'level', this.used_level(states.used, states.total)]);
+                result.push([
+                    sid,
+                    'used_lev',
+                    'level',
+                    this.used_level(states.used, states.total)
+                ]);
             }
-            if (key === 'mem' || key === 'disk' || key === 'balloon_min' || key === 'maxdisk' || key === 'maxmem' || key === 'diskwrite' || key === 'used' || key === 'total' || key === 'avail') {
+
+            // Typ-Zuordnung
+            if (sizeKeys.has(key)) {
                 result.push([sid, key, 'size', this.bytetoMb(value)]);
-            } else if (key === 'uptime' || key === 'cttime') {
+            } else if (timeKeys.has(key)) {
                 result.push([sid, key, 'time', value]);
-            } else if (key === 'netin' || key === 'netout') {
+            } else if (sizebKeys.has(key)) {
                 result.push([sid, key, 'sizeb', value]);
             } else if (key === 'cpu') {
-                result.push([sid, key, 'level', parseInt(value * 10000) / 100]);
-            } else if (key === 'pid' || key === 'vmid' || key === 'cpus' || key === 'shared' || key === 'enabled' || key === 'active' || key === 'shared') {
-                result.push([sid, key, 'default_num', parseInt(value)]); // parseInt, because pid would be string
-            } else if (key === 'content' || key === 'type' || key === 'status' || key === 'volid' || key === 'parent' || key === 'format') {
+                result.push([sid, key, 'level', Math.round(value * 10000) / 100]);
+            } else if (numKeys.has(key)) {
+                result.push([sid, key, 'default_num', parseInt(value, 10)]);
+            } else if (textKeys.has(key)) {
                 result.push([sid, key, 'text', value]);
             }
         }
 
         this.log.debug(`found states: ${JSON.stringify(result)}`);
-
-        await cb(result);
+        return result;
     }
+
 
     /**
      * Reads all channel objects and saves them in RAM
