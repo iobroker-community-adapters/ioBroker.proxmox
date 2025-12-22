@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.3",
+    "version": "2.4.4",
     "news": {
+      "2.4.4": {
+        "en": "fix reconnect if node is offline",
+        "de": "reconnect reparieren, wenn knoten offline ist",
+        "ru": "восстановить соединение, если узел отключен",
+        "pt": "corrigir a reconexão se o nó estiver desligado",
+        "nl": "repareren opnieuw verbinden als de knoop offline is",
+        "fr": "réconnecter si le noeud est hors ligne",
+        "it": "correzione di ricollegamento se nodo è offline",
+        "es": "arreglar la reconexión si el nodo está fuera de línea",
+        "pl": "naprawić ponowne połączenie jeśli węzeł jest offline",
+        "uk": "виправити відключення, якщо вузол відсутня",
+        "zh-cn": "如果节点断线, 则固定重连接"
+      },
       "2.4.3": {
         "en": "fix check backupStatus",
         "de": "backupStatus überprüfen",

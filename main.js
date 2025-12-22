@@ -59,7 +59,6 @@ class Proxmox extends utils.Adapter {
 
             this.proxmox = new ProxmoxUtils(this, this.nodesList);
 
-            // Get a new ticket (login)
             await this.proxmox.ticket();
             await this.readObjects();
             await this.getNodes();
@@ -293,7 +292,6 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
 
             if (node.status === 'online') {
-                // node is offline no infomration available
                 if (node.cpu) {
                     await this.createCustomState(sid, 'cpu', 'level', parseInt(node.cpu * 10000) / 100);
                 }
@@ -882,6 +880,7 @@ class Proxmox extends utils.Adapter {
                 }
 
                 this.log.debug(`Requesting states for node ${node.node}`);
+
                 try {
                     const nodeStatus = await this.proxmox.getNodeStatus(node.node, true);
                     if (nodeStatus) {
