@@ -97,141 +97,66 @@ class Proxmox extends utils.Adapter {
                 if (type === 'lxc' || type === 'qemu') {
                     const vmid = obj.native?.vmid;
 
-                    switch (command) {
-                        case 'start':
-                            this.proxmox
-                                ?.qemuStart(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Starting ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'stop':
-                            this.proxmox
-                                ?.qemuStop(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Stopping ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'reset':
-                            this.proxmox
-                                ?.qemuReset(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Resetting ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'resume':
-                            this.proxmox
-                                ?.qemuResume(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Resuming ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'shutdown':
-                            this.proxmox
-                                ?.qemuShutdown(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Shutting down ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'suspend':
-                            this.proxmox
-                                ?.qemuSuspend(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Supspended ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
-                        case 'reboot':
-                            this.proxmox
-                                ?.qemuReboot(node, type, vmid)
-                                .then((data) => {
-                                    this.log.info(`Reboot ${vmid}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
-                                });
-                            break;
+                    const actions = {
+                        start: () => this.proxmox?.qemuStart(node, type, vmid),
+                        stop: () => this.proxmox?.qemuStop(node, type, vmid),
+                        reset: () => this.proxmox?.qemuReset(node, type, vmid),
+                        resume: () => this.proxmox?.qemuResume(node, type, vmid),
+                        shutdown: () => this.proxmox?.qemuShutdown(node, type, vmid),
+                        suspend: () => this.proxmox?.qemuSuspend(node, type, vmid),
+                        reboot: () => this.proxmox?.qemuReboot(node, type, vmid),
+                    };
+
+                    const action = actions[command];
+                    if (!action) {
+                        return;
                     }
-                } else if (type === 'node') {
-                    this.log.debug('sending shutdown/reboot command');
-                    switch (command) {
-                        case 'shutdown':
-                            this.proxmox
-                                ?.nodeShutdown(node)
-                                .then((data) => {
-                                    this.log.info(`Shutting down node ${node}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
-                                });
-                            break;
-                        case 'reboot':
-                            this.proxmox
-                                ?.nodeReboot(node)
-                                .then((data) => {
-                                    this.log.info(`Rebooting node ${node}: ${JSON.stringify(data)}`);
-                                    this.sendRequest(10000);
-                                })
-                                .catch((err) => {
-                                    this.log.warn(`Unable to execure "${command}" type: "${type}" node: "${node}": ${err}`);
-                                });
-                            break;
+
+                    try {
+                        const data = await action();
+                        this.log.info(`${command} ${vmid}: ${JSON.stringify(data)}`);
+                        this.sendRequest(10000);
+                    } catch (err) {
+                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                     }
                 }
             }
         }
     }
 
-    sendRequest(nextRunTimeout) {
-        this.setState('info.lastUpdate', { val: Date.now(), ack: true });
-        this.requestInterval && this.clearTimeout(this.requestInterval);
-        this.requestInterval = this.setTimeout(
-            async () => {
-                this.requestInterval = null;
+    async sendRequest(nextRunTimeout) {
+        await this.setStateAsync('info.lastUpdate', { val: Date.now(), ack: true });
 
-                if (this.proxmox) {
-                    this.log.debug('sendRequest interval started');
-                    this.proxmox.resetResponseCache(); // Clear cache to start fresh
+        if (this.requestInterval) {
+            this.clearTimeout(this.requestInterval);
+            this.requestInterval = null;
+        }
 
-                    try {
-                        const nodes = await this.proxmox.getNodes();
-                        this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
-                        await this.setNodes(nodes);
-                    } catch (e) {
-                        this.log.warn(`Cannot send request: ${e}`);
-                        this.setState('info.connection', { val: false, ack: true });
-                    }
-                }
+        const delay = nextRunTimeout ?? this.config.requestInterval * 1000;
 
-                this.sendRequest();
-            },
-            nextRunTimeout || this.config.requestInterval * 1000,
-        );
+        this.requestInterval = this.setTimeout(async () => {
+            this.requestInterval = null;
+
+            if (!this.proxmox) {
+                return;
+            }
+
+            this.log.debug('sendRequest interval started');
+            this.proxmox.resetResponseCache();
+
+            try {
+                const nodes = await this.proxmox.getNodes();
+                this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+                await this.setNodes(nodes);
+                await this.setStateAsync('info.connection', { val: true, ack: true });
+            } catch (err) {
+                this.log.warn(`Cannot send request: ${err}`);
+                await this.setStateAsync('info.connection', { val: false, ack: true });
+            }
+
+            // Schedule next run
+            this.sendRequest();
+        }, delay);
     }
 
     async getNodes() {
@@ -830,14 +755,7 @@ class Proxmox extends utils.Adapter {
                     const states = await this.findState(sid, resourceStatus);
 
                     await Promise.all(
-                        states.map(([sid, id, role, val]) =>
-                            this.createCustomState(sid, id, role, val)
-                                .catch(e =>
-                                    this.log.error(
-                                        `Could not create state for ${sid}.${id}: ${e.message}`
-                                    )
-                                )
-                        )
+                        states.map(([sid, id, role, val]) => this.createCustomState(sid, id, role, val).catch((e) => this.log.error(`Could not create state for ${sid}.${id}: ${e.message}`))),
                     );
                 }
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
@@ -886,13 +804,8 @@ class Proxmox extends utils.Adapter {
 
                                 await Promise.all(
                                     states.map(([sid, id, role, val]) =>
-                                        this.createCustomState(sid, id, role, val)
-                                            .catch(e =>
-                                                this.log.error(
-                                                    `Could not create state for ${sid}.${id}: ${e.message}`
-                                                )
-                                            )
-                                    )
+                                        this.createCustomState(sid, id, role, val).catch((e) => this.log.error(`Could not create state for ${sid}.${id}: ${e.message}`)),
+                                    ),
                                 );
 
                                 if (this.config.requestStorageInformationBackup) {
@@ -1282,7 +1195,11 @@ class Proxmox extends utils.Adapter {
                                         }
                                     }
                                 });
+                            } catch (err) {
+                                this.log.error(`storageStatus: ${res.storage} on  ${res.id} not available`);
+                            }
 
+                            try {
                                 if (this.config.requestStorageInformationBackup) {
                                     const allBackupStatus = await this.proxmox.getBackupStatus(res.node, res.storage);
 
@@ -1300,7 +1217,8 @@ class Proxmox extends utils.Adapter {
                                     });
                                 }
                             } catch (err) {
-                                this.log.error(`Storage: ${res.storage} on  ${res.id} not available`);
+                                // do nothing
+                                // this.log.error(`backupStatus: ${res.storage} on  ${res.id} not available`);
                             }
                         }
                     }
@@ -1314,44 +1232,25 @@ class Proxmox extends utils.Adapter {
     async findState(sid, states) {
         const result = [];
 
-        const sizeKeys = new Set([
-            'mem', 'disk', 'balloon_min', 'maxdisk', 'maxmem',
-            'diskwrite', 'used', 'total', 'avail'
-        ]);
+        const sizeKeys = new Set(['mem', 'disk', 'balloon_min', 'maxdisk', 'maxmem', 'diskwrite', 'used', 'total', 'avail']);
 
-        const timeKeys  = new Set(['uptime', 'cttime']);
+        const timeKeys = new Set(['uptime', 'cttime']);
         const sizebKeys = new Set(['netin', 'netout']);
-        const numKeys   = new Set(['pid', 'vmid', 'cpus', 'shared', 'enabled', 'active']);
-        const textKeys  = new Set(['content', 'type', 'status', 'volid', 'parent', 'format']);
+        const numKeys = new Set(['pid', 'vmid', 'cpus', 'shared', 'enabled', 'active']);
+        const textKeys = new Set(['content', 'type', 'status', 'volid', 'parent', 'format']);
 
         for (const [key, value] of Object.entries(states)) {
-
             // Level-Berechnungen
             if (key === 'mem') {
-                result.push([
-                    sid,
-                    'mem_lev',
-                    'level',
-                    this.used_level(states.mem, states.maxmem)
-                ]);
+                result.push([sid, 'mem_lev', 'level', this.used_level(states.mem, states.maxmem)]);
             }
 
             if (key === 'disk') {
-                result.push([
-                    sid,
-                    'disk_lev',
-                    'level',
-                    this.used_level(states.disk, states.maxdisk)
-                ]);
+                result.push([sid, 'disk_lev', 'level', this.used_level(states.disk, states.maxdisk)]);
             }
 
             if (key === 'used') {
-                result.push([
-                    sid,
-                    'used_lev',
-                    'level',
-                    this.used_level(states.used, states.total)
-                ]);
+                result.push([sid, 'used_lev', 'level', this.used_level(states.used, states.total)]);
             }
 
             // Typ-Zuordnung
@@ -1373,7 +1272,6 @@ class Proxmox extends utils.Adapter {
         this.log.debug(`found states: ${JSON.stringify(result)}`);
         return result;
     }
-
 
     /**
      * Reads all channel objects and saves them in RAM

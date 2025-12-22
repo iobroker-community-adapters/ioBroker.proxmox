@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.2",
+    "version": "2.4.3",
     "news": {
+      "2.4.3": {
+        "en": "fix check backupStatus",
+        "de": "backupStatus überprüfen",
+        "ru": "обновление Check Backup",
+        "pt": "corrigir o backupStatus",
+        "nl": "fix check backupStatus",
+        "fr": "correction de la sauvegarde",
+        "it": "correzione di backup di controlloStatus",
+        "es": "reparación de cheques",
+        "pl": "fix check backup Status",
+        "uk": "фіксувати резервну копію",
+        "zh-cn": "修复检查备份状态"
+      },
       "2.4.2": {
         "en": "Adapter requires node.js >= 20, js-controller >= 6.0.11 and admin >= 7.6.17 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
         "de": "Adapter benötigt node.js >= 20, js-controller >= 6.0.11 und admin >= 7.6.17 jetzt\neinige Verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigriert zu eslint 9",

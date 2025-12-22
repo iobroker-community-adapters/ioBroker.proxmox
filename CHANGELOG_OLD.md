@@ -1,4 +1,8 @@
 # Older changes
+## 2.2.3 (2024-02-01)
+* (arteck) add icon status available for lxc and vm
+* (arteck) settings adjustment
+
 ## 2.2.2 (2023-11-06)
 * (arteck) storage message corr
 
