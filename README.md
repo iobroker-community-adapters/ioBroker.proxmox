@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.4.5 (2025-12-23)
+* (arteck) fix nodes response
+
 ### 2.4.4 (2025-12-22)
 * (arteck) fix reconnect if node is offline
 
@@ -47,13 +50,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.0 (2025-01-27)
 * (mcm1957) BREAKING: you must enter your configuration data again at the config page.
-
-### 2.3.1 (2025-01-26)
-* (arteck) new settings structure
-* (arteck) fix storage request
-* (arteck) add new eslint file
-* (arteck) fix node message
-* (arteck) refactor
 
 ## License
 

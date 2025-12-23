@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.4",
+    "version": "2.4.5",
     "news": {
+      "2.4.5": {
+        "en": "fix nodes response",
+        "de": "fix nodes response",
+        "ru": "реакция фиксирующих узлов",
+        "pt": "resposta dos nós de correção",
+        "nl": "fix nodes response",
+        "fr": "correction de la réponse des nœuds",
+        "it": "correzione della risposta dei nodi",
+        "es": "respuesta de los nodos",
+        "pl": "naprawianie odpowiedzi węzłów",
+        "uk": "виправити відповіді вузлів",
+        "zh-cn": "固定节点响应"
+      },
       "2.4.4": {
         "en": "fix reconnect if node is offline",
         "de": "reconnect reparieren, wenn knoten offline ist",
@@ -80,19 +93,6 @@
         "pl": "Adapter wymaga node.js > = 18 i kontroler js- > = 5 teraz\nfix ha i typ obiektu ceph\nZaktualizowano zależności",
         "uk": "Адаптер вимагає node.js >= 18 і js-controller >= 5 тепер\nфіксувати тип об'єкта ha і ceph\nЗалежність було оновлено",
         "zh-cn": "适配器需要节点.js QQ18和js控制器 QQ 现在5号\n固定 ha 和 ceph 对象类型\n依赖关系已更新"
-      },
-      "2.2.3": {
-        "en": "add icon status available for lxc and vm\nsettings adjustment",
-        "de": "icon-status für lxc und vm hinzufügen\neinstellungen",
-        "ru": "добавить статус значка доступен для lxc и vm\nнастройки",
-        "pt": "adicionar status de ícone disponível para lxc e vm\najuste de configurações",
-        "nl": "pictogramstatus beschikbaar voor lxc en vm toevoegen\ninstelling",
-        "fr": "ajouter le statut d'icône disponible pour lxc et vm\nréglage des paramètres",
-        "it": "aggiungere lo stato dell'icona disponibile per lxc e vm\nregolazione delle impostazioni",
-        "es": "añadir el estado de icono disponible para lxc y vm\najuste",
-        "pl": "dodaj status ikon dostępny dla lxc i vm\nregulacja ustawień",
-        "uk": "додати статус іконки, доступний для lxc і vm\nналаштування параметрів",
-        "zh-cn": "添加 lxc 和 vm 可用的图标状态\n设置调整"
       }
     },
     "connectionType": "local",

@@ -123,39 +123,32 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    async sendRequest(nextRunTimeout) {
-        await this.setStateAsync('info.lastUpdate', { val: Date.now(), ack: true });
+    sendRequest(nextRunTimeout) {
+        this.setState('info.lastUpdate', { val: Date.now(), ack: true });
+        this.requestInterval && this.clearTimeout(this.requestInterval);
 
-        if (this.requestInterval) {
-            this.clearTimeout(this.requestInterval);
-            this.requestInterval = null;
-        }
+        this.requestInterval = this.setTimeout(
+            async () => {
+                this.requestInterval = null;
 
-        const delay = nextRunTimeout ?? this.config.requestInterval * 1000;
+                if (this.proxmox) {
+                    this.log.debug('sendRequest interval started');
+                    this.proxmox.resetResponseCache(); // Clear cache to start fresh
 
-        this.requestInterval = this.setTimeout(async () => {
-            this.requestInterval = null;
+                    try {
+                        const nodes = await this.proxmox.getNodes();
+                        this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+                        await this.setNodes(nodes);
+                    } catch (e) {
+                        this.log.warn(`Cannot send request: ${e}`);
+                        this.setState('info.connection', { val: false, ack: true });
+                    }
+                }
 
-            if (!this.proxmox) {
-                return;
-            }
-
-            this.log.debug('sendRequest interval started');
-            this.proxmox.resetResponseCache();
-
-            try {
-                const nodes = await this.proxmox.getNodes();
-                this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
-                await this.setNodes(nodes);
-                await this.setStateAsync('info.connection', { val: true, ack: true });
-            } catch (err) {
-                this.log.warn(`Cannot send request: ${err}`);
-                await this.setStateAsync('info.connection', { val: false, ack: true });
-            }
-
-            // Schedule next run
-            this.sendRequest();
-        }, delay);
+                this.sendRequest();
+            },
+            nextRunTimeout || this.config.requestInterval * 1000,
+        );
     }
 
     async getNodes() {
