@@ -66,9 +66,7 @@ class Proxmox extends utils.Adapter {
             // subscribe on all state changes
             await this.subscribeStatesAsync('*');
 
-            this.sendRequest(); // start interval
-
-            await this.setStateAsync('info.connection', { val: true, ack: true });
+            await this.sendRequest(1); // start interval
         } catch (err) {
             this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
@@ -114,7 +112,7 @@ class Proxmox extends utils.Adapter {
                     try {
                         const data = await action();
                         this.log.info(`${command} ${vmid}: ${JSON.stringify(data)}`);
-                        this.sendRequest(10000);
+                        await this.sendRequest(10000);
                     } catch (err) {
                         this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                     }
@@ -123,32 +121,49 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    sendRequest(nextRunTimeout) {
-        this.setState('info.lastUpdate', { val: Date.now(), ack: true });
-        this.requestInterval && this.clearTimeout(this.requestInterval);
+    async sendRequest(nextRunTimeout) {
+        await this.setStateAsync('info.lastUpdate', { val: Date.now(), ack: true });
 
-        this.requestInterval = this.setTimeout(
-            async () => {
-                this.requestInterval = null;
+        if (this.requestInterval) {
+            this.clearTimeout(this.requestInterval);
+            this.requestInterval = null;
+        }
 
-                if (this.proxmox) {
-                    this.log.debug('sendRequest interval started');
-                    this.proxmox.resetResponseCache(); // Clear cache to start fresh
+        const delay = nextRunTimeout ?? this.config.requestInterval * 1000;
 
-                    try {
-                        const nodes = await this.proxmox.getNodes();
-                        this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
-                        await this.setNodes(nodes);
-                    } catch (e) {
-                        this.log.warn(`Cannot send request: ${e}`);
-                        this.setState('info.connection', { val: false, ack: true });
-                    }
+        this.requestInterval = this.setTimeout(async () => {
+            this.requestInterval = null;
+
+            if (!this.proxmox) {
+                return;
+            }
+
+            this.log.debug('sendRequest interval started');
+            this.proxmox.resetResponseCache();
+
+            try {
+                const nodes = await this.proxmox.getNodes();
+                this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+                await this.setNodes(nodes);
+
+                if (this.config.requestCephInformation) {
+                    await this.setCeph();
                 }
 
-                this.sendRequest();
-            },
-            nextRunTimeout || this.config.requestInterval * 1000,
-        );
+                if (this.config.requestHAInformation) {
+                    await this.setHA();
+                }
+
+                await this.setMachines();
+                await this.setStateAsync('info.connection', { val: true, ack: true });
+            } catch (err) {
+                this.log.warn(`Cannot send request: ${err}`);
+                await this.setStateAsync('info.connection', { val: false, ack: true });
+            }
+
+            // Schedule next run
+            await this.sendRequest();
+        }, delay);
     }
 
     async getNodes() {
@@ -1019,16 +1034,6 @@ class Proxmox extends utils.Adapter {
                 }
             }
         }
-
-        if (this.config.requestCephInformation) {
-            await this.setCeph();
-        }
-
-        if (this.config.requestHAInformation) {
-            await this.setHA();
-        }
-
-        await this.setVM();
     }
     async setCeph() {
         const cephid = `${this.namespace}.ceph`;
@@ -1091,7 +1096,7 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    async setVM() {
+    async setMachines() {
         try {
             const resources = await this.proxmox.getClusterResources();
             const knownObjIds = Object.keys(this.objects);

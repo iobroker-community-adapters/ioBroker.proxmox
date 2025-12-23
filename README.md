@@ -33,6 +33,11 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (arteck) fix start request
+* (arteck) fix Cannot send request
+
 ### 2.4.5 (2025-12-23)
 * (arteck) fix nodes response
 
