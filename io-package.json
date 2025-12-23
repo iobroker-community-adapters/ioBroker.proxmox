@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.5",
+    "version": "2.4.6",
     "news": {
+      "2.4.6": {
+        "en": "fix start request\nfix Cannot send request",
+        "de": "anfrage zum starten\nfix Cannot senden Anfrage",
+        "ru": "запрос на фиксацию\nисправить невозможно отправить запрос",
+        "pt": "corrigir o pedido inicial\nnão é possível enviar o pedido",
+        "nl": "fix start verzoek\nfix Kan verzoek niet versturen",
+        "fr": "correction de la requête de démarrage\ncorrection Impossible d'envoyer la demande",
+        "it": "richiesta di inizio di correzione\nfix Non inviare richiesta",
+        "es": "solicitud de inicio\nno se puede enviar solicitud",
+        "pl": "ustaw żądanie rozpoczęcia\nfix Nie można wysłać żądanie",
+        "uk": "задати заявку\nвиправити Неможливо відправити запит",
+        "zh-cn": "固定启动请求\n无法发送请求"
+      },
       "2.4.5": {
         "en": "fix nodes response",
         "de": "fix nodes response",
@@ -80,19 +93,6 @@
         "pl": "nowa struktura ustawień\nustalić wniosek o przechowywanie\ndodaj nowy plik eslint\nnaprawić wiadomość węzła\nwspółczynnik",
         "uk": "структура нових налаштувань\nфіксувати запит на зберігання\nдодати новий файл eslint\nвиправити повідомлення вузла\nрефактор",
         "zh-cn": "新设置结构\n固定存储请求\n添加新的 eslint 文件\n修复节点消息\n重构"
-      },
-      "2.3.0": {
-        "en": "Adapter requires node.js >= 18 and js-controller >= 5 now\nfixed ha and ceph object type\nDependencies have been updated",
-        "de": "Adapter benötigt node.js >= 18 und js-controller >= 5 jetzt\nha und ceph objekttyp wurden gefixed\nAbhängigkeiten wurden aktualisiert",
-        "ru": "Адаптер требует node.js >= 18 и js-контроллер >= 5 сейчас\nфиксирует тип объекта и цефа\nЗависимость обновлена",
-        "pt": "Adapter requer node.js >= 18 e js-controller >= 5 agora\ncorrigir ha e tipo de objeto ceph\nAs dependências foram atualizadas",
-        "nl": "Voor adaptor zijn node.js < 18 en js-controller > Nu 5\nfix ha en ceph object type\nAfhankelijkheden zijn bijgewerkt",
-        "fr": "L'adaptateur nécessite node.js >= 18 et js-controller >= 5 maintenant\nfixer le type d'objet ha et ceph\nLes dépendances ont été actualisées",
-        "it": "Adattatore richiede node.js >= 18 e js-controller >= 5 ora\nfix ha e ceph tipo di oggetto\nLe dipendenze sono state aggiornate",
-        "es": "Adaptador requiere node.js √≥= 18 y js-controller 5 ahora\nfijar el tipo de objeto ha y ceph\nSe han actualizado las dependencias",
-        "pl": "Adapter wymaga node.js > = 18 i kontroler js- > = 5 teraz\nfix ha i typ obiektu ceph\nZaktualizowano zależności",
-        "uk": "Адаптер вимагає node.js >= 18 і js-controller >= 5 тепер\nфіксувати тип об'єкта ha і ceph\nЗалежність було оновлено",
-        "zh-cn": "适配器需要节点.js QQ18和js控制器 QQ 现在5号\n固定 ha 和 ceph 对象类型\n依赖关系已更新"
       }
     },
     "connectionType": "local",

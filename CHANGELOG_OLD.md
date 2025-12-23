@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.0 (2025-01-27)
+* (mcm1957) BREAKING: you must enter your configuration data again at the config page.
+
 ## 2.3.1 (2025-01-26)
 * (arteck) new settings structure
 * (arteck) fix storage request

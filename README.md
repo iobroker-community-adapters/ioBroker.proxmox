@@ -33,8 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 2.4.6 (2025-12-23)
 * (arteck) fix start request
 * (arteck) fix Cannot send request
 
@@ -52,9 +51,6 @@ Control and use data from your Proxmox VE
 * (Scrounger) some improvements
 * (arteck) Dependencies have been updated
 * (arteck) migrate to eslint 9
-
-### 2.4.0 (2025-01-27)
-* (mcm1957) BREAKING: you must enter your configuration data again at the config page.
 
 ## License
 
