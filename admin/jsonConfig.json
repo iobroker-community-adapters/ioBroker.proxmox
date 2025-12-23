@@ -11,7 +11,7 @@
             "items": {
                 "header_Devices": {
                     "type": "header",
-                    "text": "Nodes",
+                    "text": "Cluster Nodes",
                     "newLine": true,
                     "size": 2,
                     "style": {
