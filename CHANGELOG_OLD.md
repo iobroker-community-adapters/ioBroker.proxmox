@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.3 (2025-12-22)
+* (arteck) fix check backupStatus
+
 ## 2.4.2 (2025-12-07)
 * (arteck) Adapter requires node.js >= 20, js-controller >= 6.0.11 and admin >= 7.6.17 now
 * (Scrounger) some improvements

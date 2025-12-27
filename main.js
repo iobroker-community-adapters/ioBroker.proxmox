@@ -50,6 +50,8 @@ class Proxmox extends utils.Adapter {
     async onReady() {
         try {
             await this.setStateAsync('info.connection', { val: false, ack: true });
+            await this.setStateAsync('info.webhookNotification', { val: '', ack: true });
+            this.subscribeForeignStates('info.webhookNotification');
 
             if (await this.initConfig()) {
                 this.log.debug(`Adapter settings successfully verified and initialized.`);
@@ -117,6 +119,17 @@ class Proxmox extends utils.Adapter {
                     } catch (err) {
                         this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                     }
+                }
+            } else {
+                if (id.includes('webhookNotification') && !state.ack) {
+                    this.log.debug(`webhook Notif : ${state.val}`);
+                    let notifArray;
+                    try {
+                        notifArray = await this.parseNotificationInfo(state.val);
+                    } catch (err) {
+                        notifArray = [];
+                    }
+                    await this.setStateAsync('info.webhookNotificationArray', { val: JSON.stringify(notifArray), ack: true });
                 }
             }
         }
@@ -1340,6 +1353,20 @@ class Proxmox extends utils.Adapter {
                 await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
                 break;
         }
+    }
+
+    async parseNotificationInfo(info) {
+        const parts = info
+            .split('***')
+            .map((s) => s.replace(/[\r\n]/g, '').trim())
+            .filter(Boolean);
+
+        return {
+            severity: parts[0] || null,
+            title: parts[1] || null,
+            message: parts[2] || null,
+            timestamp: parts[3] ? Number(parts[3]) : null,
+        };
     }
 
     async initConfig() {

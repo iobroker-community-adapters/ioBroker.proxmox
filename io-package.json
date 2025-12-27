@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.7",
+    "version": "2.4.8",
     "news": {
+      "2.4.8": {
+        "en": "add DP webhookNotification as string and as array",
+        "de": "dP webhookNotification als String und als Array hinzufügen",
+        "ru": "добавить DP webhookNotification в виде строки и массива",
+        "pt": "adicionar DP webhookNotificação como string e como array",
+        "nl": "toevoegen van DP webhookNotification als string en als array",
+        "fr": "ajouter DP webhookNotification comme chaîne et comme tableau",
+        "it": "aggiungere DP webhookNotification come stringa e come array",
+        "es": "añadir DP webhookNotificación como cadena y como matriz",
+        "pl": "dodaj DP webhookNotification jako ciąg znaków i tablica",
+        "uk": "add DP webhookNotification як рядок і як масив",
+        "zh-cn": "添加 DP webhook 通知为字符串和数组"
+      },
       "2.4.7": {
         "en": "fix refresh vm/lxc",
         "de": "erfrischung vm/lxc",
@@ -54,19 +67,6 @@
         "pl": "naprawić ponowne połączenie jeśli węzeł jest offline",
         "uk": "виправити відключення, якщо вузол відсутня",
         "zh-cn": "如果节点断线, 则固定重连接"
-      },
-      "2.4.3": {
-        "en": "fix check backupStatus",
-        "de": "backupStatus überprüfen",
-        "ru": "обновление Check Backup",
-        "pt": "corrigir o backupStatus",
-        "nl": "fix check backupStatus",
-        "fr": "correction de la sauvegarde",
-        "it": "correzione di backup di controlloStatus",
-        "es": "reparación de cheques",
-        "pl": "fix check backup Status",
-        "uk": "фіксувати резервну копію",
-        "zh-cn": "修复检查备份状态"
       },
       "2.4.2": {
         "en": "Adapter requires node.js >= 20, js-controller >= 6.0.11 and admin >= 7.6.17 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
@@ -291,6 +291,54 @@
           "zh-cn": "a. 通 束"
         },
         "role": "state",
+        "type": "string",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.webhookNotification",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "string for webhook notification",
+          "de": "Zeichenkette für Webhook-Benachrichtigung",
+          "ru": "строка для уведомления веб-перехватчика",
+          "pt": "string para notificação de webhook",
+          "nl": "tekenreeks voor webhook-melding",
+          "fr": "chaîne de caractères pour la notification de webhook",
+          "it": "stringa per la notifica webhook",
+          "es": "cadena para notificación de webhook",
+          "pl": "ciąg dla powiadomienia webhooka",
+          "uk": "рядок для сповіщення вебхука",
+          "zh-cn": "用于 webhook 通知的字符串"
+        },
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.webhookNotificationArray",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "auto generated from webhookNotification",
+          "de": "automatisch generiert aus Webhook-Benachrichtigung",
+          "ru": "автоматически генерируется из webhookNotification",
+          "pt": "Gerado automaticamente a partir da notificação do webhook.",
+          "nl": "automatisch gegenereerd vanuit webhookNotification",
+          "fr": "généré automatiquement à partir de webhookNotification",
+          "it": "generato automaticamente da webhookNotification",
+          "es": "Generado automáticamente a partir de webhookNotification",
+          "pl": "automatycznie wygenerowane z webhookNotification",
+          "uk": "автоматично згенеровано з webhookNotification",
+          "zh-cn": "由 webhookNotification 自动生成"
+        },
+        "role": "json",
         "type": "string",
         "read": true,
         "write": false

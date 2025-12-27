@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.4.8 (2025-12-27)
+* (arteck) add DP webhookNotification as string and as array
+
 ### 2.4.7 (2025-12-27)
 * (arteck) fix refresh vm/lxc
 
@@ -45,9 +48,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.4 (2025-12-22)
 * (arteck) fix reconnect if node is offline
-
-### 2.4.3 (2025-12-22)
-* (arteck) fix check backupStatus
 
 ## License
 

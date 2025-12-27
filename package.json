@@ -1,6 +1,6 @@
 {
   "name": "iobroker.proxmox",
-  "version": "2.4.7",
+  "version": "2.4.8",
   "description": "ioBroker Proxmox Adapter",
   "author": {
     "name": "MeisterTR",
@@ -37,7 +37,7 @@
     "@alcalzone/release-script-plugin-license": "^4.0.0",
     "@alcalzone/release-script-plugin-manual-review": "^4.0.0",
     "@iobroker/adapter-dev": "^1.5.0",
-    "@iobroker/eslint-config": "^2.1.0",
+    "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/testing": "^5.2.2",
     "@types/node": "^25.0.3",
     "typescript": "~5.9.3"
