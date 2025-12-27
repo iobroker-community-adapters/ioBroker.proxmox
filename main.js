@@ -40,6 +40,7 @@ class Proxmox extends utils.Adapter {
         this.bytetoMb = _methods.bytetoMb.bind(this);
         this.removeNamespace = _methods.removeNamespace.bind(this);
         this.prepareNameForId = _methods.prepareNameForId.bind(this);
+        this.findState = _methods.findState.bind(this);
 
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
@@ -759,10 +760,9 @@ class Proxmox extends utils.Adapter {
                     await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
 
                     const states = await this.findState(sid, resourceStatus);
-
-                    await Promise.all(
-                        states.map(([sid, id, role, val]) => this.createCustomState(sid, id, role, val).catch((e) => this.log.error(`Could not create state for ${sid}.${id}: ${e.message}`))),
-                    );
+                    for (const element of states) {
+                        await this.createCustomState(element[0], element[1], element[2], element[3]);
+                    }
                 }
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
                     const type = res.type;
@@ -806,13 +806,11 @@ class Proxmox extends utils.Adapter {
 
                                 this.log.debug(`new storage: ${res.storage} - ${JSON.stringify(storageStatus)}`);
 
-                                const states = await this.findState(sid, storageStatus);
-
-                                await Promise.all(
-                                    states.map(([sid, id, role, val]) =>
-                                        this.createCustomState(sid, id, role, val).catch((e) => this.log.error(`Could not create state for ${sid}.${id}: ${e.message}`)),
-                                    ),
-                                );
+                                await this.findState(sid, storageStatus, async (states) => {
+                                    for (const element of states) {
+                                        await this.createCustomState(element[0], element[1], element[2], element[3]);
+                                    }
+                                });
 
                                 if (this.config.requestStorageInformationBackup) {
                                     await this.extendObjectAsync(`${sid}.backupJson`, {
@@ -1141,7 +1139,7 @@ class Proxmox extends utils.Adapter {
                     let resourceStatus;
 
                     if (res.status === 'running') {
-                        resourceStatus = await this.proxmox.getResourceStatus(res.node, res.type, res.vmid, true);
+                        resourceStatus = await this.proxmox.getResourceStatus(res.node, res.type, res.vmid, false);
                         available = true;
                     } else {
                         this.offlineResourceStatus.status = res.status;
@@ -1153,11 +1151,11 @@ class Proxmox extends utils.Adapter {
 
                     await this.setStateChangedAsync(`${sid}.available`, { val: available, ack: true });
 
-                    await this.findState(sid, resourceStatus, async (states) => {
-                        for (const element of states) {
-                            await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
-                        }
-                    });
+                    const states = await this.findState(sid, resourceStatus);
+
+                    for (const element of states) {
+                        await this.setStateChangedAsync(`${element[0]}.${element[1]}`, element[3], true);
+                    }
                 }
 
                 if (res.type === 'storage' && this.config.requestStorageInformation) {
@@ -1224,50 +1222,6 @@ class Proxmox extends utils.Adapter {
         } catch (err) {
             this.log.debug(`Unable to get cluster resources: ${err.message} `);
         }
-    }
-
-    async findState(sid, states) {
-        const result = [];
-
-        const sizeKeys = new Set(['mem', 'disk', 'balloon_min', 'maxdisk', 'maxmem', 'diskwrite', 'used', 'total', 'avail']);
-
-        const timeKeys = new Set(['uptime', 'cttime']);
-        const sizebKeys = new Set(['netin', 'netout']);
-        const numKeys = new Set(['pid', 'vmid', 'cpus', 'shared', 'enabled', 'active']);
-        const textKeys = new Set(['content', 'type', 'status', 'volid', 'parent', 'format']);
-
-        for (const [key, value] of Object.entries(states)) {
-            // Level-Berechnungen
-            if (key === 'mem') {
-                result.push([sid, 'mem_lev', 'level', this.used_level(states.mem, states.maxmem)]);
-            }
-
-            if (key === 'disk') {
-                result.push([sid, 'disk_lev', 'level', this.used_level(states.disk, states.maxdisk)]);
-            }
-
-            if (key === 'used') {
-                result.push([sid, 'used_lev', 'level', this.used_level(states.used, states.total)]);
-            }
-
-            // Typ-Zuordnung
-            if (sizeKeys.has(key)) {
-                result.push([sid, key, 'size', this.bytetoMb(value)]);
-            } else if (timeKeys.has(key)) {
-                result.push([sid, key, 'time', value]);
-            } else if (sizebKeys.has(key)) {
-                result.push([sid, key, 'sizeb', value]);
-            } else if (key === 'cpu') {
-                result.push([sid, key, 'level', Math.round(value * 10000) / 100]);
-            } else if (numKeys.has(key)) {
-                result.push([sid, key, 'default_num', parseInt(value, 10)]);
-            } else if (textKeys.has(key)) {
-                result.push([sid, key, 'text', value]);
-            }
-        }
-
-        this.log.debug(`found states: ${JSON.stringify(result)}`);
-        return result;
     }
 
     /**
