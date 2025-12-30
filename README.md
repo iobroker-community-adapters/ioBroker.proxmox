@@ -53,6 +53,8 @@ Control and use data from your Proxmox VE
 
 The MIT License (MIT)
 
+
+Copyright (c) 2026 iobroker-community-adapters <iobroker-community-adapters@gmx.de>  
 Copyright (c) 2023-2025 ioBroker Community Developers <iobroker-community-adapters@gmx.de>  
 Copyright (c) 2023 MeisterTR <meistertr.smarthome@gmail.com>
 
