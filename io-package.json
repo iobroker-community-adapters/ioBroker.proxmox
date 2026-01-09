@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.8",
+    "version": "2.4.9",
     "news": {
+      "2.4.9": {
+        "en": "fix webhookNotification array DP",
+        "de": "fix webhookNotification array DP",
+        "ru": "исправить webhookNotification array DP",
+        "pt": "corrigir webhookNotification array DP",
+        "nl": "fix webhookNotification array DP",
+        "fr": "réparer webhookNotification tableau DP",
+        "it": "correzione webhookSarra di notifica DP",
+        "es": "fix webhookNotification array DP",
+        "pl": "fix webhookNotification array DP",
+        "uk": "javaScript licenses API Веб-сайт Go1.13.8",
+        "zh-cn": "修补 Webhook 通知数组 DP"
+      },
       "2.4.8": {
         "en": "add DP webhookNotification as string and as array",
         "de": "dP webhookNotification als String und als Array hinzufügen",
@@ -80,19 +93,6 @@
         "pl": "Adapter wymaga node.js > = 20, kontroler js- i admin > = 7.6.17\npewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
         "uk": "Адаптер вимагає node.js >= 20, js-controller >= 6.0.11 і admin >= 7.6.17 тепер\nдеякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
         "zh-cn": "适配器需要节点.js >= 20,js控制器 >= 6.0.11和admin >= 7.6.17 现在\n一些改进\n依赖关系已更新\n迁移到 eslint 9"
-      },
-      "2.4.0": {
-        "en": "BREAKING: you must enter your configuration data again at the config page.",
-        "de": "BREAKING: Sie müssen Ihre Konfigurationsdaten auf der config-Seite erneut eingeben.",
-        "ru": "BREAKING: вы должны снова ввести данные конфигурации на странице настройки.",
-        "pt": "BREAKING: você deve inserir seus dados de configuração novamente na página de configuração.",
-        "nl": "BREAKING: u moet uw configuratiegegevens opnieuw invoeren op de configuratiepagina.",
-        "fr": "BREAKING: vous devez saisir à nouveau vos données de configuration à la page de configuration.",
-        "it": "BREAKING: è necessario inserire nuovamente i dati di configurazione nella pagina di configurazione.",
-        "es": "BREAKING: debe volver a introducir sus datos de configuración en la página de configuración.",
-        "pl": "BREAKING: musisz ponownie wprowadzić dane konfiguracyjne na stronie konfiguracyjnej.",
-        "uk": "BREAKING: Ви повинні ввести дані конфігурації знову на сторінці налаштування.",
-        "zh-cn": "您必须在配置页上再次输入配置数据 ."
       }
     },
     "connectionType": "local",

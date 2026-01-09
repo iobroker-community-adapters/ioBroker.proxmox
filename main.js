@@ -1356,16 +1356,60 @@ class Proxmox extends utils.Adapter {
     }
 
     async parseNotificationInfo(info) {
-        const parts = info
-            .split('***')
-            .map((s) => s.replace(/[\r\n]/g, '').trim())
-            .filter(Boolean);
+        if (typeof info !== 'string') {
+            return {
+                severity: null,
+                title: null,
+                message: null,
+                timestamp: null,
+            };
+        }
+
+        // Ersten und letzten Trenner gezielt finden
+        const firstSep = info.indexOf('***');
+        const lastSep = info.lastIndexOf('***');
+
+        if (firstSep === -1 || lastSep === firstSep) {
+            // Ungültiges / unbekanntes Format
+            return {
+                severity: null,
+                title: null,
+                message: info.trim(),
+                timestamp: null,
+            };
+        }
+
+        const severity = info.slice(0, firstSep).trim();
+
+        const restAfterSeverity = info.slice(firstSep + 3);
+        const secondSep = restAfterSeverity.indexOf('***');
+
+        if (secondSep === -1) {
+            return {
+                severity,
+                title: null,
+                message: restAfterSeverity.trim(),
+                timestamp: null,
+            };
+        }
+
+        const title = restAfterSeverity.slice(0, secondSep).trim();
+
+        const messageAndTs = restAfterSeverity.slice(secondSep + 3);
+
+        const message = messageAndTs
+            .slice(0, lastSep - firstSep - secondSep - 6)
+            .replace(/\r/g, '')
+            .trim();
+
+        const tsRaw = info.slice(lastSep + 3).trim();
+        const timestamp = /^\d+$/.test(tsRaw) ? Number(tsRaw) : null;
 
         return {
-            severity: parts[0] || null,
-            title: parts[1] || null,
-            message: parts[2] || null,
-            timestamp: parts[3] ? Number(parts[3]) : null,
+            severity,
+            title,
+            message: message || null,
+            timestamp,
         };
     }
 

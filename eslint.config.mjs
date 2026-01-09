@@ -25,6 +25,7 @@ export default [
         // you may disable some 'jsdoc' warnings - but using jsdoc is highly recommended
         // as this improves maintainability. jsdoc warnings will not block buiuld process.
         rules: {
+             'prettier/prettier': ['off', { endOfLine: 'auto' }],
              'jsdoc/no-blank-blocks': 'off',
              'no-prototype-builtins': 'off',
              '@typescript-eslint/no-unused-vars': 'warn',
