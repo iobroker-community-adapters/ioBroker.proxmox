@@ -30,7 +30,7 @@ class Proxmox extends utils.Adapter {
             swap: 0,
             status: '',
             type: '',
-            name: '',
+            name: ''
             vmid: 0,
         };
 
@@ -119,6 +119,25 @@ class Proxmox extends utils.Adapter {
                     } catch (err) {
                         this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
                     }
+                } else if (type === 'node') {
+                    
+                    const actions = {                        
+                        shutdown: () => this.proxmox?.nodeShutdown(node),
+                        reboot: () => this.proxmox?..nodeReboot(node),
+                    };
+
+                    const action = actions[command];
+                    if (!action) {
+                        return;
+                    }
+                    
+                    try {
+                        const data = await action();
+                        this.log.info(`${command} ${node}: ${JSON.stringify(data)}`);
+                        await this.sendRequest(10000);
+                    } catch (err) {
+                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                    }                                     
                 }
             } else {
                 if (id.includes('webhookNotification') && !state.ack) {

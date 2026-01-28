@@ -33,6 +33,10 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (arteck) fix node action 
+
 ### 2.4.9 (2026-01-09)
 * (arteck) fix webhookNotification array DP
 
