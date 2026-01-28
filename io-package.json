@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.4.9",
+    "version": "2.4.10",
     "news": {
+      "2.4.10": {
+        "en": "fix node action",
+        "de": "fixed node aktion",
+        "ru": "фиксация действия узла",
+        "pt": "corrigir a acção do nó",
+        "nl": "fix node actie",
+        "fr": "correction de l'action du nœud",
+        "it": "correzione azione nodo",
+        "es": "acción del nodo",
+        "pl": "naprawić działanie węzła",
+        "uk": "виправити дію вузла",
+        "zh-cn": "固定节点动作"
+      },
       "2.4.9": {
         "en": "fix webhookNotification array DP",
         "de": "fix webhookNotification array DP",
@@ -80,19 +93,6 @@
         "pl": "naprawić ponowne połączenie jeśli węzeł jest offline",
         "uk": "виправити відключення, якщо вузол відсутня",
         "zh-cn": "如果节点断线, 则固定重连接"
-      },
-      "2.4.2": {
-        "en": "Adapter requires node.js >= 20, js-controller >= 6.0.11 and admin >= 7.6.17 now\nsome improvements\nDependencies have been updated\nmigrate to eslint 9",
-        "de": "Adapter benötigt node.js >= 20, js-controller >= 6.0.11 und admin >= 7.6.17 jetzt\neinige Verbesserungen\nAbhängigkeiten wurden aktualisiert\nmigriert zu eslint 9",
-        "ru": "Адаптер требует node.js >= 20, js-контроллер >= 6.0.11 и админ >= 7.6.17 сейчас\nнекоторые улучшения\nЗависимости были обновлены\nскачать eslint 9",
-        "pt": "O adaptador necessita de nodo.js >= 20, js-controlador >= 6.0.11 e administrador >= 7.6.17 agora\nalgumas melhorias\nAs dependências foram atualizadas\nmigrar para o eslint 9",
-        "nl": "Voor adapters zijn node.js < 20, js-controller <= 6,0.11 en admin <= 7.6.17 nu vereist\nenkele verbeteringen\nAfhankelijkheden zijn bijgewerkt\nmigreren naar eslint 9",
-        "fr": "Adapter nécessite node.js >= 20, js-controller >= 6.0.11 et admin >= 7.6.17 maintenant\nquelques améliorations\nLes dépendances ont été actualisées\nmigrer vers l'île 9",
-        "it": "Adattatore richiede node.js >= 20, js-controller >= 6.0.11 e admin >= 7.6.17 ora\nalcuni miglioramenti\nLe dipendenze sono state aggiornate\nmigrare a eslint 9",
-        "es": "Adaptador requiere node.js ю= 20, js-controller √= 6.0.11 y admin= 7.6.17 ahora\nalgunas mejoras\nSe han actualizado las dependencias\nmigrar a eslint 9",
-        "pl": "Adapter wymaga node.js > = 20, kontroler js- i admin > = 7.6.17\npewne ulepszenia\nZaktualizowano zależności\nmigrate to eslint 9",
-        "uk": "Адаптер вимагає node.js >= 20, js-controller >= 6.0.11 і admin >= 7.6.17 тепер\nдеякі поліпшення\nЗалежність було оновлено\nmigrate до eslint 9",
-        "zh-cn": "适配器需要节点.js >= 20,js控制器 >= 6.0.11和admin >= 7.6.17 现在\n一些改进\n依赖关系已更新\n迁移到 eslint 9"
       }
     },
     "connectionType": "local",

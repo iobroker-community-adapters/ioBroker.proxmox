@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.5 (2025-12-23)
+* (arteck) fix nodes response
+
 ## 2.4.4 (2025-12-22)
 * (arteck) fix reconnect if node is offline
 
