@@ -30,7 +30,7 @@ class Proxmox extends utils.Adapter {
             swap: 0,
             status: '',
             type: '',
-            name: ''
+            name: '',
             vmid: 0,
         };
 
@@ -123,7 +123,7 @@ class Proxmox extends utils.Adapter {
                     
                     const actions = {                        
                         shutdown: () => this.proxmox?.nodeShutdown(node),
-                        reboot: () => this.proxmox?..nodeReboot(node),
+                        reboot: () => this.proxmox?.nodeReboot(node),
                     };
 
                     const action = actions[command];
@@ -136,7 +136,7 @@ class Proxmox extends utils.Adapter {
                         this.log.info(`${command} ${node}: ${JSON.stringify(data)}`);
                         await this.sendRequest(10000);
                     } catch (err) {
-                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}": ${err}`);
                     }                                     
                 }
             } else {
