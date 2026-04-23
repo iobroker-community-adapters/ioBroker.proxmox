@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.7 (2025-12-27)
+* (arteck) fix refresh vm/lxc
+
 ## 2.4.6 (2025-12-23)
 * (arteck) fix start request
 * (arteck) fix Cannot send request

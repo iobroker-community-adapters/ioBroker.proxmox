@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.5.1 (2026-04-23)
+* (arteck) typo
+
 ### 2.5.0 (2026-04-23)
 * (arteck) fix translations
 * (arteck) new checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings 
@@ -49,9 +52,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.8 (2025-12-27)
 * (arteck) add DP webhookNotification as string and as array
-
-### 2.4.7 (2025-12-27)
-* (arteck) fix refresh vm/lxc
 
 ## License
 

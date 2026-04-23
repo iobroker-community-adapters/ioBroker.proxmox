@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "news": {
+      "2.5.1": {
+        "en": "typo",
+        "de": "typo",
+        "ru": "опечатка",
+        "pt": "erro de digitação",
+        "nl": "type",
+        "fr": "typo",
+        "it": "tipo",
+        "es": "typo",
+        "pl": "typo",
+        "uk": "типо",
+        "zh-cn": "类型"
+      },
       "2.5.0": {
         "en": "fix translations\nnew checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings \nfix some errors\nadd test\nadd qemu pause\nAdapter requires admin >= 7.7.22 now",
         "de": "übersetzungen anpassen\nneues kontrollkästchen in einstellungen für knoten im cluster oder nicht (einzelknotenüberprüfung) -> kontrolladaptereinstellungen\nfehler beheben\ntest hinzufügen\nqemu pause hinzufügen\nAdapter benötigt admin >= 7.7.22 jetzt",
@@ -80,19 +93,6 @@
         "pl": "ustaw żądanie rozpoczęcia\nfix Nie można wysłać żądanie",
         "uk": "задати заявку\nвиправити Неможливо відправити запит",
         "zh-cn": "固定启动请求\n无法发送请求"
-      },
-      "2.4.5": {
-        "en": "fix nodes response",
-        "de": "fix nodes response",
-        "ru": "реакция фиксирующих узлов",
-        "pt": "resposta dos nós de correção",
-        "nl": "fix nodes response",
-        "fr": "correction de la réponse des nœuds",
-        "it": "correzione della risposta dei nodi",
-        "es": "respuesta de los nodos",
-        "pl": "naprawianie odpowiedzi węzłów",
-        "uk": "виправити відповіді вузлів",
-        "zh-cn": "固定节点响应"
       }
     },
     "connectionType": "local",
