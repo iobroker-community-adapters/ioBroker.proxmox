@@ -388,3 +388,138 @@ describe('ProxmoxUtils.ticket()', () => {
         assert.equal(inst._csrf,   'NEW-CSRF');
     });
 });
+
+// ─── Token-Auth Tests ─────────────────────────────────────────────────────────
+
+/**
+ * Erstellt ProxmoxUtils-Instanz für Token-Auth ohne echten axios-Call.
+ */
+function makeTokenInstance(axiosMock) {
+    const axiosPath = require.resolve('axios');
+    const realAxios = require.cache[axiosPath];
+
+    const fakeModule = { exports: axiosMock };
+    fakeModule.exports.default      = axiosMock;
+    fakeModule.exports.isAxiosError = axiosMock.isAxiosError ?? (() => false);
+    require.cache[axiosPath] = fakeModule;
+
+    const utilsPath = require.resolve('../lib/proxmox');
+    delete require.cache[utilsPath];
+    const ProxmoxUtils = require('../lib/proxmox');
+
+    require.cache[axiosPath] = realAxios;
+
+    const nodeList = [{
+        realmIp:          '192.168.1.100',
+        realmPort:        8006,
+        realmUser:        'root',
+        realm:            'pam',
+        authType:         'token',
+        realmTokenId:     'mytoken',
+        realmTokenSecret: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    }];
+
+    const adapter = makeAdapter();
+    const inst    = new ProxmoxUtils(adapter, nodeList);
+    return { inst, adapter };
+}
+
+describe('ProxmoxUtils.ticket() – Token-Auth', () => {
+
+    it('kein HTTP-Call bei Token-Auth', async () => {
+        let axiosCalled = false;
+        const axiosMock = async () => { axiosCalled = true; return {}; };
+        axiosMock.isAxiosError = () => false;
+
+        const { inst } = makeTokenInstance(axiosMock);
+        await inst.ticket();
+
+        assert.ok(!axiosCalled, 'axios sollte bei Token-Auth NICHT aufgerufen werden');
+    });
+
+    it('setzt Authorization-Header im PVEAPIToken-Format', async () => {
+        const { inst } = makeTokenInstance(async () => ({}));
+        await inst.ticket();
+
+        assert.ok(inst._ticket.startsWith('PVEAPIToken='),
+            `Erwartete PVEAPIToken=..., bekam: ${inst._ticket}`);
+        assert.ok(inst._ticket.includes('mytoken'),
+            'Token-ID fehlt im Header');
+        assert.ok(inst._ticket.includes('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'),
+            'Token-Secret fehlt im Header');
+    });
+
+    it('CSRF ist leer bei Token-Auth', async () => {
+        const { inst } = makeTokenInstance(async () => ({}));
+        await inst.ticket();
+
+        assert.equal(inst._csrf, '');
+    });
+
+    it('loggt debug-Meldung bei Token-Auth', async () => {
+        const { inst, adapter } = makeTokenInstance(async () => ({}));
+        await inst.ticket();
+
+        assert.ok(
+            adapter._logs.debug.some(m => m.includes('Token-Auth')),
+            'Kein debug-Log für Token-Auth gefunden',
+        );
+    });
+
+    it('_getData sendet Authorization-Header statt Cookie+CSRF bei Token-Auth', async () => {
+        let capturedHeaders = null;
+        const axiosMock = async (cfg) => {
+            capturedHeaders = cfg.headers;
+            return { status: 200, data: { data: [] } };
+        };
+        axiosMock.isAxiosError = () => false;
+
+        const { inst } = makeTokenInstance(axiosMock);
+        await inst.ticket();
+        await inst.getNodes();
+
+        assert.ok(capturedHeaders?.Authorization,
+            'Authorization-Header fehlt');
+        assert.ok(!capturedHeaders?.Cookie,
+            'Cookie-Header darf bei Token-Auth nicht gesetzt sein');
+        assert.ok(!capturedHeaders?.CSRFPreventionToken,
+            'CSRFPreventionToken-Header darf bei Token-Auth nicht gesetzt sein');
+        assert.ok(capturedHeaders.Authorization.startsWith('PVEAPIToken='),
+            `Falsches Header-Format: ${capturedHeaders.Authorization}`);
+    });
+
+    it('wirft TOKEN_AUTH_FAILED bei 401 – kein Retry', async () => {
+        let callCount = 0;
+        const axiosMock = async () => {
+            callCount++;
+            return { status: 401, data: 'Unauthorized' };
+        };
+        axiosMock.isAxiosError = () => false;
+
+        const { inst } = makeTokenInstance(axiosMock);
+        inst._ticket  = 'PVEAPIToken=root@pam!mytoken=secret';
+        inst.authType = 'token';
+
+        await assert.rejects(
+            () => inst.getNodes(),
+            (err) => {
+                assert.ok(err.message.includes('TOKEN_AUTH_FAILED'),
+                    `Erwartete TOKEN_AUTH_FAILED im Fehler, bekam: ${err.message}`);
+                return true;
+            },
+        );
+        assert.equal(callCount, 1, 'Bei Token-Auth darf kein Retry erfolgen');
+    });
+
+    it('enthält User, Realm und Token-ID im Authorization-Header', async () => {
+        const { inst } = makeTokenInstance(async () => ({}));
+        await inst.ticket();
+
+        // PVEAPIToken=USER@REALM!TOKENID=SECRET
+        const header = inst._ticket;
+        assert.ok(header.includes('@pam'),    `Realm fehlt: ${header}`);
+        assert.ok(header.includes('!mytoken'), `Token-ID fehlt: ${header}`);
+    });
+});
+
+

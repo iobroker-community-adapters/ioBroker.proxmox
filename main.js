@@ -114,7 +114,9 @@ class Proxmox extends utils.Adapter {
 
             await this.sendRequest(1); // start interval
         } catch (err) {
-            this.log.error('Unable to authenticate with Proxmox host. Please check your credentials');
+            const reason = err?.message || String(err);
+            this.log.error(`Unable to authenticate with Proxmox host. Please check your credentials. Error: ${reason}`);
+            this.log.debug(`Auth error stack: ${err?.stack || 'n/a'}`);
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
         }
     }
@@ -431,11 +433,14 @@ continue;
 }
 
             const obj = {
-                realmIp:       nodeDevice.realmIp,
-                realmPort:     nodeDevice.realmPort,
-                realmUser:     nodeDevice.realmUser,
-                realmPassword: nodeDevice.realmPassword,
-                realm:         nodeDevice.realm,
+                realmIp:          nodeDevice.realmIp,
+                realmPort:        nodeDevice.realmPort,
+                realmUser:        nodeDevice.realmUser,
+                realmPassword:    nodeDevice.realmPassword,
+                realm:            nodeDevice.realm,
+                authType:         nodeDevice.authType      || 'password',
+                realmTokenId:     nodeDevice.realmTokenId     || '',
+                realmTokenSecret: nodeDevice.realmTokenSecret || '',
             };
 
             if (nodeDevice.clusterNode) {

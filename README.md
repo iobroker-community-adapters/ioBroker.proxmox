@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.5.2 (2026-04-23)
+* (arteck) add token login process
+
 ### 2.5.1 (2026-04-23)
 * (arteck) typo
 
@@ -49,9 +52,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.9 (2026-01-09)
 * (arteck) fix webhookNotification array DP
-
-### 2.4.8 (2025-12-27)
-* (arteck) add DP webhookNotification as string and as array
 
 ## License
 

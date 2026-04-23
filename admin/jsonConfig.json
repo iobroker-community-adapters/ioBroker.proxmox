@@ -96,11 +96,47 @@
                             "validatorNoSaveOnError": true
                         },
                         {
+                            "type": "select",
+                            "title": "authType",
+                            "attr": "authType",
+                            "default": "password",
+                            "width": "10%",
+                            "options": [
+                                {
+                                    "label": "Password",
+                                    "value": "password"
+                                },
+                                {
+                                    "label": "API Token",
+                                    "value": "token"
+                                }
+                            ]
+                        },
+                        {
                             "type": "password",
                             "title": "RealmPassword",
                             "attr": "realmPassword",
-                            "width": "15%",
-                            "validator": "data.realmPassword.length > 0",
+                            "width": "12%",
+                            "hidden": "data.authType === 'token'",
+                            "validator": "data.authType === 'token' || data.realmPassword.length > 0",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "text",
+                            "title": "tokenId",
+                            "attr": "realmTokenId",
+                            "width": "12%",
+                            "hidden": "data.authType !== 'token'",
+                            "validator": "data.authType !== 'token' || (data.realmTokenId && data.realmTokenId.length > 0)",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "password",
+                            "title": "tokenSecret",
+                            "attr": "realmTokenSecret",
+                            "width": "13%",
+                            "hidden": "data.authType !== 'token'",
+                            "validator": "data.authType !== 'token' || (data.realmTokenSecret && data.realmTokenSecret.length > 0)",
                             "validatorNoSaveOnError": true
                         },
                         {

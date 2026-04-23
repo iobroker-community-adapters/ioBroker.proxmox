@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.1",
+    "version": "2.5.2",
     "news": {
+      "2.5.2": {
+        "en": "add token login process",
+        "de": "fügen sie den login-prozess hinzu",
+        "ru": "добавить процесс входа в маркер",
+        "pt": "adicionar o processo de login do token",
+        "nl": "token-aanmeldproces toevoegen",
+        "fr": "ajouter le processus de connexion token",
+        "it": "aggiungere il processo di login",
+        "es": "añadir proceso de inicio de sesión token",
+        "pl": "dodaj proces logowania tokena",
+        "uk": "додати процес входу в токени",
+        "zh-cn": "添加符号登录进程"
+      },
       "2.5.1": {
         "en": "typo",
         "de": "typo",
@@ -15,19 +28,6 @@
         "pl": "typo",
         "uk": "типо",
         "zh-cn": "类型"
-      },
-      "2.5.0": {
-        "en": "fix translations\nnew checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings \nfix some errors\nadd test\nadd qemu pause\nAdapter requires admin >= 7.7.22 now",
-        "de": "übersetzungen anpassen\nneues kontrollkästchen in einstellungen für knoten im cluster oder nicht (einzelknotenüberprüfung) -> kontrolladaptereinstellungen\nfehler beheben\ntest hinzufügen\nqemu pause hinzufügen\nAdapter benötigt admin >= 7.7.22 jetzt",
-        "ru": "исправление переводов\nновый флажок в настройках для узлов в кластере или нет (проверка одного узла) -> проверьте настройки адаптера\nисправить некоторые ошибки\nдобавить тест\nдобавить qemu паузу\nАдаптер требует администратора >= 7.7.22",
-        "pt": "corrigir traduções\nnova caixa de seleção nas configurações para nós no cluster ou não (check único de nó) -> check adaptator settings\ncorrigir alguns erros\nadicionar teste\nadicionar a pausa do qemu\nAdaptador requer admin >= 7.7.22 agora",
-        "nl": "vertalingen herstellen\nnieuwe selectievakje in instellingen voor knooppunten in cluster of niet (enkele knoopcontrole) -> adapterinstellingen controleren\nenkele fouten herstellen\ntest toevoegen\nqemu-pauze toevoegen\nAdapter vereist admin < 7.7.22 nu",
-        "fr": "corriger les traductions\nnouvelle case à cocher dans les paramètres pour les noeuds dans le cluster ou non (cochez un noeud) -> vérifier les paramètres de l'adaptateur\ncorriger certaines erreurs\najouter un essai\najouter une pause qemu\nAdaptateur nécessite admin >= 7.7.22 maintenant",
-        "it": "correggere le traduzioni\nnuova casella di controllo in impostazioni per nodi in cluster o non (controllo unico nodo) -> controllare le impostazioni dell'adattatore\ncorreggere alcuni errori\naggiungere test\naggiungere pausa qemu\nAdattatore richiede admin >= 7.7.22 ora",
-        "es": "arreglar traducciones\nnueva casilla de verificación para los nodos en el clúster o no (prueba de nodo único) - configuración del adaptador de cheques\ncorregir algunos errores\nagregar la prueba\nañadir qemu pause\nEl adaptador requiere administrador= 7.7.22 ahora",
-        "pl": "poprawianie tłumaczeń\nnowe pole wyboru w ustawieniach dla węzłów w klastrze lub nie (kontrola pojedynczego węzła) - > opcje wyboru adaptera\nnaprawić błędy\ndodać test\ndodaj pauzę qemu\nAdapter wymaga admin > = 7.7.22",
-        "uk": "фіксувати переклади\nнова прапорець в налаштуваннях вузлів в кластері або не (перевірка вузла) -> налаштування адаптера\nвиправлення помилок\nдодати тест\nдодати qemu пауза\nАдаптер вимагає адмін >= 7.7.22 тепер",
-        "zh-cn": "固定翻译\n组装或不组装节点设置中的新复选框( 单一节点检查) - > 检查适配器设置\n修补一些错误\n添加测试\n添加 qemu 暂停\n适任者需要管理员 \\ 7.7.22 现在"
       },
       "2.4.10": {
         "en": "fix node action",

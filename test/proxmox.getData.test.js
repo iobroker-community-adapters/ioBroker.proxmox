@@ -490,4 +490,199 @@ describe('Failover – Mehrere Knoten', () => {
         });
     });
 
+    // ─── Token-Auth + Failover ───────────────────────────────────────────────
+
+    /**
+     * Erstellt eine Multi-Node-Instanz mit Token-Auth.
+     * Beide Nodes verwenden Token-Auth, aber unterschiedliche Token-Secrets.
+     */
+    function makeTokenMultiNodeInstance(axiosMock, nodeCount = 2) {
+        const axiosPath = require.resolve('axios');
+        const realAxios = require.cache[axiosPath];
+
+        const fakeModule = { exports: axiosMock };
+        fakeModule.exports.default      = axiosMock;
+        fakeModule.exports.isAxiosError = axiosMock.isAxiosError ?? (() => false);
+        require.cache[axiosPath] = fakeModule;
+
+        const utilsPath = require.resolve('../lib/proxmox');
+        delete require.cache[utilsPath];
+        const ProxmoxUtils = require('../lib/proxmox');
+
+        require.cache[axiosPath] = realAxios;
+
+        const nodeList = Array.from({ length: nodeCount }, (_, i) => ({
+            realmIp:          `192.168.1.${i + 1}`,
+            realmPort:        8006,
+            realmUser:        'root',
+            realm:            'pam',
+            authType:         'token',
+            realmTokenId:     `token${i + 1}`,
+            realmTokenSecret: `secret-node-${i + 1}-aaaa-bbbb-cccc`,
+        }));
+
+        const adapter = makeAdapter();
+        const inst    = new ProxmoxUtils(adapter, nodeList);
+        return { inst, adapter };
+    }
+
+    describe('Token-Auth – Failover bei Netzwerkfehler', () => {
+
+        it('wechselt bei Netzwerkfehler auf Knoten 2 ohne HTTP-Ticket-Call', async () => {
+            let axisCalls    = 0;
+            let ticketCalled = false;
+
+            const axiosMock = async () => {
+                axisCalls++;
+                if (axisCalls === 1) throw Object.assign(new Error('ECONNREFUSED'), {});
+                return { status: 200, data: { data: [] } };
+            };
+            axiosMock.isAxiosError = () => true;
+
+            const { inst } = makeTokenMultiNodeInstance(axiosMock, 2);
+
+            // ticket() überwachen – darf bei Token-Auth kein axios aufrufen
+            const origTicket = inst.ticket.bind(inst);
+            inst.ticket = async function () {
+                ticketCalled = true;
+                // Knoten wurde schon gewechselt (setNextUrlMain), echtes ticket() aufrufen
+                return origTicket();
+            };
+
+            const result = await inst._getData('/nodes', 'get');
+
+            assert.equal(axisCalls, 2, 'Soll 2× aufgerufen werden: 1× fail, 1× success');
+            assert.ok(ticketCalled, 'ticket() soll nach Failover aufgerufen worden sein');
+            assert.deepEqual(result, { data: [] });
+        });
+
+        it('setzt neuen PVEAPIToken-Header für Knoten 2 nach Failover', async () => {
+            let axisCalls       = 0;
+            const capturedAuth  = [];
+
+            const axiosMock = async (cfg) => {
+                axisCalls++;
+                if (cfg.headers?.Authorization) capturedAuth.push(cfg.headers.Authorization);
+                if (axisCalls === 1) throw Object.assign(new Error('ECONNREFUSED'), {});
+                return { status: 200, data: {} };
+            };
+            axiosMock.isAxiosError = () => true;
+
+            const { inst } = makeTokenMultiNodeInstance(axiosMock, 2);
+            await inst.ticket(); // initialen Header für Node 1 setzen
+
+            await inst._getData('/nodes', 'get');
+
+            // Der zweite Request (nach Failover) soll Token von Node 2 verwenden
+            assert.ok(capturedAuth.length >= 1, 'Kein Authorization-Header empfangen');
+            assert.ok(capturedAuth.some(h => h.startsWith('PVEAPIToken=')),
+                `Kein PVEAPIToken-Header: ${JSON.stringify(capturedAuth)}`);
+        });
+
+        it('nach Failover ist authType immer noch "token" (kein Downgrade auf password)', async () => {
+            let calls = 0;
+            const axiosMock = async () => {
+                calls++;
+                if (calls === 1) throw Object.assign(new Error('ETIMEDOUT'), {});
+                return { status: 200, data: {} };
+            };
+            axiosMock.isAxiosError = () => true;
+
+            const { inst } = makeTokenMultiNodeInstance(axiosMock, 2);
+            await inst.ticket();
+
+            await inst._getData('/nodes', 'get');
+
+            assert.equal(inst.authType, 'token',
+                'authType soll nach Failover weiterhin "token" sein');
+        });
+
+        it('loggt Failover-warn bei Netzwerkfehler', async () => {
+            let calls = 0;
+            const axiosMock = async () => {
+                calls++;
+                if (calls === 1) throw Object.assign(new Error('ECONNREFUSED'), {});
+                return { status: 200, data: {} };
+            };
+            axiosMock.isAxiosError = () => true;
+
+            const { inst, adapter } = makeTokenMultiNodeInstance(axiosMock, 2);
+            await inst._getData('/nodes', 'get');
+
+            assert.ok(adapter._logs.warn.some(m => m.includes('Failover') || m.includes('Netzwerkfehler')),
+                'Kein Failover-Log in warn');
+        });
+
+        it('erschöpft alle Token-Knoten und wirft klaren Fehler', async () => {
+            const axiosMock = async () => {
+                throw Object.assign(new Error('ECONNREFUSED'), {});
+            };
+            axiosMock.isAxiosError = () => true;
+
+            const { inst, adapter } = makeTokenMultiNodeInstance(axiosMock, 3);
+
+            await assert.rejects(
+                () => inst._getData('/nodes', 'get'),
+                (err) => {
+                    assert.ok(err.message.includes('Failover erschöpft'),
+                        `Erwartet "Failover erschöpft", bekam: ${err.message}`);
+                    assert.ok(err.message.includes('3'),
+                        'Knotenanzahl (3) soll im Fehler genannt werden');
+                    return true;
+                },
+            );
+
+            assert.ok(adapter._logs.error.some(m => m.includes('Failover erschöpft')),
+                'error-Log für erschöpften Failover fehlt');
+        });
+    });
+
+    describe('Token-Auth – 401 löst KEINEN Failover aus', () => {
+
+        it('wirft TOKEN_AUTH_FAILED bei 401 – kein Knotenwechsel', async () => {
+            let axisCalls    = 0;
+            let nextUrlCalled = false;
+
+            const axiosMock = async () => {
+                axisCalls++;
+                return { status: 401, data: 'Unauthorized' };
+            };
+            axiosMock.isAxiosError = () => false;
+
+            const { inst } = makeTokenMultiNodeInstance(axiosMock, 2);
+            const origSetNext = inst.setNextUrlMain.bind(inst);
+            inst.setNextUrlMain = function () {
+                nextUrlCalled = true;
+                return origSetNext();
+            };
+
+            await inst.ticket(); // Token für Node 1 setzen
+
+            await assert.rejects(
+                () => inst._getData('/nodes', 'get'),
+                (err) => {
+                    assert.ok(err.message.includes('TOKEN_AUTH_FAILED'),
+                        `Erwartet TOKEN_AUTH_FAILED, bekam: ${err.message}`);
+                    return true;
+                },
+            );
+
+            assert.equal(axisCalls, 1, 'Bei Token-401 darf kein Retry erfolgen');
+            assert.ok(!nextUrlCalled, 'setNextUrlMain() darf bei 401 nicht aufgerufen werden');
+        });
+
+        it('loggt error-Meldung bei 401', async () => {
+            const axiosMock = async () => ({ status: 401, data: 'Unauthorized' });
+            axiosMock.isAxiosError = () => false;
+
+            const { inst, adapter } = makeTokenMultiNodeInstance(axiosMock, 2);
+            await inst.ticket();
+
+            await assert.rejects(() => inst._getData('/nodes', 'get'), () => true);
+
+            assert.ok(adapter._logs.error.some(m => m.includes('Token') || m.includes('401')),
+                'Kein error-Log bei Token-401');
+        });
+    });
+
 });

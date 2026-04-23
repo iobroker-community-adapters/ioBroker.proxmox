@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.8 (2025-12-27)
+* (arteck) add DP webhookNotification as string and as array
+
 ## 2.4.7 (2025-12-27)
 * (arteck) fix refresh vm/lxc
 
