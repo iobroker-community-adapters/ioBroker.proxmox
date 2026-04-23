@@ -57,6 +57,14 @@
                             "default": true
                         },
                         {
+                            "type": "checkbox",
+                            "attr": "clusterNode",
+                            "width": "50px",
+                            "title": "Cluster Node",
+                            "tooltip": "tooltip_clusterNode",
+                            "default": false
+                        },
+                        {
                             "type": "text",
                             "title": "IP Address",
                             "attr": "realmIp",
@@ -114,7 +122,6 @@
                         }
                     ]
                 },
-
                 "_additionalInformationHeader": {
                     "newLine": true,
                     "type": "header",
@@ -129,6 +136,7 @@
                 "requestDiskInformation": {
                     "type": "checkbox",
                     "label": "Request disk information",
+                    "newLine": true,
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
@@ -180,6 +188,45 @@
                     "md": 6,
                     "lg": 4,
                     "xl": 4
+                }
+            }
+        },
+        "tab_notifications": {
+            "type": "panel",
+            "label": "settings",
+            "items": {
+                "cleanup_header": {
+                    "type": "header",
+                    "text": "cleanup",
+                    "size": 4,
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "cleanup_button": {
+                    "type": "sendTo",
+                    "command": "cleanup",
+                    "jsonData": "{}",
+                    "label": "cleanup",
+                    "variant": "contained",
+                    "color": "primary",
+                    "icon": "delete",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 6,
+                    "md": 4,
+                    "lg": 3,
+                    "xl": 3,
+                    "confirm": {
+                        "condition": "true",
+                        "text": "cleanup_confirm_text",
+                        "title": "cleanup_confirm_title",
+                        "ok": "cleanup_confirm_ok",
+                        "cancel": "cleanup_confirm_cancel"
+                    }
                 }
             }
         }

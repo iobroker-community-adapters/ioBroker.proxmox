@@ -33,8 +33,12 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 2.5.0 (2026-04-23)
+* (arteck) fix translations
+* (arteck) new checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings 
+* (arteck) fix some errors
+* (arteck) add test
+* (arteck) add qemu pause
 - (copilot) Adapter requires admin >= 7.7.22 now
 
 ### 2.4.10 (2026-01-28)
@@ -48,10 +52,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.7 (2025-12-27)
 * (arteck) fix refresh vm/lxc
-
-### 2.4.6 (2025-12-23)
-* (arteck) fix start request
-* (arteck) fix Cannot send request
 
 ## License
 
