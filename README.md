@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 2.5.3 (2026-04-23)
+* (arteck) Dependencies have been updated
+
 ### 2.5.2 (2026-04-23)
 * (arteck) add token login process
 
@@ -49,9 +52,6 @@ Control and use data from your Proxmox VE
 
 ### 2.4.10 (2026-01-28)
 * (arteck) fix node action
-
-### 2.4.9 (2026-01-09)
-* (arteck) fix webhookNotification array DP
 
 ## License
 

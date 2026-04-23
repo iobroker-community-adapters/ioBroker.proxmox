@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.2",
+    "version": "2.5.3",
     "news": {
+      "2.5.3": {
+        "en": "Dependencies have been updated",
+        "de": "Abhängigkeiten wurden aktualisiert",
+        "ru": "Зависимости были обновлены",
+        "pt": "As dependências foram atualizadas",
+        "nl": "Afhankelijkheden zijn bijgewerkt",
+        "fr": "Les dépendances ont été actualisées",
+        "it": "Le dipendenze sono state aggiornate",
+        "es": "Se han actualizado las dependencias",
+        "pl": "Zaktualizowano zależności",
+        "uk": "Залежність було оновлено",
+        "zh-cn": "依赖关系已更新"
+      },
       "2.5.2": {
         "en": "add token login process",
         "de": "fügen sie den login-prozess hinzu",
@@ -80,19 +93,6 @@
         "pl": "fix refresh vm / lxc",
         "uk": "фіксувати оновлення vm/lxc",
         "zh-cn": "修复刷新 vm/ lxc"
-      },
-      "2.4.6": {
-        "en": "fix start request\nfix Cannot send request",
-        "de": "anfrage zum starten\nfix Cannot senden Anfrage",
-        "ru": "запрос на фиксацию\nисправить невозможно отправить запрос",
-        "pt": "corrigir o pedido inicial\nnão é possível enviar o pedido",
-        "nl": "fix start verzoek\nfix Kan verzoek niet versturen",
-        "fr": "correction de la requête de démarrage\ncorrection Impossible d'envoyer la demande",
-        "it": "richiesta di inizio di correzione\nfix Non inviare richiesta",
-        "es": "solicitud de inicio\nno se puede enviar solicitud",
-        "pl": "ustaw żądanie rozpoczęcia\nfix Nie można wysłać żądanie",
-        "uk": "задати заявку\nвиправити Неможливо відправити запит",
-        "zh-cn": "固定启动请求\n无法发送请求"
       }
     },
     "connectionType": "local",
