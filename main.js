@@ -249,7 +249,9 @@ await this.setHA();
                     await this.setMachines();
                     anySuccess = true;
                 } catch (err) {
-                    this.log.warn(`Cannot send request [${inst.nodeURL}]: ${err}`);
+                    if (err.message !== 'STOPPED') {
+                        this.log.warn(`Cannot send request [${inst.nodeURL}]: ${err}`);
+                    }
                 }
             }
 
@@ -277,6 +279,9 @@ await this.setHA();
 
                 await this.createNodes(nodes);
             } catch (e) {
+                if (e.message === 'STOPPED') {
+                    return; // Adapter wird beendet – kein Logging nötig
+                }
                 this.log.error(`Could not create nodes [${inst.nodeURL}], please restart adapter: ${e.message}`);
             }
         }
@@ -481,14 +486,25 @@ continue;
         if (msg.command === 'cleanup') {
             this.log.info('Smart-Cleanup gestartet: Verwaiste VM/LXC-Datenpunkte werden ermittelt...');
             try {
-                if (!this.proxmox) {
+                if (!this.proxmoxInstances || this.proxmoxInstances.length === 0) {
                     throw new Error('Proxmox-Verbindung nicht initialisiert. Bitte Adapter neu starten.');
                 }
 
-                // Aktuelle Ressourcen von Proxmox holen
-                const resources = await this.proxmox.getClusterResources();
+                // Aktuelle Ressourcen von ALLEN Proxmox-Instanzen holen
+                let resources = [];
+                for (const inst of this.proxmoxInstances) {
+                    try {
+                        const r = await inst.getClusterResources();
+                        resources = resources.concat(r);
+                    } catch (instErr) {
+                        this.log.warn(`Smart-Cleanup: Instanz [${inst.nodeURL}] nicht erreichbar – wird übersprungen: ${instErr.message}`);
+                    }
+                }
+                if (resources.length === 0) {
+                    throw new Error('Keine Ressourcen von Proxmox erhalten. Sind alle Instanzen erreichbar?');
+                }
 
-                // Set der aktuell vorhandenen VM/LXC-Namen aufbauen
+                // Set der aktuell vorhandenen VM/LXC-Namen aufbauen (Duplikate via Set vermeiden)
                 const activeNames = new Set();
                 for (const res of resources) {
                     if (res.type === 'qemu' || res.type === 'lxc') {
@@ -501,7 +517,7 @@ continue;
                     }
                 }
 
-                this.log.debug(`Smart-Cleanup: ${activeNames.size} aktive VMs/LXC in Proxmox gefunden`);
+                this.log.debug(`Smart-Cleanup: ${activeNames.size} aktive VMs/LXC in Proxmox gefunden: ${JSON.stringify([...activeNames])}`);
 
                 // Alle ioBroker-Channel-Objekte des Adapters lesen
                 const allChannels = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
@@ -520,10 +536,16 @@ continue;
                     const relId = fullId.replace(`${this.namespace}.`, '');
 
                     // Prüfen ob diese Maschine noch in Proxmox existiert
-                    const stillActive = [...activeNames].some(name => relId === name || relId.startsWith(`${name}.`) || relId.startsWith(`${name}/`));
+                    // relId ist z.B. "qemu.myvm" oder "qemu_myvm"
+                    const stillActive = [...activeNames].some(name =>
+                        relId === name ||
+                        relId.startsWith(`${name}.`) ||
+                        relId.startsWith(`${name}/`)
+                    );
 
                     if (!stillActive) {
                         toDelete.push(fullId);
+                        this.log.debug(`Smart-Cleanup: Markiert für Löschung: "${fullId}" (relId="${relId}")`);
                     }
                 }
 
@@ -533,10 +555,14 @@ continue;
                 let deleted = 0;
                 for (const id of toDelete) {
                     const relId = id.replace(`${this.namespace}.`, '');
-                    await this.delObjectAsync(relId, { recursive: true });
-                    delete this.objects[id];
-                    deleted++;
-                    this.log.info(`Smart-Cleanup: Gelöscht → "${id}"`);
+                    try {
+                        await this.delObjectAsync(relId, { recursive: true });
+                        delete this.objects[id];
+                        deleted++;
+                        this.log.info(`Smart-Cleanup: Gelöscht → "${id}"`);
+                    } catch (delErr) {
+                        this.log.warn(`Smart-Cleanup: Fehler beim Löschen von "${id}": ${delErr.message}`);
+                    }
                 }
 
                 const resultMsg = deleted > 0
@@ -549,8 +575,9 @@ continue;
                     this.sendTo(msg.from, msg.command, { result: 'ok', deleted, message: resultMsg }, msg.callback);
                 }
 
+                // Kleines Delay, damit die sendTo-Antwort vor dem Neustart übertragen wird
                 if (deleted > 0) {
-                    this.restart();
+                    this.setTimeout(() => this.restart(), 1500);
                 }
             } catch (err) {
                 this.log.error(`Smart-Cleanup fehlgeschlagen: ${err.message}`);

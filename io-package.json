@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.3",
+    "version": "2.5.4",
     "news": {
+      "2.5.4": {
+        "en": "fix erro local on storage/pve/local",
+        "de": "fix erro lokal auf lager/pve/lokal",
+        "ru": "erro local on storage/pve/local",
+        "pt": "corrigir erro local no armazenamento/pve/local",
+        "nl": "fix erro local on storage/pve/local",
+        "fr": "réparer erro local sur stockage/pve/local",
+        "it": "fix erro locale su storage/pve/local",
+        "es": "fijar erro local en almacenamiento/pve/local",
+        "pl": "fix erro local on storage / pve / local",
+        "uk": "фіксувати erro локальне на зберігання/pve/local",
+        "zh-cn": "在存储/ pve/ 本地设置错误"
+      },
       "2.5.3": {
         "en": "Dependencies have been updated",
         "de": "Abhängigkeiten wurden aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "dodaj DP webhookNotification jako ciąg znaków i tablica",
         "uk": "add DP webhookNotification як рядок і як масив",
         "zh-cn": "添加 DP webhook 通知为字符串和数组"
-      },
-      "2.4.7": {
-        "en": "fix refresh vm/lxc",
-        "de": "erfrischung vm/lxc",
-        "ru": "обновление vm/lxc",
-        "pt": "corrigir atualização vm/lxc",
-        "nl": "repareren vm/lxc",
-        "fr": "correction du rafraîchissement vm/lxc",
-        "it": "correzione aggiornamento vm/lxc",
-        "es": "fijar refresco vm/lxc",
-        "pl": "fix refresh vm / lxc",
-        "uk": "фіксувати оновлення vm/lxc",
-        "zh-cn": "修复刷新 vm/ lxc"
       }
     },
     "connectionType": "local",

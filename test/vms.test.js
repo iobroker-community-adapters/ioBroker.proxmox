@@ -258,6 +258,44 @@ describe('createVM', () => {
             await assert.doesNotReject(() => adapter.createVM());
             assert.ok(adapter._logs.debug.some(m => m.includes('Unable to get cluster resources')));
         });
+
+        it('STOPPED von getClusterResources → kein Log, kein Crash', async () => {
+            const adapter = makeAdapter([]);
+            adapter.proxmox.getClusterResources = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.createVM());
+            // Kein debug/warn/error Log bei STOPPED
+            assert.ok(!adapter._logs.debug.some(m => m.includes('Unable to get cluster resources')), 'Kein debug-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.warn.length,  0, 'Kein warn-Log bei STOPPED erwartet');
+        });
+
+        it('STOPPED von getResourceStatus → kein error-Log, kein Crash', async () => {
+            const adapter = makeAdapter([makeQemuResource({ status: 'running' })]);
+            adapter.proxmox.getResourceStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.createVM());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+        });
+
+        it('STOPPED von getStorageStatus → kein Log, früher return', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], { config: { requestStorageInformation: true } });
+            adapter.proxmox.getStorageStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.createVM());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.warn.length,  0, 'Kein warn-Log bei STOPPED erwartet');
+        });
+
+        it('echter Storage-Fehler (HTTP 500) → error-Log mit Fehlermeldung', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], { config: { requestStorageInformation: true } });
+            adapter.proxmox.getStorageStatus = async () => { throw new Error('getStorageStatus für "local" auf "pve" fehlgeschlagen: HTTP 500: storage offline'); };
+
+            await assert.doesNotReject(() => adapter.createVM());
+            assert.ok(adapter._logs.error.some(m => m.includes('Storageerror createVM')), 'error-Log soll bei echtem Fehler erscheinen');
+        });
     });
 });
 
@@ -359,6 +397,76 @@ describe('setMachines', () => {
             adapter.proxmox.getClusterResources = async () => { throw new Error('timeout'); };
 
             await assert.doesNotReject(() => adapter.setMachines());
+        });
+
+        it('STOPPED von getClusterResources → kein warn/error-Log', async () => {
+            const adapter = makeAdapter([]);
+            adapter.proxmox.getClusterResources = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.warn.length,  0, 'Kein warn-Log bei STOPPED erwartet');
+        });
+
+        it('STOPPED von getResourceStatus (laufende VM) → kein error-Log', async () => {
+            const adapter = makeAdapter([makeQemuResource({ status: 'running' })]);
+            adapter.objects['proxmox.0.qemu_testvm'] = { type: 'channel', native: { type: 'qemu' } };
+            adapter.proxmox.getResourceStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+        });
+
+        it('STOPPED von getResourceStatus (laufendes LXC) → kein error-Log', async () => {
+            const adapter = makeAdapter([makeLxcResource({ status: 'running' })]);
+            adapter.objects['proxmox.0.lxc_testlxc'] = { type: 'channel', native: { type: 'lxc' } };
+            adapter.proxmox.getResourceStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED (LXC) erwartet');
+        });
+
+        it('STOPPED von getStorageStatus → kein warn/error-Log, früher return', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], { config: { requestStorageInformation: true } });
+            adapter.proxmox.getStorageStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.warn.length,  0, 'Kein warn-Log bei STOPPED erwartet');
+        });
+
+        it('STOPPED von getBackupStatus → kein warn/error-Log, früher return', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], {
+                config: { requestStorageInformation: true, requestStorageInformationBackup: true },
+            });
+            adapter.proxmox.getBackupStatus = async () => { throw new Error('STOPPED'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log bei STOPPED erwartet');
+            assert.equal(adapter._logs.warn.length,  0, 'Kein warn-Log bei STOPPED erwartet');
+        });
+
+        it('echter Storage-Fehler (HTTP 500) → warn-Log, kein Crash', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], { config: { requestStorageInformation: true } });
+            adapter.proxmox.getStorageStatus = async () => { throw new Error('getStorageStatus für "local" auf "pve" fehlgeschlagen: HTTP 500'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.ok(adapter._logs.warn.some(m => m.includes('setMachines storageStatus')), 'warn-Log soll bei echtem Fehler erscheinen');
+            assert.equal(adapter._logs.error.length, 0, 'Kein error-Log – Storage-Fehler ist warn-Level');
+        });
+
+        it('echter Backup-Fehler → warn-Log, kein Crash', async () => {
+            const storageRes = { type: 'storage', node: 'pve', storage: 'local', status: 'available', shared: false };
+            const adapter = makeAdapter([storageRes], {
+                config: { requestStorageInformation: true, requestStorageInformationBackup: true },
+            });
+            adapter.proxmox.getBackupStatus = async () => { throw new Error('getBackupStatus fehlgeschlagen für local auf pve: HTTP 500'); };
+
+            await assert.doesNotReject(() => adapter.setMachines());
+            assert.ok(adapter._logs.warn.some(m => m.includes('setMachines backupStatus')), 'warn-Log soll bei echtem Backup-Fehler erscheinen');
         });
     });
 });

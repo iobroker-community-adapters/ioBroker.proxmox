@@ -1,4 +1,7 @@
 # Older changes
+## 2.4.10 (2026-01-28)
+* (arteck) fix node action
+
 ## 2.4.9 (2026-01-09)
 * (arteck) fix webhookNotification array DP
 
