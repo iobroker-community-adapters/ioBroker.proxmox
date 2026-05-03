@@ -53,6 +53,8 @@ Control and use data from your Proxmox VE
 * (arteck) add qemu pause
 - (copilot) Adapter requires admin >= 7.7.22 now
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 The MIT License (MIT)
