@@ -34,7 +34,8 @@ Control and use data from your Proxmox VE
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
-* (arteck) fix ceph info 
+* (arteck) fix ceph info
+* (arteck) fix ceph tree limit 
 
 ### 2.5.4 (2026-04-23)
 * (arteck) fix erro local on storage/pve/local
