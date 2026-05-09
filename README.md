@@ -49,6 +49,8 @@ Control and use data from your Proxmox VE
 ### 2.5.1 (2026-04-23)
 * (arteck) typo
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 The MIT License (MIT)
