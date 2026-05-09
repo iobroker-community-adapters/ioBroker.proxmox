@@ -33,9 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.5.5 (2026-05-09)
 * (arteck) fix ceph info
-* (arteck) fix ceph tree limit 
+* (arteck) fix ceph tree limit
 
 ### 2.5.4 (2026-04-23)
 * (arteck) fix erro local on storage/pve/local
@@ -48,14 +48,6 @@ Control and use data from your Proxmox VE
 
 ### 2.5.1 (2026-04-23)
 * (arteck) typo
-
-### 2.5.0 (2026-04-23)
-* (arteck) fix translations
-* (arteck) new checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings 
-* (arteck) fix some errors
-* (arteck) add test
-* (arteck) add qemu pause
-- (copilot) Adapter requires admin >= 7.7.22 now
 
 ## License
 

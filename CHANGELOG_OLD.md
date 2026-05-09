@@ -1,4 +1,12 @@
 # Older changes
+## 2.5.0 (2026-04-23)
+* (arteck) fix translations
+* (arteck) new checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings 
+* (arteck) fix some errors
+* (arteck) add test
+* (arteck) add qemu pause
+- (copilot) Adapter requires admin >= 7.7.22 now
+
 ## 2.4.10 (2026-01-28)
 * (arteck) fix node action
 

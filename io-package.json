@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.4",
+    "version": "2.5.5",
     "news": {
+      "2.5.5": {
+        "en": "fix ceph info\nfix ceph tree limit",
+        "de": "ceph info\nceph tree limit",
+        "ru": "исправить ceph info\nустановить предел ceph tree",
+        "pt": "corrigir informações do ceph\nfixar o limite da árvore ceph",
+        "nl": "fix ceph info\nfix ceph boom limiet",
+        "fr": "corriger ceph info\nfixer la limite de l'arbre ceph",
+        "it": "correzione di ceph info\nfissare il limite dell'albero di cefo",
+        "es": "fijar información de ceph\nfijar límite de árbol de ceph",
+        "pl": "fix ceph info\nfix granica drzewa ceph",
+        "uk": "фіксувати дані ceph\nфіксувати обмеження ceph дерева",
+        "zh-cn": "修复ceph信息\n固定雪松树限制"
+      },
       "2.5.4": {
         "en": "fix erro local on storage/pve/local",
         "de": "fix erro lokal auf lager/pve/lokal",
@@ -80,19 +93,6 @@
         "pl": "fix webhookNotification array DP",
         "uk": "javaScript licenses API Веб-сайт Go1.13.8",
         "zh-cn": "修补 Webhook 通知数组 DP"
-      },
-      "2.4.8": {
-        "en": "add DP webhookNotification as string and as array",
-        "de": "dP webhookNotification als String und als Array hinzufügen",
-        "ru": "добавить DP webhookNotification в виде строки и массива",
-        "pt": "adicionar DP webhookNotificação como string e como array",
-        "nl": "toevoegen van DP webhookNotification als string en als array",
-        "fr": "ajouter DP webhookNotification comme chaîne et comme tableau",
-        "it": "aggiungere DP webhookNotification come stringa e come array",
-        "es": "añadir DP webhookNotificación como cadena y como matriz",
-        "pl": "dodaj DP webhookNotification jako ciąg znaków i tablica",
-        "uk": "add DP webhookNotification як рядок і як масив",
-        "zh-cn": "添加 DP webhook 通知为字符串和数组"
       }
     },
     "connectionType": "local",
