@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
+
 ### 2.5.5 (2026-05-09)
 * (arteck) fix ceph info
 * (arteck) fix ceph tree limit
