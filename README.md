@@ -33,8 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
-- (copilot) Adapter requires node.js >= 22 now
+### 2.5.6 (2026-05-13)
+* (arteck) fix high i/o
+* (copilot) Adapter requires node.js >= 22 now
 
 ### 2.5.5 (2026-05-09)
 * (arteck) fix ceph info
@@ -48,11 +49,6 @@ Control and use data from your Proxmox VE
 
 ### 2.5.2 (2026-04-23)
 * (arteck) add token login process
-
-### 2.5.1 (2026-04-23)
-* (arteck) typo
-
-[Older changelogs can be found there](CHANGELOG_OLD.md)
 
 ## License
 

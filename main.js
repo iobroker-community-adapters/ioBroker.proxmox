@@ -36,6 +36,7 @@ class Proxmox extends utils.Adapter {
         };
 
         this.requestInterval = null;
+        this.stopping = false;
 
         // lib/methods
         this.used_level       = _methods.used_level.bind(this);
@@ -98,9 +99,13 @@ class Proxmox extends utils.Adapter {
                 return;
             }
 
-            // Tickets für alle Instanzen holen
+            // Tickets für alle Instanzen holen – einzelne Fehler sollen nicht den Start abbrechen
             for (const inst of this.proxmoxInstances) {
-                await inst.ticket();
+                try {
+                    await inst.ticket();
+                } catch (ticketErr) {
+                    this.log.warn(`Ticket für Instanz [${inst.nodeURL}] fehlgeschlagen: ${ticketErr.message} – Instanz wird im Polling-Zyklus erneut versucht`);
+                }
             }
 
             // Primäre Instanz für Backward-Compat setzen
@@ -112,7 +117,7 @@ class Proxmox extends utils.Adapter {
             // subscribe on all state changes
             await this.subscribeStatesAsync('*');
 
-            await this.sendRequest(1); // start interval
+            await this.sendRequest(); // start interval with configured delay
         } catch (err) {
             const reason = err?.message || String(err);
             this.log.error(`Unable to authenticate with Proxmox host. Please check your credentials. Error: ${reason}`);
@@ -187,7 +192,7 @@ class Proxmox extends utils.Adapter {
                     }                                     
                 }
             } else {
-                if (id.includes('webhookNotification') && !state.ack) {
+                if (id.includes('webhookNotification')) {
                     this.log.debug(`webhook Notif : ${state.val}`);
                     let notifArray;
                     try {
@@ -202,8 +207,6 @@ class Proxmox extends utils.Adapter {
     }
 
     async sendRequest(nextRunTimeout) {
-        await this.setStateAsync('info.lastUpdate', { val: Date.now(), ack: true });
-
         if (this.requestInterval) {
             this.clearTimeout(this.requestInterval);
             this.requestInterval = null;
@@ -215,10 +218,15 @@ class Proxmox extends utils.Adapter {
             this.requestInterval = null;
 
             if (this.proxmoxInstances.length === 0) {
+                this.log.warn('sendRequest: Keine Proxmox-Instanzen vorhanden – warte auf nächsten Zyklus');
+                if (!this.stopping) {
+                    await this.sendRequest();
+                }
                 return;
             }
 
             this.log.debug('sendRequest interval started');
+            await this.setStateAsync('info.lastUpdate', { val: Date.now(), ack: true });
 
             let anySuccess = false;
 
@@ -240,11 +248,11 @@ class Proxmox extends utils.Adapter {
                     await this.setNodes(nodes);
 
                     if (this.config.requestCephInformation) {
-await this.setCeph();
-}
-                    if (this.config.requestHAInformation)   {
-await this.setHA();
-}
+                        await this.setCeph();
+                    }
+                    if (this.config.requestHAInformation) {
+                        await this.setHA();
+                    }
 
                     await this.setMachines();
                     anySuccess = true;
@@ -255,13 +263,15 @@ await this.setHA();
                 }
             }
 
-            await this.setStateAsync('info.connection', { val: anySuccess, ack: true });
+            await this.setStateChangedAsync('info.connection', { val: anySuccess, ack: true });
             if (!anySuccess) {
                 this.log.warn('Alle Proxmox-Instanzen nicht erreichbar');
             }
 
-            // Schedule next run
-            await this.sendRequest();
+            // Schedule next run – nur wenn Adapter noch läuft
+            if (!this.stopping) {
+                await this.sendRequest();
+            }
         }, delay);
     }
 
@@ -593,6 +603,8 @@ continue;
      */
     onUnload(callback) {
         try {
+            this.stopping = true;
+
             for (const inst of this.proxmoxInstances) {
                 inst.stop();
             }

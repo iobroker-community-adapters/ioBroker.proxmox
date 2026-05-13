@@ -1,4 +1,9 @@
 # Older changes
+## 2.5.1 (2026-04-23)
+* (arteck) typo
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## 2.5.0 (2026-04-23)
 * (arteck) fix translations
 * (arteck) new checkbox in settings for nodes in cluster or not (single node check) -> check adapter settings 
