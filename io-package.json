@@ -1,11 +1,11 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.5.6",
+    "version": "2.6.0",
     "news": {
-      "2.5.6": {
-        "en": "fix high i/o\nAdapter requires node.js >= 22 now",
-        "de": "hoch i/o\nAdapter benötigt node.js >= 22 jetzt",
+      "2.6.0": {
+        "en": "high i/o rate problem fixed\nAdapter requires node.js >= 22 now",
+        "de": "Problme mit hoher i/o Laste behoben\nAdapter benötigt node.js >= 22 jetzt",
         "ru": "фиксировать высокий i/o\nАдаптер требует node.js >= 22 сейчас",
         "pt": "fixar i/o elevado\nAdaptador requer nod.js >= 22 agora",
         "nl": "fix high i/o\nVoor de adapter zijn node.js < 22 nu nodig",
@@ -80,19 +80,6 @@
         "pl": "typo",
         "uk": "типо",
         "zh-cn": "类型"
-      },
-      "2.4.10": {
-        "en": "fix node action",
-        "de": "fixed node aktion",
-        "ru": "фиксация действия узла",
-        "pt": "corrigir a acção do nó",
-        "nl": "fix node actie",
-        "fr": "correction de l'action du nœud",
-        "it": "correzione azione nodo",
-        "es": "acción del nodo",
-        "pl": "naprawić działanie węzła",
-        "uk": "виправити дію вузла",
-        "zh-cn": "固定节点动作"
       }
     },
     "connectionType": "local",
