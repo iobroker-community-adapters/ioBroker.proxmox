@@ -50,6 +50,8 @@ Control and use data from your Proxmox VE
 ### 2.5.2 (2026-04-23)
 * (arteck) add token login process
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 The MIT License (MIT)
