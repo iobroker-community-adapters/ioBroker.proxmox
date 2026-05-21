@@ -1,4 +1,9 @@
 # Older changes
+## 2.5.2 (2026-04-23)
+* (arteck) add token login process
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## 2.5.1 (2026-04-23)
 * (arteck) typo
 

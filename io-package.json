@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "news": {
+      "2.6.1": {
+        "en": "fix reconnect",
+        "de": "zurück zur übersicht",
+        "ru": "фиксировать соединение",
+        "pt": "corrigir a reconexão",
+        "nl": "fix reconnect",
+        "fr": "corriger le reconnect",
+        "it": "correzione della connessione",
+        "es": "reconectar",
+        "pl": "naprawić ponowne połączenie",
+        "uk": "фіксувати відключення",
+        "zh-cn": "修复重连接"
+      },
       "2.6.0": {
         "en": "high i/o rate problem fixed\nAdapter requires node.js >= 22 now",
         "de": "Problme mit hoher i/o Laste behoben\nAdapter benötigt node.js >= 22 jetzt",
