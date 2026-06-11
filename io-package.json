@@ -42,19 +42,6 @@
         "uk": "фіксувати дані ceph\nфіксувати обмеження ceph дерева",
         "zh-cn": "修复ceph信息\n固定雪松树限制"
       },
-      "2.5.4": {
-        "en": "fix erro local on storage/pve/local",
-        "de": "fix erro lokal auf lager/pve/lokal",
-        "ru": "erro local on storage/pve/local",
-        "pt": "corrigir erro local no armazenamento/pve/local",
-        "nl": "fix erro local on storage/pve/local",
-        "fr": "réparer erro local sur stockage/pve/local",
-        "it": "fix erro locale su storage/pve/local",
-        "es": "fijar erro local en almacenamiento/pve/local",
-        "pl": "fix erro local on storage / pve / local",
-        "uk": "фіксувати erro локальне на зберігання/pve/local",
-        "zh-cn": "在存储/ pve/ 本地设置错误"
-      },
       "2.5.3": {
         "en": "Dependencies have been updated",
         "de": "Abhängigkeiten wurden aktualisiert",
@@ -67,32 +54,6 @@
         "pl": "Zaktualizowano zależności",
         "uk": "Залежність було оновлено",
         "zh-cn": "依赖关系已更新"
-      },
-      "2.5.2": {
-        "en": "add token login process",
-        "de": "fügen sie den login-prozess hinzu",
-        "ru": "добавить процесс входа в маркер",
-        "pt": "adicionar o processo de login do token",
-        "nl": "token-aanmeldproces toevoegen",
-        "fr": "ajouter le processus de connexion token",
-        "it": "aggiungere il processo di login",
-        "es": "añadir proceso de inicio de sesión token",
-        "pl": "dodaj proces logowania tokena",
-        "uk": "додати процес входу в токени",
-        "zh-cn": "添加符号登录进程"
-      },
-      "2.5.1": {
-        "en": "typo",
-        "de": "typo",
-        "ru": "опечатка",
-        "pt": "erro de digitação",
-        "nl": "type",
-        "fr": "typo",
-        "it": "tipo",
-        "es": "typo",
-        "pl": "typo",
-        "uk": "типо",
-        "zh-cn": "类型"
       }
     },
     "connectionType": "local",
