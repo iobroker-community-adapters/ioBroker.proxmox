@@ -30,35 +30,9 @@ async function withRetry(fn, retries, label) {
             ]);
         } catch (err) {
             if (i === retries) {
-                throw err;
-            }
-            this.log.debug(`${label}: Retry ${i + 1}/${retries} nach Fehler: ${err.message}`);
-        }
-    }
+throw err;
 }
-
-/**
- * Serialisiert das gesamte 'checks'-Objekt als JSON-String.
- * Dadurch werden keinerlei Unterordner für einzelne Checks oder Details angelegt.
- *
- * @param {object|Array} data - zu verarbeitende Daten (wird direkt mutiert)
- */
-function flattenCephChecksDetail(data) {
-    if (!data || typeof data !== 'object') {
-        return;
-    }
-    if (Array.isArray(data)) {
-        for (let i = 0; i < data.length; i++) {
-            flattenCephChecksDetail(data[i]);
-        }
-        return;
-    }
-    for (const [key, value] of Object.entries(data)) {
-        if (key === 'checks' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
-            // Das gesamte checks-Objekt als JSON-String serialisieren
-            data[key] = JSON.stringify(value);
-        } else if (typeof value === 'object') {
-            flattenCephChecksDetail(value);
+            this.log.debug(`${label}: Retry ${i + 1}/${retries} nach Fehler: ${err.message}`);
         }
     }
 }
@@ -78,8 +52,8 @@ function flattenCephChecksDetail(data) {
  */
 async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onState, visitedPaths = new Set()) {
     if (!data || typeof data !== 'object') {
-        return;
-    }
+return;
+}
     if (depth > 10) {
         ctx.log.warn(`traverseCeph: maximale Tiefe 10 erreicht bei Pfad: ${path}`);
         return;
@@ -87,8 +61,8 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
 
     for (const [key, value] of Object.entries(data)) {
         if (value === null || value === undefined) {
-            continue;
-        }
+continue;
+}
 
         const stateId = `${path}.${key}`;
 
@@ -102,7 +76,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.extendObjectAsync(stateId, {
                     type: 'folder',
-                    common: {name: key},
+                    common: { name: key },
                     native: {},
                 });
             }
@@ -112,7 +86,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
                     if (createObjects) {
                         await ctx.extendObjectAsync(arrId, {
                             type: 'folder',
-                            common: {name: `${key}[${i}]`},
+                            common: { name: `${key}[${i}]` },
                             native: {},
                         });
                     }
@@ -121,13 +95,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
                     if (createObjects) {
                         await ctx.extendObjectAsync(arrId, {
                             type: 'state',
-                            common: {
-                                name: `${key}[${i}]`,
-                                type: typeof value[i],
-                                read: true,
-                                write: false,
-                                role: 'value'
-                            },
+                            common: { name: `${key}[${i}]`, type: typeof value[i], read: true, write: false, role: 'value' },
                             native: {},
                         });
                     }
@@ -143,7 +111,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.setObjectNotExistsAsync(stateId, {
                     type: 'folder',
-                    common: {name: key},
+                    common: { name: key },
                     native: {},
                 });
             }
@@ -152,7 +120,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.extendObjectAsync(stateId, {
                     type: 'state',
-                    common: {name: key, type: typeof value, read: true, write: false, role: 'value'},
+                    common: { name: key, type: typeof value, read: true, write: false, role: 'value' },
                     native: {},
                 });
             }
@@ -170,7 +138,7 @@ async function createCeph() {
     try {
         await this.setObjectNotExistsAsync(cephid, {
             type: 'channel',
-            common: {name: 'ceph'},
+            common: { name: 'ceph' },
             native: {},
         });
 
@@ -185,8 +153,6 @@ async function createCeph() {
             this.log.debug('createCeph: keine Ceph-Daten verfügbar (Ceph nicht installiert?)');
             return;
         }
-
-        flattenCephChecksDetail(cephInformation.data);
 
         await traverseCeph(
             this, cephid, cephInformation.data, 1, cephid, true,
@@ -220,8 +186,6 @@ async function setCeph() {
             return;
         }
 
-        flattenCephChecksDetail(cephInformation.data);
-
         await traverseCeph(
             this, cephid, cephInformation.data, 1, cephid, true,
             async (id, val) => this.setStateChangedAsync(id, val, true)
@@ -231,4 +195,4 @@ async function setCeph() {
     }
 }
 
-module.exports = {createCeph, setCeph};
+module.exports = { createCeph, setCeph };

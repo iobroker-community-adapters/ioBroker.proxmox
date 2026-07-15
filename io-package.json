@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.6.1",
+    "version": "2.6.2",
     "news": {
+      "2.6.2": {
+        "en": "restructure ceph health message",
+        "de": "Umstrukturierung der Ceph-Gesundheitsbotschaft",
+        "ru": "реструктуризация сообщения о состоянии здоровья Ceph",
+        "pt": "reestruturar mensagem de saúde ceph",
+        "nl": "Herstructureer het bericht over Ceph Health.",
+        "fr": "restructurer le message de santé de Ceph",
+        "it": "ristrutturare il messaggio sanitario di Ceph",
+        "es": "reestructurar el mensaje de salud cefálica",
+        "pl": "zrestrukturyzuj komunikat zdrowotny Ceph",
+        "uk": "реструктуризувати повідомлення про стан ceph",
+        "zh-cn": "重组头颈健康信息"
+      },
       "2.6.1": {
         "en": "fix reconnect",
         "de": "zurück zur übersicht",

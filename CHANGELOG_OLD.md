@@ -1,4 +1,7 @@
 # Older changes
+## 2.5.3 (2026-04-23)
+* (arteck) Dependencies have been updated
+
 ## 2.5.2 (2026-04-23)
 * (arteck) add token login process
 
