@@ -33,6 +33,10 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (arteck) fix next node reconnect
+
 ### 2.6.2 (2026-07-15)
 * (arteck) restructure ceph health message
 
