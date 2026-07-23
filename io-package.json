@@ -249,6 +249,30 @@
       "native": {}
     },
     {
+      "_id": "info.node",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Connected Proxmox node(s)",
+          "de": "Verbundene Proxmox-Knoten",
+          "ru": "Подключенные узлы Proxmox",
+          "pt": "Nó(s) Proxmox conectado(s)",
+          "nl": "Verbonden Proxmox-node(s)",
+          "fr": "Nœud(s) Proxmox connecté(s)",
+          "it": "Nodi Proxmox connessi",
+          "es": "Nodo(s) Proxmox conectado(s)",
+          "pl": "Połączone węzły Proxmox",
+          "uk": "Підключені вузли Proxmox",
+          "zh-cn": "已连接的 Proxmox 节点"
+        },
+        "role": "state",
+        "type": "string",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    },
+    {
       "_id": "info.offlineMachines",
       "type": "state",
       "common": {

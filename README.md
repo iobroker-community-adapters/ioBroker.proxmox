@@ -36,6 +36,7 @@ Control and use data from your Proxmox VE
 
 ### **WORK IN PROGRESS**
 * (arteck) fix next node reconnect
+* (arteck) add state info.node for actual node ip
 
 ### 2.6.2 (2026-07-15)
 * (arteck) restructure ceph health message

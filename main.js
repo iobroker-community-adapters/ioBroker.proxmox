@@ -264,6 +264,18 @@ class Proxmox extends utils.Adapter {
             }
 
             await this.setStateChangedAsync('info.connection', { val: anySuccess, ack: true });
+
+            // Collect connected node info as "ip:port" strings from the currently active nodeURL
+            const nodeAddresses = [];
+            for (const inst of this.proxmoxInstances) {
+                if (inst?.nodeURL) {
+                    // nodeURL format: https://{ip}:{port}/api2/json
+                    const hostPort = inst.nodeURL.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+                    nodeAddresses.push(hostPort);
+                }
+            }
+            await this.setStateAsync('info.node', { val: nodeAddresses.join(', '), ack: true });
+
             if (!anySuccess) {
                 this.log.warn('Alle Proxmox-Instanzen nicht erreichbar');
             }
