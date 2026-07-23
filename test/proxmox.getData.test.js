@@ -132,17 +132,21 @@ describe('ProxmoxUtils._getData', () => {
         });
     });
 
-    // ── 3. HTTP 500 / 595 / 599 ───────────────────────────────────────────────
+    // ── 3. HTTP 500 / 595 / 599 → Retry + Failover (Einzelknoten) ──────────
     for (const code of [500, 595, 599]) {
-        describe(`HTTP ${code}`, () => {
-            it(`wirft Error("HTTP ${code}")`, async () => {
-                const { inst } = makeInstance(axiosReturns(code, { errors: 'server error' }));
+        describe(`HTTP ${code} (Einzelknoten, Retries + Failover erschöpft)`, () => {
+            it(`wirft Failover-erschöpft-Error nach Retries`, async () => {
+                // Achtung: makeInstance hat nur 1 Knoten → 2 Retries, dann Failover sofort erschöpft
+                const { inst, adapter } = makeInstance(axiosReturns(code, { errors: 'server error' }));
+
+                // Adapter-Konfig für schnellere Retries (Standard: 2 Retries mit 1s/2s Backoff)
+                adapter.config = { retryCount5xx: 1, retryDelay5xx: 10 };
 
                 await assert.rejects(
                     () => inst._getData('/nodes', 'get'),
                     (err) => {
-                        assert.equal(err.message, `HTTP ${code}`);
-                        assert.ok(err.response, 'err.response soll gesetzt sein');
+                        assert.ok(err.message.includes(`HTTP ${code}`), `Soll HTTP ${code} enthalten, war: ${err.message}`);
+                        assert.ok(err.message.includes('Failover erschöpft'), `Soll Failover-Meldung sein, war: ${err.message}`);
                         return true;
                     },
                 );
