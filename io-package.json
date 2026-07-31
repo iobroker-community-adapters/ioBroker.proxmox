@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "proxmox",
-    "version": "2.6.2",
+    "version": "2.6.3",
     "news": {
+      "2.6.3": {
+        "en": "fix next node reconnect\nadd state info.node for actual node ip",
+        "de": "nächster node reconnect\nzustand info.node für den tatsächlichen knoten ip hinzufügen",
+        "ru": "обновление next node reconnect\nдобавить state info.node для реального узла ip",
+        "pt": "corrigir o novo nó\nadd state info.node for real node ip",
+        "nl": "fix volgende knoop opnieuw verbinden\nstate info.node toevoegen voor werkelijke node ip",
+        "fr": "correction de la prochaine connexion du noeud\najouter l'état info.node pour le noeud réel ip",
+        "it": "risolvere il prossimo nodo ricollegare\naggiungere informazioni di stato.node per nodo effettivo ip",
+        "es": "arreglar la próxima desconexión del nodo\nañadir información del estado.nodo para el nodo real ip",
+        "pl": "naprawić ponowne połączenie następnego węzła\ndodaj stan info.node dla rzeczywistego ip węzła",
+        "uk": "виправити наступний вузол\nдодати інформацію про стан.node для фактичного вузла ip",
+        "zh-cn": "修复下一个节点重新连接\n为实际节点 ip 添加状态信息.node"
+      },
       "2.6.2": {
         "en": "restructure ceph health message",
         "de": "Umstrukturierung der Ceph-Gesundheitsbotschaft",

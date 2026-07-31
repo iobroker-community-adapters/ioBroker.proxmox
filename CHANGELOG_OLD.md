@@ -1,4 +1,7 @@
 # Older changes
+## 2.5.4 (2026-04-23)
+* (arteck) fix erro local on storage/pve/local
+
 ## 2.5.3 (2026-04-23)
 * (arteck) Dependencies have been updated
 

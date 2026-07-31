@@ -33,8 +33,7 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 2.6.3 (2026-07-31)
 * (arteck) fix next node reconnect
 * (arteck) add state info.node for actual node ip
 
@@ -51,9 +50,6 @@ Control and use data from your Proxmox VE
 ### 2.5.5 (2026-05-09)
 * (arteck) fix ceph info
 * (arteck) fix ceph tree limit
-
-### 2.5.4 (2026-04-23)
-* (arteck) fix erro local on storage/pve/local
 
 ## License
 
