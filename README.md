@@ -32,6 +32,9 @@ Control and use data from your Proxmox VE
 
 ### **WORK IN PROGRESS**
 - (copilot) Adapter requires node.js >= 22.19.0 now
+- (bluefox) The adapter was refactored to TypeScript. It can only be installed from npm now, not from GitHub
+- (bluefox) Fixed the cleanup button in the configuration dialog, it never got an answer from the adapter
+- (bluefox) Repaired the translations of the configuration dialog, which were broken since 2.5.0
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
