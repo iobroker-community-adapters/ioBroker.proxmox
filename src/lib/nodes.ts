@@ -129,7 +129,6 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
             },
             native: { node: node.node, type: node.type },
         });
-        this.subscribeForeignStates(`${sid}.shutdown`);
 
         await this.extendObjectAsync(`${sid}.reboot`, {
             type: 'state',
@@ -142,7 +141,6 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
             },
             native: { node: node.node, type: node.type },
         });
-        this.subscribeForeignStates(`${sid}.reboot`);
 
         await this.extendObjectAsync(`${sid}.status`, {
             type: 'state',

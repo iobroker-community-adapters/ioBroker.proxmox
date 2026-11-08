@@ -630,3 +630,16 @@ describe('VMs/LXC mit gleichem Namen (#702)', () => {
         assert.equal(adapter.objects['proxmox.0.lxc_web_100.stop'].native.vmid, 7);
     });
 });
+
+// ─── Abos (#703) ──────────────────────────────────────────────────────────────
+
+describe('Button-Abos (#703)', () => {
+    it('createVM abonniert keine einzelnen Buttons, subscribeStates("*") deckt sie ab', async () => {
+        const subscribed = [];
+        const adapter = makeAdapter([makeQemuResource()], { subscribeForeignStates: id => subscribed.push(id) });
+
+        await adapter.createVM();
+
+        assert.deepEqual(subscribed, []);
+    });
+});

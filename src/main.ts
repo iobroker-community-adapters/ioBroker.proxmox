@@ -144,7 +144,8 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
             await this.readObjects();
             await this.getNodes();
 
-            // subscribe on all state changes
+            // Deckt auch alle Buttons ab. Nicht zusätzlich einzeln abonnieren: Redis liefert je passendem
+            // Muster eine Nachricht, Befehle würden doppelt ausgeführt.
             await this.subscribeStatesAsync('*');
 
             this.sendRequest(); // start interval with configured delay

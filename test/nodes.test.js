@@ -248,3 +248,16 @@ describe('setNodes', () => {
         assert.ok(adapter._logs.error.some(m => m.includes('Fehler beim Abrufen des Node-Status')));
     });
 });
+
+// ─── Abos (#703) ──────────────────────────────────────────────────────────────
+
+describe('Button-Abos (#703)', () => {
+    it('createNodes abonniert keine einzelnen Buttons, subscribeStates("*") deckt sie ab', async () => {
+        const subscribed = [];
+        const adapter = makeAdapter({ subscribeForeignStates: id => subscribed.push(id) });
+
+        await adapter.createNodes([makeNode()]);
+
+        assert.deepEqual(subscribed, []);
+    });
+});

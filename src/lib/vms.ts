@@ -138,7 +138,6 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
                         },
                         native: vmNative,
                     });
-                    this.subscribeForeignStates(`${sid}.${cmd}`);
                 }
 
                 await this.extendObjectAsync(`${sid}.status`, {

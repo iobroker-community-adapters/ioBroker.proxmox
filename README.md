@@ -36,6 +36,7 @@ Control and use data from your Proxmox VE
 - (bluefox) Fixed the cleanup button in the configuration dialog, it never got an answer from the adapter
 - (bluefox) Repaired the translations of the configuration dialog, which were broken since 2.5.0
 - (bluefox) VMs and containers with the same name no longer share their states and buttons: all of them get the object ID `<name>_<vmid>`. Other object IDs do not change (#702)
+- (bluefox) Buttons no longer execute their command twice when the states are stored in Redis (#703)
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
