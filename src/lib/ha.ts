@@ -1,47 +1,26 @@
-'use strict';
-
-const API_TIMEOUT_MS = 10000;
-const API_RETRY_COUNT = 2;
-
-/**
- * Retry-Wrapper mit Timeout für async Funktionen.
- *
- * @param fn
- * @param retries
- * @param label
- */
-async function withRetry(fn, retries, label) {
-    for (let i = 0; i <= retries; i++) {
-        try {
-            return await Promise.race([
-                fn(),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error(`Timeout nach ${API_TIMEOUT_MS}ms`)), API_TIMEOUT_MS)
-                ),
-            ]);
-        } catch (err) {
-            if (i === retries) {
-throw err;
-}
-            this.log.debug(`${label}: Retry ${i + 1}/${retries} nach Fehler: ${err.message}`);
-        }
-    }
-}
+import { API_RETRY_COUNT, withRetry } from './methods';
+import type { ProxmoxAdapterContext, ProxmoxHAEntry } from './types';
 
 /**
  * Traversiert haInformation.data und ruft für jeden State onCreate (optional) und onState auf.
  *
- * @param ctx
- * @param haid
- * @param data
- * @param createObjects
- * @param onState
+ * @param ctx - Adapter-Instanz
+ * @param haid - Basis-State-ID
+ * @param data - Einträge aus der Proxmox-API
+ * @param createObjects - ob Objekte angelegt werden sollen
+ * @param onState - wird für jeden State aufgerufen
  */
-async function traverseHA(ctx, haid, data, createObjects, onState) {
+async function traverseHA(
+    ctx: ProxmoxAdapterContext,
+    haid: string,
+    data: ProxmoxHAEntry[],
+    createObjects: boolean,
+    onState: (id: string, val: ioBroker.StateValue) => Promise<unknown>,
+): Promise<void> {
     for (const lpData of data) {
         if (typeof lpData !== 'object' || lpData === null) {
-continue;
-}
+            continue;
+        }
         if (!lpData.id) {
             ctx.log.debug('traverseHA: HA-Eintrag ohne id übersprungen');
             continue;
@@ -51,22 +30,28 @@ continue;
 
         for (const [key, value] of Object.entries(lpData)) {
             if (key === 'id') {
-continue;
-}
+                continue;
+            }
             if (value === null || value === undefined) {
-continue;
-}
+                continue;
+            }
 
             const stateId = `${haid}.${lpData2Id}_${key}`;
 
             if (createObjects) {
                 await ctx.extendObjectAsync(stateId, {
                     type: 'state',
-                    common: {name: key, type: typeof value, read: true, write: false, role: 'value'},
+                    common: {
+                        name: key,
+                        type: typeof value as ioBroker.CommonType,
+                        read: true,
+                        write: false,
+                        role: 'value',
+                    },
                     native: {},
                 });
             }
-            await onState(stateId, value);
+            await onState(stateId, value as ioBroker.StateValue);
         }
     }
 }
@@ -74,21 +59,21 @@ continue;
 /**
  * createHA – legt HA-Objekte beim Adapter-Start an.
  */
-async function createHA() {
+export async function createHA(this: ProxmoxAdapterContext): Promise<void> {
     const haid = `${this.namespace}.ha`;
 
     try {
         await this.setObjectNotExistsAsync(haid, {
             type: 'channel',
-            common: {name: 'ha'},
+            common: { name: 'ha' },
             native: {},
         });
 
-        const haInformation = await withRetry.call(
+        const haInformation = await withRetry(
             this,
-            () => this.proxmox.getHAStatusInformation(),
+            () => this.proxmox!.getHAStatusInformation(),
             API_RETRY_COUNT,
-            'createHA'
+            'createHA',
         );
 
         if (!haInformation || !Array.isArray(haInformation.data) || haInformation.data.length === 0) {
@@ -96,29 +81,28 @@ async function createHA() {
             return;
         }
 
-        await traverseHA(
-            this, haid, haInformation.data, true,
-            async (id, val) => this.setStateChangedAsync(id, val, true)
+        await traverseHA(this, haid, haInformation.data, true, async (id, val) =>
+            this.setStateChangedAsync(id, val, true),
         );
 
         this.log.debug('createHA: HA-Objekte erfolgreich angelegt');
     } catch (err) {
-        this.log.error(`createHA: Fehler beim Verarbeiten der HA-Informationen: ${err.message}`);
+        this.log.error(`createHA: Fehler beim Verarbeiten der HA-Informationen: ${(err as Error).message}`);
     }
 }
 
 /**
  * setHA – aktualisiert HA-States im laufenden Betrieb.
  */
-async function setHA() {
+export async function setHA(this: ProxmoxAdapterContext): Promise<void> {
     const haid = `${this.namespace}.ha`;
 
     try {
-        const haInformation = await withRetry.call(
+        const haInformation = await withRetry(
             this,
-            () => this.proxmox.getHAStatusInformation(),
+            () => this.proxmox!.getHAStatusInformation(),
             API_RETRY_COUNT,
-            'setHA'
+            'setHA',
         );
 
         this.log.debug(`haInformation: ${JSON.stringify(haInformation)}`);
@@ -128,13 +112,10 @@ async function setHA() {
             return;
         }
 
-        await traverseHA(
-            this, haid, haInformation.data, false,
-            async (id, val) => this.setStateChangedAsync(id, val, true)
+        await traverseHA(this, haid, haInformation.data, false, async (id, val) =>
+            this.setStateChangedAsync(id, val, true),
         );
     } catch (err) {
-        this.log.error(`setHA: Fehler beim Abrufen der HA-Informationen: ${err.message}`);
+        this.log.error(`setHA: Fehler beim Abrufen der HA-Informationen: ${(err as Error).message}`);
     }
 }
-
-module.exports = {createHA, setHA};

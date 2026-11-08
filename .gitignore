@@ -18,3 +18,7 @@ admin/i18n/*/flat.txt
 
 #ignore .commitinfo created by ioBroker release script
 .commitinfo
+
+# TypeScript build output (see common.nogit in io-package.json)
+build
+*.tsbuildinfo

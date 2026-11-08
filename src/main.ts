@@ -1,73 +1,99 @@
+import * as utils from '@iobroker/adapter-core';
+import * as _ceph from './lib/ceph';
+import * as _ha from './lib/ha';
+import * as _methods from './lib/methods';
+import * as _nodes from './lib/nodes';
+import { ProxmoxUtils } from './lib/proxmox';
+import * as translations from './lib/translations';
+import type {
+    CustomStateType,
+    KnownObjects,
+    NotificationInfo,
+    OfflineResourceStatus,
+    ProxmoxAdapterContext,
+    ProxmoxClusterResource,
+    ProxmoxNode,
+    ProxmoxNodeConfig,
+} from './lib/types';
+import * as _vms from './lib/vms';
 
-'use strict';
+const ADAPTER_NAME = 'proxmox';
 
-const utils        = require('@iobroker/adapter-core');
-const ProxmoxUtils = require('./lib/proxmox');
-const adapterName  = require('./package.json').name.split('.').pop();
-const _methods     = require('./lib/methods');
-const _nodes       = require('./lib/nodes');
-const _vms         = require('./lib/vms');
-const _ceph        = require('./lib/ceph');
-const _ha          = require('./lib/ha');
-const translations = require('./lib/translations');
+class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
+    /** Die aktuell verarbeitete Instanz. Wird in sendRequest() und getNodes() umgesetzt. */
+    public proxmox: ProxmoxUtils | null = null;
+    public objects: KnownObjects = {};
+    public nodesList: ProxmoxNodeConfig[] = [];
 
-class Proxmox extends utils.Adapter {
-    constructor(options) {
-        super({ ...options, name: adapterName });
+    /** Nodes die gemeinsam als Cluster fungieren (Failover-Gruppe) */
+    public clusterNodesList: ProxmoxNodeConfig[] = [];
+    /** Nodes die einzeln und unabhängig abgefragt werden */
+    public individualNodesList: ProxmoxNodeConfig[] = [];
 
-        this.proxmox  = null;
-        this.objects  = {};
-        this.nodesList = [];
+    /** Alle ProxmoxUtils-Instanzen (1 pro Gruppe/Einzelnode) */
+    public proxmoxInstances: ProxmoxUtils[] = [];
 
-        /** Alle ProxmoxUtils-Instanzen (1 pro Gruppe/Einzelnode) */
-        this.proxmoxInstances = [];
+    /**
+     * Mapping: Node-Name (z.B. "pve") → ProxmoxUtils-Instanz
+     * Wird nach getNodes() befüllt, damit onStateChange die richtige Instanz nutzt.
+     */
+    public nodeInstanceMap: Record<string, ProxmoxUtils> = {};
 
-        /**
-         * Mapping: Node-Name (z.B. "pve") → ProxmoxUtils-Instanz
-         * Wird nach getNodes() befüllt, damit onStateChange die richtige Instanz nutzt.
-         *
-         */
-        this.nodeInstanceMap = {};
+    public offlineResourceStatus: OfflineResourceStatus = {
+        uptime: 0,
+        disk: 0,
+        netout: 0,
+        netin: 0,
+        diskread: 0,
+        cpu: 0,
+        diskwrite: 0,
+        pid: 0,
+        mem: 0,
+        swap: 0,
+        status: '',
+        type: '',
+        name: '',
+        vmid: 0,
+    };
 
-        this.offlineResourceStatus = {
-            uptime: 0, disk: 0, netout: 0, netin: 0, diskread: 0,
-            cpu: 0, diskwrite: 0, pid: 0, mem: 0, swap: 0,
-            status: '', type: '', name: '', vmid: 0,
-        };
+    public requestInterval: ioBroker.Timeout | null | undefined = null;
+    public stopping = false;
 
-        this.requestInterval = null;
-        this.stopping = false;
+    private _systemLang: string | undefined;
 
-        // lib/methods
-        this.used_level       = _methods.used_level.bind(this);
-        this.bytetoMb         = _methods.bytetoMb.bind(this);
-        this.removeNamespace  = _methods.removeNamespace.bind(this);
-        this.prepareNameForId = _methods.prepareNameForId.bind(this);
-        this.findState        = _methods.findState.bind(this);
+    // lib/methods
+    public used_level = _methods.used_level;
+    public bytetoMb = _methods.bytetoMb;
+    public removeNamespace = _methods.removeNamespace.bind(this);
+    public prepareNameForId = _methods.prepareNameForId;
+    public findState = _methods.findState;
 
-        // lib/nodes
-        this.createNodes = _nodes.createNodes.bind(this);
-        this.setNodes    = _nodes.setNodes.bind(this);
+    // lib/nodes
+    public createNodes: (nodes: ProxmoxNode[]) => Promise<void> = _nodes.createNodes.bind(this);
+    public setNodes: (nodes: ProxmoxNode[]) => Promise<void> = _nodes.setNodes.bind(this);
 
-        // lib/vms
-        this.createVM    = _vms.createVM.bind(this);
-        this.setMachines = _vms.setMachines.bind(this);
+    // lib/vms
+    public createVM: () => Promise<void> = _vms.createVM.bind(this);
+    public setMachines: () => Promise<void> = _vms.setMachines.bind(this);
 
-        // lib/ceph
-        this.createCeph = _ceph.createCeph.bind(this);
-        this.setCeph    = _ceph.setCeph.bind(this);
+    // lib/ceph
+    public createCeph: () => Promise<void> = _ceph.createCeph.bind(this);
+    public setCeph: () => Promise<void> = _ceph.setCeph.bind(this);
 
-        // lib/ha
-        this.createHA = _ha.createHA.bind(this);
-        this.setHA    = _ha.setHA.bind(this);
+    // lib/ha
+    public createHA: () => Promise<void> = _ha.createHA.bind(this);
+    public setHA: () => Promise<void> = _ha.setHA.bind(this);
 
-        this.on('ready',       this.onReady.bind(this));
+    public constructor(options: Partial<utils.AdapterOptions> = {}) {
+        super({ ...options, name: ADAPTER_NAME });
+
+        this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
-        this.on('message',     this.onMessage.bind(this));
-        this.on('unload',      this.onUnload.bind(this));
+        this.on('message', this.onMessage.bind(this));
+        this.on('unload', this.onUnload.bind(this));
     }
 
-    async onReady() {
+    private async onReady(): Promise<void> {
         try {
             await this.setStateAsync('info.connection', { val: false, ack: true });
             await this.setStateAsync('info.webhookNotification', { val: '', ack: true });
@@ -76,7 +102,9 @@ class Proxmox extends utils.Adapter {
             if (await this.initConfig()) {
                 this.log.debug(`Adapter settings successfully verified and initialized.`);
             } else {
-                this.log.error(`Adapter settings initialization failed.  ---> Please check your adapter instance settings!`);
+                this.log.error(
+                    `Adapter settings initialization failed.  ---> Please check your adapter instance settings!`,
+                );
                 return;
             }
 
@@ -104,7 +132,9 @@ class Proxmox extends utils.Adapter {
                 try {
                     await inst.ticket();
                 } catch (ticketErr) {
-                    this.log.warn(`Ticket für Instanz [${inst.nodeURL}] fehlgeschlagen: ${ticketErr.message} – Instanz wird im Polling-Zyklus erneut versucht`);
+                    this.log.warn(
+                        `Ticket für Instanz [${inst.nodeURL}] fehlgeschlagen: ${(ticketErr as Error).message} – Instanz wird im Polling-Zyklus erneut versucht`,
+                    );
                 }
             }
 
@@ -117,25 +147,22 @@ class Proxmox extends utils.Adapter {
             // subscribe on all state changes
             await this.subscribeStatesAsync('*');
 
-            await this.sendRequest(); // start interval with configured delay
-        } catch (err) {
+            this.sendRequest(); // start interval with configured delay
+        } catch (e) {
+            const err = e as Error | undefined;
             const reason = err?.message || String(err);
             this.log.error(`Unable to authenticate with Proxmox host. Please check your credentials. Error: ${reason}`);
             this.log.debug(`Auth error stack: ${err?.stack || 'n/a'}`);
-            typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
+            this.terminate(11);
         }
     }
 
-    /**
-     * @param {string} id
-     * @param {ioBroker.State | null | undefined} state
-     */
-    async onStateChange(id, state) {
+    private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
         if (state && !state.ack) {
             const obj = await this.getForeignObjectAsync(id);
-            if (obj && obj?.native?.type) {
-                const type = obj.native.type;
-                const node = obj.native.node;
+            if (obj?.native?.type) {
+                const type = obj.native.type as string;
+                const node = obj.native.node as string;
 
                 let command = id.split('.')[3];
 
@@ -145,17 +172,17 @@ class Proxmox extends utils.Adapter {
                 this.log.debug(`state changed: "${command}" type: "${type}" node: "${node}"`);
 
                 if (type === 'lxc' || type === 'qemu') {
-                    const vmid = obj.native?.vmid;
+                    const vmid = obj.native?.vmid as number;
                     const inst = this.nodeInstanceMap[node] ?? this.proxmox;
 
-                    const actions = {
-                        start:    () => inst?.qemuStart(node, type, vmid),
-                        stop:     () => inst?.qemuStop(node, type, vmid),
-                        reset:    () => inst?.qemuReset(node, type, vmid),
-                        resume:   () => inst?.qemuResume(node, type, vmid),
+                    const actions: Record<string, () => Promise<unknown> | undefined> = {
+                        start: () => inst?.qemuStart(node, type, vmid),
+                        stop: () => inst?.qemuStop(node, type, vmid),
+                        reset: () => inst?.qemuReset(node, type, vmid),
+                        resume: () => inst?.qemuResume(node, type, vmid),
                         shutdown: () => inst?.qemuShutdown(node, type, vmid),
-                        suspend:  () => inst?.qemuSuspend(node, type, vmid),
-                        reboot:   () => inst?.qemuReboot(node, type, vmid),
+                        suspend: () => inst?.qemuSuspend(node, type, vmid),
+                        reboot: () => inst?.qemuReboot(node, type, vmid),
                     };
 
                     const action = actions[command];
@@ -166,47 +193,54 @@ class Proxmox extends utils.Adapter {
                     try {
                         const data = await action();
                         this.log.info(`${command} ${vmid}: ${JSON.stringify(data)}`);
-                        await this.sendRequest(10000);
+                        this.sendRequest(10000);
                     } catch (err) {
-                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err}`);
+                        this.log.warn(
+                            `Unable to execute "${command}" type: "${type}" node: "${node}", vmid: "${vmid}": ${err as string}`,
+                        );
                     }
                 } else if (type === 'node') {
                     const inst = this.nodeInstanceMap[node] ?? this.proxmox;
 
-                    const actions = {
+                    const actions: Record<string, () => Promise<unknown> | undefined> = {
                         shutdown: () => inst?.nodeShutdown(node),
-                        reboot:   () => inst?.nodeReboot(node),
+                        reboot: () => inst?.nodeReboot(node),
                     };
 
                     const action = actions[command];
                     if (!action) {
                         return;
                     }
-                    
+
                     try {
                         const data = await action();
                         this.log.info(`${command} ${node}: ${JSON.stringify(data)}`);
-                        await this.sendRequest(10000);
+                        this.sendRequest(10000);
                     } catch (err) {
-                        this.log.warn(`Unable to execute "${command}" type: "${type}" node: "${node}": ${err}`);
-                    }                                     
+                        this.log.warn(
+                            `Unable to execute "${command}" type: "${type}" node: "${node}": ${err as string}`,
+                        );
+                    }
                 }
             } else {
                 if (id.includes('webhookNotification')) {
-                    this.log.debug(`webhook Notif : ${state.val}`);
-                    let notifArray;
+                    this.log.debug(`webhook Notif : ${String(state.val)}`);
+                    let notifArray: NotificationInfo | never[];
                     try {
                         notifArray = await this.parseNotificationInfo(state.val);
-                    } catch (err) {
+                    } catch {
                         notifArray = [];
                     }
-                    await this.setStateAsync('info.webhookNotificationArray', { val: JSON.stringify(notifArray), ack: true });
+                    await this.setStateAsync('info.webhookNotificationArray', {
+                        val: JSON.stringify(notifArray),
+                        ack: true,
+                    });
                 }
             }
         }
     }
 
-    async sendRequest(nextRunTimeout) {
+    public sendRequest(nextRunTimeout?: number): void {
         if (this.requestInterval) {
             this.clearTimeout(this.requestInterval);
             this.requestInterval = null;
@@ -220,7 +254,7 @@ class Proxmox extends utils.Adapter {
             if (this.proxmoxInstances.length === 0) {
                 this.log.warn('sendRequest: Keine Proxmox-Instanzen vorhanden – warte auf nächsten Zyklus');
                 if (!this.stopping) {
-                    await this.sendRequest();
+                    this.sendRequest();
                 }
                 return;
             }
@@ -257,8 +291,8 @@ class Proxmox extends utils.Adapter {
                     await this.setMachines();
                     anySuccess = true;
                 } catch (err) {
-                    if (err.message !== 'STOPPED') {
-                        this.log.warn(`Cannot send request [${inst.nodeURL}]: ${err}`);
+                    if ((err as Error).message !== 'STOPPED') {
+                        this.log.warn(`Cannot send request [${inst.nodeURL}]: ${err as string}`);
                     }
                 }
             }
@@ -266,7 +300,7 @@ class Proxmox extends utils.Adapter {
             await this.setStateChangedAsync('info.connection', { val: anySuccess, ack: true });
 
             // Collect connected node info as "ip:port" strings from the currently active nodeURL
-            const nodeAddresses = [];
+            const nodeAddresses: string[] = [];
             for (const inst of this.proxmoxInstances) {
                 if (inst?.nodeURL) {
                     // nodeURL format: https://{ip}:{port}/api2/json
@@ -282,12 +316,12 @@ class Proxmox extends utils.Adapter {
 
             // Schedule next run – nur wenn Adapter noch läuft
             if (!this.stopping) {
-                await this.sendRequest();
+                this.sendRequest();
             }
         }, delay);
     }
 
-    async getNodes() {
+    public async getNodes(): Promise<void> {
         for (const inst of this.proxmoxInstances) {
             this.proxmox = inst;
             try {
@@ -301,45 +335,49 @@ class Proxmox extends utils.Adapter {
 
                 await this.createNodes(nodes);
             } catch (e) {
-                if (e.message === 'STOPPED') {
+                if ((e as Error).message === 'STOPPED') {
                     return; // Adapter wird beendet – kein Logging nötig
                 }
-                this.log.error(`Could not create nodes [${inst.nodeURL}], please restart adapter: ${e.message}`);
+                this.log.error(
+                    `Could not create nodes [${inst.nodeURL}], please restart adapter: ${(e as Error).message}`,
+                );
             }
         }
     }
 
     /**
      * Reads all channel objects and saves them in RAM
-     *
-     * @returns {Promise<void>}
      */
-    async readObjects() {
+    public async readObjects(): Promise<void> {
         try {
             this.objects = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
             this.log.debug(`[readObjects] reading objects: ${JSON.stringify(this.objects)}`);
         } catch (err) {
-            this.log.error(err);
+            this.log.error(err as string);
         }
     }
 
     /**
      * Create state object if non existing and set states
      *
-     * @param {string} sid - state id w/o name
-     * @param {string} name - name of the state
-     * @param {string} type - e.g., time
-     * @param {any} val - state val
-     * @returns {Promise<void>}
+     * @param sid - state id w/o name
+     * @param name - name of the state
+     * @param type - e.g., time
+     * @param val - state val
      */
-    async createCustomState(sid, name, type, val) {
-        const typeMap = {
-            time:        { type: 'number', unit: 'sec.' },
-            size:        { type: 'number', unit: 'MiB'  },
-            sizeb:       { type: 'number', unit: 'byte' },
-            level:       { type: 'number', unit: '%'    },
-            default_num: { type: 'number'               },
-            text:        { type: 'string'               },
+    public async createCustomState(
+        sid: string,
+        name: string,
+        type: CustomStateType,
+        val: ioBroker.StateValue,
+    ): Promise<void> {
+        const typeMap: Record<string, { type: ioBroker.CommonType; unit?: string }> = {
+            time: { type: 'number', unit: 'sec.' },
+            size: { type: 'number', unit: 'MiB' },
+            sizeb: { type: 'number', unit: 'byte' },
+            level: { type: 'number', unit: '%' },
+            default_num: { type: 'number' },
+            text: { type: 'string' },
         };
 
         const common = typeMap[type];
@@ -362,7 +400,8 @@ class Proxmox extends utils.Adapter {
         await this.setStateChangedAsync(`${sid}.${name}`, { val, ack: true });
     }
 
-    async parseNotificationInfo(info) {
+    // eslint-disable-next-line @typescript-eslint/require-await -- Fehler landen als Rejection im catch von onStateChange
+    public async parseNotificationInfo(info: unknown): Promise<NotificationInfo> {
         if (typeof info !== 'string') {
             return {
                 severity: null,
@@ -424,10 +463,9 @@ class Proxmox extends utils.Adapter {
      * Returns a translated string based on ioBroker system language.
      * Falls back to English if the language is not supported.
      *
-     * @param {Record<string, string>} translations - Object with language codes as keys
-     * @returns {Promise<string>}
+     * @param texts - Object with language codes as keys
      */
-    async _t(translations) {
+    public async _t(texts: translations.Translations): Promise<string> {
         if (!this._systemLang) {
             try {
                 const sysConfig = await this.getForeignObjectAsync('system.config');
@@ -436,10 +474,10 @@ class Proxmox extends utils.Adapter {
                 this._systemLang = 'en';
             }
         }
-        return translations[this._systemLang] || translations['en'];
+        return texts[this._systemLang] || texts.en;
     }
 
-    async initConfig() {
+    public async initConfig(): Promise<boolean> {
         if (this.config.tableDevices.length < 1) {
             return false;
         }
@@ -449,24 +487,22 @@ class Proxmox extends utils.Adapter {
             this.config.requestInterval = 5;
         }
 
-        /** Nodes die gemeinsam als Cluster fungieren (Failover-Gruppe) */
         this.clusterNodesList = [];
-        /** Nodes die einzeln und unabhängig abgefragt werden */
         this.individualNodesList = [];
 
         for (const nodeDevice of this.config.tableDevices) {
             if (!nodeDevice.enabled) {
-continue;
-}
+                continue;
+            }
 
-            const obj = {
-                realmIp:          nodeDevice.realmIp,
-                realmPort:        nodeDevice.realmPort,
-                realmUser:        nodeDevice.realmUser,
-                realmPassword:    nodeDevice.realmPassword,
-                realm:            nodeDevice.realm,
-                authType:         nodeDevice.authType      || 'password',
-                realmTokenId:     nodeDevice.realmTokenId     || '',
+            const obj: ProxmoxNodeConfig = {
+                realmIp: nodeDevice.realmIp,
+                realmPort: nodeDevice.realmPort,
+                realmUser: nodeDevice.realmUser,
+                realmPassword: nodeDevice.realmPassword,
+                realm: nodeDevice.realm,
+                authType: nodeDevice.authType || 'password',
+                realmTokenId: nodeDevice.realmTokenId || '',
                 realmTokenSecret: nodeDevice.realmTokenSecret || '',
             };
 
@@ -479,7 +515,7 @@ continue;
 
         this.log.debug(
             `initConfig: ${this.clusterNodesList.length} Cluster-Node(s), ` +
-            `${this.individualNodesList.length} Einzel-Node(s)`
+                `${this.individualNodesList.length} Einzel-Node(s)`,
         );
 
         // ── Warnung bei wahrscheinlich falsch konfiguriertem Cluster ──────
@@ -497,10 +533,7 @@ continue;
         return this.nodesList.length > 0;
     }
 
-    /**
-     * @param {ioBroker.Message} msg
-     */
-    async onMessage(msg) {
+    private async onMessage(msg: ioBroker.Message): Promise<void> {
         if (!msg || !msg.command) {
             return;
         }
@@ -513,13 +546,15 @@ continue;
                 }
 
                 // Aktuelle Ressourcen von ALLEN Proxmox-Instanzen holen
-                let resources = [];
+                let resources: ProxmoxClusterResource[] = [];
                 for (const inst of this.proxmoxInstances) {
                     try {
                         const r = await inst.getClusterResources();
                         resources = resources.concat(r);
                     } catch (instErr) {
-                        this.log.warn(`Smart-Cleanup: Instanz [${inst.nodeURL}] nicht erreichbar – wird übersprungen: ${instErr.message}`);
+                        this.log.warn(
+                            `Smart-Cleanup: Instanz [${inst.nodeURL}] nicht erreichbar – wird übersprungen: ${(instErr as Error).message}`,
+                        );
                     }
                 }
                 if (resources.length === 0) {
@@ -527,7 +562,7 @@ continue;
                 }
 
                 // Set der aktuell vorhandenen VM/LXC-Namen aufbauen (Duplikate via Set vermeiden)
-                const activeNames = new Set();
+                const activeNames = new Set<string>();
                 for (const res of resources) {
                     if (res.type === 'qemu' || res.type === 'lxc') {
                         const resName = this.prepareNameForId(res.name);
@@ -539,12 +574,14 @@ continue;
                     }
                 }
 
-                this.log.debug(`Smart-Cleanup: ${activeNames.size} aktive VMs/LXC in Proxmox gefunden: ${JSON.stringify([...activeNames])}`);
+                this.log.debug(
+                    `Smart-Cleanup: ${activeNames.size} aktive VMs/LXC in Proxmox gefunden: ${JSON.stringify([...activeNames])}`,
+                );
 
                 // Alle ioBroker-Channel-Objekte des Adapters lesen
                 const allChannels = await this.getForeignObjectsAsync(`${this.namespace}.*`, 'channel');
 
-                const toDelete = [];
+                const toDelete: string[] = [];
                 for (const fullId of Object.keys(allChannels)) {
                     const obj = allChannels[fullId];
                     const native = obj?.native;
@@ -559,10 +596,8 @@ continue;
 
                     // Prüfen ob diese Maschine noch in Proxmox existiert
                     // relId ist z.B. "qemu.myvm" oder "qemu_myvm"
-                    const stillActive = [...activeNames].some(name =>
-                        relId === name ||
-                        relId.startsWith(`${name}.`) ||
-                        relId.startsWith(`${name}/`)
+                    const stillActive = [...activeNames].some(
+                        name => relId === name || relId.startsWith(`${name}.`) || relId.startsWith(`${name}/`),
                     );
 
                     if (!stillActive) {
@@ -583,13 +618,14 @@ continue;
                         deleted++;
                         this.log.info(`Smart-Cleanup: Gelöscht → "${id}"`);
                     } catch (delErr) {
-                        this.log.warn(`Smart-Cleanup: Fehler beim Löschen von "${id}": ${delErr.message}`);
+                        this.log.warn(`Smart-Cleanup: Fehler beim Löschen von "${id}": ${(delErr as Error).message}`);
                     }
                 }
 
-                const resultMsg = deleted > 0
-                    ? `${deleted} verwaiste VM/LXC-Datenpunkte erfolgreich gelöscht.`
-                    : 'Keine verwaisten Datenpunkte gefunden – alles aktuell.';
+                const resultMsg =
+                    deleted > 0
+                        ? `${deleted} verwaiste VM/LXC-Datenpunkte erfolgreich gelöscht.`
+                        : 'Keine verwaisten Datenpunkte gefunden – alles aktuell.';
 
                 this.log.info(`Smart-Cleanup abgeschlossen: ${resultMsg}`);
 
@@ -602,18 +638,20 @@ continue;
                     this.setTimeout(() => this.restart(), 1500);
                 }
             } catch (err) {
-                this.log.error(`Smart-Cleanup fehlgeschlagen: ${err.message}`);
+                this.log.error(`Smart-Cleanup fehlgeschlagen: ${(err as Error).message}`);
                 if (msg.callback) {
-                    this.sendTo(msg.from, msg.command, { result: 'error', error: err.message }, msg.callback);
+                    this.sendTo(
+                        msg.from,
+                        msg.command,
+                        { result: 'error', error: (err as Error).message },
+                        msg.callback,
+                    );
                 }
             }
         }
     }
 
-    /**
-     * @param {() => void} callback
-     */
-    onUnload(callback) {
+    private onUnload(callback: () => void): void {
         try {
             this.stopping = true;
 
@@ -628,11 +666,9 @@ continue;
             }
 
             // Alle VM/LXC-available auf false und connection auf false setzen
-            const statePromises = [];
+            const statePromises: Promise<unknown>[] = [];
 
-            statePromises.push(
-                this.setStateAsync('info.connection', { val: false, ack: true }).catch(() => {})
-            );
+            statePromises.push(this.setStateAsync('info.connection', { val: false, ack: true }).catch(() => {}));
 
             for (const fullId of Object.keys(this.objects)) {
                 const obj = this.objects[fullId];
@@ -640,28 +676,24 @@ continue;
                 if (type === 'qemu' || type === 'lxc') {
                     const relId = fullId.replace(`${this.namespace}.`, '');
                     statePromises.push(
-                        this.setStateAsync(`${relId}.available`, { val: false, ack: true }).catch(() => {})
+                        this.setStateAsync(`${relId}.available`, { val: false, ack: true }).catch(() => {}),
                     );
                 }
             }
 
-            Promise.all(statePromises)
+            void Promise.all(statePromises)
                 .catch(() => {})
                 .finally(() => callback());
-
-        } catch (e) {
+        } catch {
             callback();
         }
     }
 }
 
-if (module.parent) {
+if (require.main !== module) {
     // Export the constructor in compact mode
-    /**
-     * @param {Partial<ioBroker.AdapterOptions>} [options]
-     */
-    module.exports = (options) => new Proxmox(options);
+    module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new Proxmox(options);
 } else {
     // otherwise start the instance directly
-    new Proxmox();
+    (() => new Proxmox())();
 }

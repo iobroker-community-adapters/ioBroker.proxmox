@@ -161,6 +161,7 @@
     "mode": "daemon",
     "icon": "proxmox.png",
     "compact": true,
+    "nogit": true,
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
     "licenseInformation": {
@@ -215,7 +216,8 @@
     "requestHAInformation": false,
     "requestCephInformation": false,
     "requestStorageInformation": true,
-    "requestStorageInformationBackup": false
+    "requestStorageInformationBackup": false,
+    "tableDevices": []
   },
   "instanceObjects": [
     {

@@ -15,6 +15,9 @@ function makeAdapter() {
     const logs = { debug: [], warn: [], error: [], info: [] };
     return {
         _logs: logs,
+        // Die lib-Module nutzen die Adapter-Timer, im Mock laufen sie als echte Timer
+        setTimeout:   (fn, ms) => setTimeout(fn, ms),
+        clearTimeout: (t) => clearTimeout(t),
         log: {
             debug: (m) => logs.debug.push(m),
             warn:  (m) => logs.warn.push(m),
@@ -37,9 +40,9 @@ function makeInstance(axiosMock) {
     fakeModule.exports.isAxiosError = axiosMock.isAxiosError ?? (() => false);
     require.cache[axiosPath] = fakeModule;
 
-    const utilsPath = require.resolve('../lib/proxmox');
+    const utilsPath = require.resolve('../build/lib/proxmox');
     delete require.cache[utilsPath];
-    const ProxmoxUtils = require('../lib/proxmox');
+    const { ProxmoxUtils } = require('../build/lib/proxmox');
 
     require.cache[axiosPath] = realAxios;
 
@@ -245,9 +248,9 @@ describe('ProxmoxUtils._getTicket', () => {
             fakeModule.exports.isAxiosError = () => false;
             require.cache[axiosPath] = fakeModule;
 
-            const utilsPath = require.resolve('../lib/proxmox');
+            const utilsPath = require.resolve('../build/lib/proxmox');
             delete require.cache[utilsPath];
-            const ProxmoxUtils = require('../lib/proxmox');
+            const { ProxmoxUtils } = require('../build/lib/proxmox');
             require.cache[axiosPath] = realAxios;
 
             // Sonderzeichen: @ im User, Leerzeichen im Passwort, Umlaute im Realm
@@ -403,9 +406,9 @@ function makeTokenInstance(axiosMock) {
     fakeModule.exports.isAxiosError = axiosMock.isAxiosError ?? (() => false);
     require.cache[axiosPath] = fakeModule;
 
-    const utilsPath = require.resolve('../lib/proxmox');
+    const utilsPath = require.resolve('../build/lib/proxmox');
     delete require.cache[utilsPath];
-    const ProxmoxUtils = require('../lib/proxmox');
+    const { ProxmoxUtils } = require('../build/lib/proxmox');
 
     require.cache[axiosPath] = realAxios;
 

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Tests für lib/methods.js
+ * Tests für src/lib/methods.ts
  * Ausführen: node --test test/methods.test.js
  */
 
@@ -13,7 +13,7 @@ const {
     used_level,
     prepareNameForId,
     findState,
-} = require('../lib/methods');
+} = require('../build/lib/methods');
 
 // findState braucht this.used_level / this.bytetoMb nicht mehr (direkte Funktionsaufrufe)
 // Wir binden einen Dummy-this für removeNamespace (nicht getestet hier)

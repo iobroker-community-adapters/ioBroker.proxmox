@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Tests für lib/translations.js
+ * Tests für src/lib/translations.ts
  *
  * Ausführen: node --test test/translations.test.js
  */
@@ -13,7 +13,7 @@ const {
     STATUS, SHUTDOWN, REBOOT, START, STOP, RESET, SUSPEND, RESUME, AVAILABLE,
     vmButtonLabels, nodeButtonLabels, stateNames,
     warnIndividualNodes, warnSingleClusterNode,
-} = require('../lib/translations');
+} = require('../build/lib/translations');
 
 // ─── Alle unterstützten Sprachen ──────────────────────────────────────────────
 

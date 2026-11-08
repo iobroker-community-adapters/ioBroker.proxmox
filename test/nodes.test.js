@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Tests für lib/nodes.js (createNodes + setNodes)
+ * Tests für src/lib/nodes.ts (createNodes + setNodes)
  *
  * Ausführen:  node --test test/nodes.test.js
  */
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { createNodes, setNodes } = require('../lib/nodes');
-const { bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../lib/methods');
+const { createNodes, setNodes } = require('../build/lib/nodes');
+const { bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../build/lib/methods');
 
 // ─── Adapter-Mock ─────────────────────────────────────────────────────────────
 
@@ -39,6 +39,9 @@ function makeAdapter(overrides = {}) {
             ...overrides.config,
         },
         objects,
+        // Die lib-Module nutzen die Adapter-Timer, im Mock laufen sie als echte Timer
+        setTimeout:   (fn, ms) => setTimeout(fn, ms),
+        clearTimeout: (t) => clearTimeout(t),
         log: {
             debug: (m) => logs.debug.push(m),
             info:  (m) => logs.info.push(m),

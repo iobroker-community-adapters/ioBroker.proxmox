@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Tests für lib/vms.js (createVM + setMachines)
+ * Tests für src/lib/vms.ts (createVM + setMachines)
  *
  * Ausführen:  node --test test/vms.test.js
  */
 
 const { describe, it, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
-const { createVM, setMachines } = require('../lib/vms');
-const { findState, bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../lib/methods');
+const { createVM, setMachines } = require('../build/lib/vms');
+const { findState, bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../build/lib/methods');
 
 // ─── Adapter-Mock ─────────────────────────────────────────────────────────────
 

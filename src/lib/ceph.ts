@@ -1,49 +1,19 @@
-'use strict';
-
-const API_TIMEOUT_MS = 10000;
-const API_RETRY_COUNT = 2;
+import { API_RETRY_COUNT, withRetry } from './methods';
+import type { ProxmoxAdapterContext } from './types';
 
 /**
  * Schlüsselnamen die beim Traversieren komplett übersprungen werden sollen – unabhängig von ihrer Position im Baum.
  * Nur den Schlüsselnamen eintragen (kein Pfad).
  */
-const CEPH_EXCLUDED_PATHS = [
-    'available_modules',
-];
-
-/**
- * Retry-Wrapper mit Timeout für async Funktionen.
- *
- * @param {Function} fn
- * @param {number} retries
- * @param {string} label
- * @returns {Promise<any>}
- */
-async function withRetry(fn, retries, label) {
-    for (let i = 0; i <= retries; i++) {
-        try {
-            return await Promise.race([
-                fn(),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error(`Timeout nach ${API_TIMEOUT_MS}ms`)), API_TIMEOUT_MS)
-                ),
-            ]);
-        } catch (err) {
-            if (i === retries) {
-                throw err;
-            }
-            this.log.debug(`${label}: Retry ${i + 1}/${retries} nach Fehler: ${err.message}`);
-        }
-    }
-}
+const CEPH_EXCLUDED_PATHS = ['available_modules'];
 
 /**
  * Serialisiert das gesamte 'checks'-Objekt als JSON-String.
  * Dadurch werden keinerlei Unterordner für einzelne Checks oder Details angelegt.
  *
- * @param {object|Array} data - zu verarbeitende Daten (wird direkt mutiert)
+ * @param data - zu verarbeitende Daten (wird direkt mutiert)
  */
-function flattenCephChecksDetail(data) {
+function flattenCephChecksDetail(data: unknown): void {
     if (!data || typeof data !== 'object') {
         return;
     }
@@ -53,10 +23,11 @@ function flattenCephChecksDetail(data) {
         }
         return;
     }
-    for (const [key, value] of Object.entries(data)) {
+    const record = data as Record<string, unknown>;
+    for (const [key, value] of Object.entries(record)) {
         if (key === 'checks' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
             // Das gesamte checks-Objekt als JSON-String serialisieren
-            data[key] = JSON.stringify(value);
+            record[key] = JSON.stringify(value);
         } else if (typeof value === 'object') {
             flattenCephChecksDetail(value);
         }
@@ -67,16 +38,25 @@ function flattenCephChecksDetail(data) {
  * Traversiert cephInformation.data ohne feste Tiefengrenze.
  * Schutz vor Zyklen via visitedPaths-Set.
  *
- * @param {object} ctx - Adapter-Instanz (this)
- * @param {string} baseId - Basis-State-ID
- * @param {object} data - zu traversierende Daten
- * @param {number} depth - aktuelle Tiefe (1-basiert)
- * @param {string} path - aktueller State-Pfad
- * @param {boolean} createObjects - ob Objekte angelegt werden sollen
- * @param {Function} onState - async (id, val) => void
- * @param {Set<string>} [visitedPaths] - bereits besuchte Pfade (Zyklenschutz)
+ * @param ctx - Adapter-Instanz (this)
+ * @param baseId - Basis-State-ID
+ * @param data - zu traversierende Daten
+ * @param depth - aktuelle Tiefe (1-basiert)
+ * @param path - aktueller State-Pfad
+ * @param createObjects - ob Objekte angelegt werden sollen
+ * @param onState - wird für jeden State aufgerufen
+ * @param visitedPaths - bereits besuchte Pfade (Zyklenschutz)
  */
-async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onState, visitedPaths = new Set()) {
+async function traverseCeph(
+    ctx: ProxmoxAdapterContext,
+    baseId: string,
+    data: unknown,
+    depth: number,
+    path: string,
+    createObjects: boolean,
+    onState: (id: string, val: ioBroker.StateValue) => Promise<unknown>,
+    visitedPaths = new Set<string>(),
+): Promise<void> {
     if (!data || typeof data !== 'object') {
         return;
     }
@@ -102,36 +82,37 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.extendObjectAsync(stateId, {
                     type: 'folder',
-                    common: {name: key},
+                    common: { name: key },
                     native: {},
                 });
             }
             for (let i = 0; i < value.length; i++) {
                 const arrId = `${stateId}.${i}`;
-                if (typeof value[i] === 'object' && value[i] !== null) {
+                const element: unknown = value[i];
+                if (typeof element === 'object' && element !== null) {
                     if (createObjects) {
                         await ctx.extendObjectAsync(arrId, {
                             type: 'folder',
-                            common: {name: `${key}[${i}]`},
+                            common: { name: `${key}[${i}]` },
                             native: {},
                         });
                     }
-                    await traverseCeph(ctx, baseId, value[i], depth + 1, arrId, createObjects, onState, visitedPaths);
+                    await traverseCeph(ctx, baseId, element, depth + 1, arrId, createObjects, onState, visitedPaths);
                 } else {
                     if (createObjects) {
                         await ctx.extendObjectAsync(arrId, {
                             type: 'state',
                             common: {
                                 name: `${key}[${i}]`,
-                                type: typeof value[i],
+                                type: typeof element as ioBroker.CommonType,
                                 read: true,
                                 write: false,
-                                role: 'value'
+                                role: 'value',
                             },
                             native: {},
                         });
                     }
-                    await onState(arrId, value[i]);
+                    await onState(arrId, element as ioBroker.StateValue);
                 }
             }
         } else if (typeof value === 'object') {
@@ -143,7 +124,7 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.setObjectNotExistsAsync(stateId, {
                     type: 'folder',
-                    common: {name: key},
+                    common: { name: key },
                     native: {},
                 });
             }
@@ -152,11 +133,17 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
             if (createObjects) {
                 await ctx.extendObjectAsync(stateId, {
                     type: 'state',
-                    common: {name: key, type: typeof value, read: true, write: false, role: 'value'},
+                    common: {
+                        name: key,
+                        type: typeof value as ioBroker.CommonType,
+                        read: true,
+                        write: false,
+                        role: 'value',
+                    },
                     native: {},
                 });
             }
-            await onState(stateId, value);
+            await onState(stateId, value as ioBroker.StateValue);
         }
     }
 }
@@ -164,21 +151,21 @@ async function traverseCeph(ctx, baseId, data, depth, path, createObjects, onSta
 /**
  * createCeph – legt Ceph-Objekte beim Adapter-Start an.
  */
-async function createCeph() {
+export async function createCeph(this: ProxmoxAdapterContext): Promise<void> {
     const cephid = `${this.namespace}.ceph`;
 
     try {
         await this.setObjectNotExistsAsync(cephid, {
             type: 'channel',
-            common: {name: 'ceph'},
+            common: { name: 'ceph' },
             native: {},
         });
 
-        const cephInformation = await withRetry.call(
+        const cephInformation = await withRetry(
             this,
-            () => this.proxmox.getCephInformation(),
+            () => this.proxmox!.getCephInformation(),
             API_RETRY_COUNT,
-            'createCeph'
+            'createCeph',
         );
 
         if (!cephInformation || !cephInformation.data || typeof cephInformation.data !== 'object') {
@@ -188,29 +175,28 @@ async function createCeph() {
 
         flattenCephChecksDetail(cephInformation.data);
 
-        await traverseCeph(
-            this, cephid, cephInformation.data, 1, cephid, true,
-            async (id, val) => this.setStateChangedAsync(id, val, true)
+        await traverseCeph(this, cephid, cephInformation.data, 1, cephid, true, async (id, val) =>
+            this.setStateChangedAsync(id, val, true),
         );
 
         this.log.debug('createCeph: Ceph-Objekte erfolgreich angelegt');
     } catch (err) {
-        this.log.error(`createCeph: Fehler beim Verarbeiten der Ceph-Informationen: ${err.message}`);
+        this.log.error(`createCeph: Fehler beim Verarbeiten der Ceph-Informationen: ${(err as Error).message}`);
     }
 }
 
 /**
  * setCeph – aktualisiert Ceph-States im laufenden Betrieb.
  */
-async function setCeph() {
+export async function setCeph(this: ProxmoxAdapterContext): Promise<void> {
     const cephid = `${this.namespace}.ceph`;
 
     try {
-        const cephInformation = await withRetry.call(
+        const cephInformation = await withRetry(
             this,
-            () => this.proxmox.getCephInformation(),
+            () => this.proxmox!.getCephInformation(),
             API_RETRY_COUNT,
-            'setCeph'
+            'setCeph',
         );
 
         this.log.debug(`cephInformation: ${JSON.stringify(cephInformation)}`);
@@ -222,13 +208,12 @@ async function setCeph() {
 
         flattenCephChecksDetail(cephInformation.data);
 
-        await traverseCeph(
-            this, cephid, cephInformation.data, 1, cephid, true,
-            async (id, val) => this.setStateChangedAsync(id, val, true)
+        // Absicht (seit 2bcf333): createObjects = true. Anders als bei setHA() werden Objekte hier
+        // auch im laufenden Betrieb angelegt bzw. erweitert.
+        await traverseCeph(this, cephid, cephInformation.data, 1, cephid, true, async (id, val) =>
+            this.setStateChangedAsync(id, val, true),
         );
     } catch (err) {
-        this.log.error(`setCeph: Fehler beim Abrufen der Ceph-Informationen: ${err.message}`);
+        this.log.error(`setCeph: Fehler beim Abrufen der Ceph-Informationen: ${(err as Error).message}`);
     }
 }
-
-module.exports = {createCeph, setCeph};

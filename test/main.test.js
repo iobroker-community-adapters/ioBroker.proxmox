@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Ausführliche Tests für main.js – Proxmox ioBroker Adapter
+ * Ausführliche Tests für src/main.ts – Proxmox ioBroker Adapter
  *
  * Ausführen: node --test test/main.test.js
  */
@@ -131,7 +131,7 @@ function makeAdapter(configOverrides = {}) {
  * Wir laden main.js als Funktion und injizieren den Mock.
  */
 function makeProxmoxInstance(configOverrides = {}, proxmoxApiMock = null) {
-    // main.js exportiert eine Fabrik-Funktion wenn module.parent gesetzt ist
+    // main.js exportiert eine Fabrik-Funktion wenn es per require() geladen wird
     // Wir mocken @iobroker/adapter-core
     const adapterCorePath = require.resolve('@iobroker/adapter-core');
     const realAdapterCore = require.cache[adapterCorePath];
@@ -154,9 +154,9 @@ function makeProxmoxInstance(configOverrides = {}, proxmoxApiMock = null) {
     require.cache[adapterCorePath] = { exports: fakeCore };
 
     // main.js neu laden
-    const mainPath = require.resolve('../main.js');
+    const mainPath = require.resolve('../build/main.js');
     delete require.cache[mainPath];
-    const mainFactory = require('../main.js');
+    const mainFactory = require('../build/main.js');
 
     // Adapter-Core wiederherstellen
     require.cache[adapterCorePath] = realAdapterCore;

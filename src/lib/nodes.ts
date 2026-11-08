@@ -1,46 +1,37 @@
-'use strict';
-
-const { nodeButtonLabels, stateNames } = require('./translations');
-
-const API_TIMEOUT_MS = 10000;
-
-/**
- * Führt fn() mit Timeout aus.
- *
- * @param {Function} fn
- * @param {string} label
- */
-async function withTimeout(fn, label) {
-    return Promise.race([
-        fn(),
-        new Promise((_, reject) =>
-            setTimeout(() => reject(new Error(`Timeout nach ${API_TIMEOUT_MS}ms`)), API_TIMEOUT_MS)
-        ),
-    ]);
-}
+import { withTimeout } from './methods';
+import { nodeButtonLabels, stateNames } from './translations';
+import type { ProxmoxAdapterContext, ProxmoxNode } from './types';
 
 /**
  * Setzt Disk-States für einen Node (create oder set).
  *
- * @param {object} ctx - Adapter-Instanz
- * @param {string} sid - State-Basis-ID des Nodes
- * @param {string} nodeName - Node-Name für API-Calls
- * @param {boolean} createObjects - ob Objekte angelegt werden sollen
+ * @param ctx - Adapter-Instanz
+ * @param sid - State-Basis-ID des Nodes
+ * @param nodeName - Node-Name für API-Calls
+ * @param createObjects - ob Objekte angelegt werden sollen
  */
-async function processDiskStates(ctx, sid, nodeName, createObjects) {
-    const nodeDisks = await withTimeout(() => ctx.proxmox.getNodeDisks(nodeName, false), `getNodeDisks(${nodeName})`);
+async function processDiskStates(
+    ctx: ProxmoxAdapterContext,
+    sid: string,
+    nodeName: string,
+    createObjects: boolean,
+): Promise<void> {
+    const nodeDisks = await withTimeout(ctx, () => ctx.proxmox!.getNodeDisks(nodeName, false));
 
     for (const disk of nodeDisks) {
         if (!disk.devpath) {
-            ctx.log.warn(`${createObjects ? 'createNodes' : 'setNodes'}: Disk ohne devpath auf Node ${nodeName} übersprungen`);
+            ctx.log.warn(
+                `${createObjects ? 'createNodes' : 'setNodes'}: Disk ohne devpath auf Node ${nodeName} übersprungen`,
+            );
             continue;
         }
-        const diskPath = `disk_${String(disk.devpath).replace('/dev/', '')}`;
+        const devpath = disk.devpath;
+        const diskPath = `disk_${String(devpath).replace('/dev/', '')}`;
 
         if (createObjects) {
             await ctx.setObjectNotExistsAsync(`${sid}.${diskPath}`, {
                 type: 'folder',
-                common: { name: disk.devpath },
+                common: { name: devpath },
                 native: {},
             });
         }
@@ -66,10 +57,7 @@ async function processDiskStates(ctx, sid, nodeName, createObjects) {
                 await ctx.setStateChangedAsync(`${sid}.${diskPath}.health`, { val: disk.health, ack: true });
             }
             try {
-                const smart = await withTimeout(
-                    () => ctx.proxmox.getNodeDisksSmart(nodeName, disk.devpath),
-                    `getNodeDisksSmart(${disk.devpath})`
-                );
+                const smart = await withTimeout(ctx, () => ctx.proxmox!.getNodeDisksSmart(nodeName, devpath));
                 if (smart?.data?.text) {
                     if (createObjects) {
                         await ctx.createCustomState(sid, `${diskPath}.smart`, 'text', smart.data.text);
@@ -78,10 +66,13 @@ async function processDiskStates(ctx, sid, nodeName, createObjects) {
                     }
                 }
             } catch (smartErr) {
-                ctx.log.debug(`${createObjects ? 'createNodes' : 'setNodes'}: SMART für ${disk.devpath} nicht verfügbar: ${smartErr.message}`);
+                ctx.log.debug(
+                    `${createObjects ? 'createNodes' : 'setNodes'}: SMART für ${devpath} nicht verfügbar: ${(smartErr as Error).message}`,
+                );
             }
         }
-        if (disk.wearout !== undefined && !isNaN(disk.wearout)) {
+        // Absicht: isNaN() mit Coercion. Proxmox liefert bei HDDs 'N/A', das so übersprungen wird.
+        if (disk.wearout !== undefined && !isNaN(disk.wearout as number)) {
             if (createObjects) {
                 await ctx.createCustomState(sid, `${diskPath}.wearout`, 'level', disk.wearout);
             } else {
@@ -101,14 +92,14 @@ async function processDiskStates(ctx, sid, nodeName, createObjects) {
 /**
  * createNodes – legt Node-Channel + States beim Adapter-Start an.
  *
- * @param {any[]} nodes
+ * @param nodes - Nodes aus der Proxmox-API
  */
-async function createNodes(nodes) {
+export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]): Promise<void> {
     const nodesAll = Object.keys(this.objects)
-        .map(this.removeNamespace.bind(this))
-        .filter((id) => id.startsWith('node_'));
+        .map(id => this.removeNamespace(id))
+        .filter(id => id.startsWith('node_'));
 
-    const nodesKeep = [];
+    const nodesKeep: string[] = [];
 
     for (const node of nodes) {
         const nodeName = this.prepareNameForId(node.node);
@@ -131,7 +122,10 @@ async function createNodes(nodes) {
             type: 'state',
             common: {
                 name: nodeButtonLabels.shutdown,
-                type: 'boolean', role: 'button', read: true, write: true,
+                type: 'boolean',
+                role: 'button',
+                read: true,
+                write: true,
             },
             native: { node: node.node, type: node.type },
         });
@@ -141,7 +135,10 @@ async function createNodes(nodes) {
             type: 'state',
             common: {
                 name: nodeButtonLabels.reboot,
-                type: 'boolean', role: 'button', read: true, write: true,
+                type: 'boolean',
+                role: 'button',
+                read: true,
+                write: true,
             },
             native: { node: node.node, type: node.type },
         });
@@ -151,7 +148,10 @@ async function createNodes(nodes) {
             type: 'state',
             common: {
                 name: stateNames.status,
-                type: 'string', role: 'indicator.status', write: false, read: true,
+                type: 'string',
+                role: 'indicator.status',
+                write: false,
+                read: true,
             },
             native: {},
         });
@@ -168,7 +168,7 @@ async function createNodes(nodes) {
 
             this.log.debug(`Requesting states for node ${node.node}`);
             try {
-                const nodeStatus = await withTimeout(() => this.proxmox.getNodeStatus(node.node), `getNodeStatus(${node.node})`);
+                const nodeStatus = await withTimeout(this, () => this.proxmox!.getNodeStatus(node.node));
                 if (nodeStatus) {
                     if (nodeStatus.uptime !== undefined) {
                         await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
@@ -180,22 +180,47 @@ async function createNodes(nodes) {
                         await this.createCustomState(sid, 'memory.used', 'size', this.bytetoMb(nodeStatus.memory.used));
                     }
                     if (nodeStatus.memory?.used !== undefined && nodeStatus.memory?.total !== undefined) {
-                        await this.createCustomState(sid, 'memory.used_lev', 'level', this.used_level(nodeStatus.memory.used, nodeStatus.memory.total));
+                        await this.createCustomState(
+                            sid,
+                            'memory.used_lev',
+                            'level',
+                            this.used_level(nodeStatus.memory.used, nodeStatus.memory.total),
+                        );
                     }
                     if (nodeStatus.memory?.total !== undefined) {
-                        await this.createCustomState(sid, 'memory.total', 'size', this.bytetoMb(nodeStatus.memory.total));
+                        await this.createCustomState(
+                            sid,
+                            'memory.total',
+                            'size',
+                            this.bytetoMb(nodeStatus.memory.total),
+                        );
                     }
                     if (nodeStatus.memory?.free !== undefined) {
                         await this.createCustomState(sid, 'memory.free', 'size', this.bytetoMb(nodeStatus.memory.free));
                     }
                     if (nodeStatus.loadavg?.[0] !== undefined) {
-                        await this.createCustomState(sid, 'loadavg.0', 'default_num', parseFloat(nodeStatus.loadavg[0]));
+                        await this.createCustomState(
+                            sid,
+                            'loadavg.0',
+                            'default_num',
+                            parseFloat(nodeStatus.loadavg[0]),
+                        );
                     }
                     if (nodeStatus.loadavg?.[1] !== undefined) {
-                        await this.createCustomState(sid, 'loadavg.1', 'default_num', parseFloat(nodeStatus.loadavg[1]));
+                        await this.createCustomState(
+                            sid,
+                            'loadavg.1',
+                            'default_num',
+                            parseFloat(nodeStatus.loadavg[1]),
+                        );
                     }
                     if (nodeStatus.loadavg?.[2] !== undefined) {
-                        await this.createCustomState(sid, 'loadavg.2', 'default_num', parseFloat(nodeStatus.loadavg[2]));
+                        await this.createCustomState(
+                            sid,
+                            'loadavg.2',
+                            'default_num',
+                            parseFloat(nodeStatus.loadavg[2]),
+                        );
                     }
                     if (nodeStatus.swap?.used !== undefined) {
                         await this.createCustomState(sid, 'swap.used', 'size', this.bytetoMb(nodeStatus.swap.used));
@@ -208,18 +233,27 @@ async function createNodes(nodes) {
                     }
                     // FIX: Guard war swap.free statt swap.used → falscher Wert hätte undefined sein können
                     if (nodeStatus.swap?.used !== undefined && nodeStatus.swap?.total !== undefined) {
-                        await this.createCustomState(sid, 'swap.used_lev', 'level', this.used_level(nodeStatus.swap.used, nodeStatus.swap.total));
+                        await this.createCustomState(
+                            sid,
+                            'swap.used_lev',
+                            'level',
+                            this.used_level(nodeStatus.swap.used, nodeStatus.swap.total),
+                        );
                     }
                 }
             } catch (err) {
-                this.log.error(`createNodes: Fehler beim Abrufen des Node-Status ${node.node}: ${err.message}`);
+                this.log.error(
+                    `createNodes: Fehler beim Abrufen des Node-Status ${node.node}: ${(err as Error).message}`,
+                );
             }
 
             if (this.config.requestDiskInformation) {
                 try {
                     await processDiskStates(this, sid, node.node, true);
                 } catch (err) {
-                    this.log.warn(`createNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${err.message}`);
+                    this.log.warn(
+                        `createNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${(err as Error).message}`,
+                    );
                 }
             }
         }
@@ -246,9 +280,9 @@ async function createNodes(nodes) {
 /**
  * setNodes – aktualisiert Node-States im laufenden Betrieb.
  *
- * @param {any[]} nodes
+ * @param nodes - Nodes aus der Proxmox-API
  */
-async function setNodes(nodes) {
+export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]): Promise<void> {
     const knownObjIds = Object.keys(this.objects);
 
     for (const node of nodes) {
@@ -260,7 +294,8 @@ async function setNodes(nodes) {
 
         if (!knownObjIds.includes(sid) && node.status === 'online') {
             this.log.info(`Detected new node "${node.node}" - restarting instance`);
-            return void this.restart();
+            this.restart();
+            return;
         }
 
         await this.setStateChangedAsync(`${sid}.status`, { val: node.status, ack: true });
@@ -276,50 +311,86 @@ async function setNodes(nodes) {
 
             this.log.debug(`Requesting states for node ${node.node}`);
             try {
-                const nodeStatus = await withTimeout(() => this.proxmox.getNodeStatus(node.node, true), `getNodeStatus(${node.node})`);
+                const nodeStatus = await withTimeout(this, () => this.proxmox!.getNodeStatus(node.node, true));
                 if (nodeStatus) {
                     if (nodeStatus.uptime !== undefined) {
                         await this.setStateChangedAsync(`${sid}.uptime`, { val: nodeStatus.uptime, ack: true });
                     }
                     if (nodeStatus.wait !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.iowait`, { val: Math.round(nodeStatus.wait * 10000) / 100, ack: true });
+                        await this.setStateChangedAsync(`${sid}.iowait`, {
+                            val: Math.round(nodeStatus.wait * 10000) / 100,
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.memory?.used !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.memory.used`, { val: this.bytetoMb(nodeStatus.memory.used), ack: true });
+                        await this.setStateChangedAsync(`${sid}.memory.used`, {
+                            val: this.bytetoMb(nodeStatus.memory.used),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.memory?.used !== undefined && nodeStatus.memory?.total !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.memory.used_lev`, { val: this.used_level(nodeStatus.memory.used, nodeStatus.memory.total), ack: true });
+                        await this.setStateChangedAsync(`${sid}.memory.used_lev`, {
+                            val: this.used_level(nodeStatus.memory.used, nodeStatus.memory.total),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.memory?.total !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.memory.total`, { val: this.bytetoMb(nodeStatus.memory.total), ack: true });
+                        await this.setStateChangedAsync(`${sid}.memory.total`, {
+                            val: this.bytetoMb(nodeStatus.memory.total),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.memory?.free !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.memory.free`, { val: this.bytetoMb(nodeStatus.memory.free), ack: true });
+                        await this.setStateChangedAsync(`${sid}.memory.free`, {
+                            val: this.bytetoMb(nodeStatus.memory.free),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.loadavg?.[0] !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.loadavg.0`, { val: parseFloat(nodeStatus.loadavg[0]), ack: true });
+                        await this.setStateChangedAsync(`${sid}.loadavg.0`, {
+                            val: parseFloat(nodeStatus.loadavg[0]),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.loadavg?.[1] !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.loadavg.1`, { val: parseFloat(nodeStatus.loadavg[1]), ack: true });
+                        await this.setStateChangedAsync(`${sid}.loadavg.1`, {
+                            val: parseFloat(nodeStatus.loadavg[1]),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.loadavg?.[2] !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.loadavg.2`, { val: parseFloat(nodeStatus.loadavg[2]), ack: true });
+                        await this.setStateChangedAsync(`${sid}.loadavg.2`, {
+                            val: parseFloat(nodeStatus.loadavg[2]),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.swap?.used !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.swap.used`, { val: this.bytetoMb(nodeStatus.swap.used), ack: true });
+                        await this.setStateChangedAsync(`${sid}.swap.used`, {
+                            val: this.bytetoMb(nodeStatus.swap.used),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.swap?.free !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.swap.free`, { val: this.bytetoMb(nodeStatus.swap.free), ack: true });
+                        await this.setStateChangedAsync(`${sid}.swap.free`, {
+                            val: this.bytetoMb(nodeStatus.swap.free),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.swap?.total !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.swap.total`, { val: this.bytetoMb(nodeStatus.swap.total), ack: true });
+                        await this.setStateChangedAsync(`${sid}.swap.total`, {
+                            val: this.bytetoMb(nodeStatus.swap.total),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.swap?.used !== undefined && nodeStatus.swap?.total !== undefined) {
-                        await this.setStateChangedAsync(`${sid}.swap.used_lev`, { val: this.used_level(nodeStatus.swap.used, nodeStatus.swap.total), ack: true });
+                        await this.setStateChangedAsync(`${sid}.swap.used_lev`, {
+                            val: this.used_level(nodeStatus.swap.used, nodeStatus.swap.total),
+                            ack: true,
+                        });
                     }
                 }
             } catch (err) {
-                this.log.error(`setNodes: Fehler beim Abrufen des Node-Status ${node.node}: ${err.message}`);
+                this.log.error(`setNodes: Fehler beim Abrufen des Node-Status ${node.node}: ${(err as Error).message}`);
             }
         }
 
@@ -327,10 +398,10 @@ async function setNodes(nodes) {
             try {
                 await processDiskStates(this, sid, node.node, false);
             } catch (err) {
-                this.log.warn(`setNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${err.message}`);
+                this.log.warn(
+                    `setNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${(err as Error).message}`,
+                );
             }
         }
     }
 }
-
-module.exports = { createNodes, setNodes };

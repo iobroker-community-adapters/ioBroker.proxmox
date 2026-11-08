@@ -1,7 +1,2 @@
 package.json
 package-lock.json
-README.md
-io-package.json
-docs/**
-.github/**
-admin/words.js
