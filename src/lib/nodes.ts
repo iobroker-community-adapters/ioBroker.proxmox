@@ -93,12 +93,10 @@ async function processDiskStates(
  * createNodes – legt Node-Channel + States beim Adapter-Start an.
  *
  * @param nodes - Nodes aus der Proxmox-API
+ * @returns IDs der Channels (ohne Namespace), die diese Proxmox-Instanz noch kennt, oder `null`, wenn
+ * das nicht vollständig ermittelt werden konnte. Gelöscht wird in getNodes(), wenn alle Instanzen durch sind.
  */
-export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]): Promise<void> {
-    const nodesAll = Object.keys(this.objects)
-        .map(id => this.removeNamespace(id))
-        .filter(id => id.startsWith('node_'));
-
+export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]): Promise<string[] | null> {
     const nodesKeep: string[] = [];
 
     for (const node of nodes) {
@@ -263,16 +261,9 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
     if (this.config.requestHAInformation) {
         await this.createHA();
     }
-    await this.createVM();
+    const resourcesKeep = await this.createVM();
 
-    // Nicht mehr vorhandene Nodes löschen
-    for (const node of nodesAll) {
-        if (!nodesKeep.includes(node)) {
-            await this.delObjectAsync(node, { recursive: true });
-            delete this.objects[`${this.namespace}.${node}`];
-            this.log.info(`Deleted old node "${node}"`);
-        }
-    }
+    return resourcesKeep ? [...nodesKeep, ...resourcesKeep] : null;
 }
 
 /**

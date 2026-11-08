@@ -951,21 +951,6 @@ describe('createNodes()', () => {
         assert.ok(calls.some(c => c[0].includes('.status') && c[1].val === 'online'));
     });
 
-    it('löscht nicht mehr vorhandene Nodes', async () => {
-        const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock();
-        // pve2 ist in objects aber nicht mehr in nodes-Liste
-        inst.objects = {
-            'proxmox.0.node_pve2': { type: 'channel', common: { name: 'pve2' }, native: {} },
-        };
-
-        await inst.createNodes([{ node: 'pve', type: 'node', status: 'offline' }]);
-
-        const delCalls = inst._calls['delObjectAsync'] || [];
-        assert.ok(delCalls.some(c => c[0] === 'node_pve2'),
-            'node_pve2 soll gelöscht werden');
-    });
-
     it('fragt NodeStatus bei online-Node ab', async () => {
         const inst = makeProxmoxInstance();
         let nodeStatusCalled = false;
@@ -1156,5 +1141,124 @@ describe('Integrations-Smoke-Test', () => {
         let ok = false;
         await new Promise(resolve => inst.onUnload(() => { ok = true; resolve(); }));
         assert.equal(ok, true);
+    });
+});
+
+// ─── getNodes: veraltete Objekte ──────────────────────────────────────────────
+
+describe('getNodes() – veraltete Objekte', () => {
+    const channel = { type: 'channel', common: { name: 'x' }, native: {} };
+
+    /** Eine Proxmox-Instanz mit einem Node und einer VM */
+    function host(node, vmName, overrides = {}) {
+        return makeProxmoxMock({
+            nodeURL: `https://${node}:8006/api2/json`,
+            getNodes: async () => [{ node, type: 'node', status: 'offline' }],
+            getClusterResources: async () => [{ type: 'qemu', name: vmName, node, vmid: 100, status: 'stopped' }],
+            ...overrides,
+        });
+    }
+
+    function makeInstance(instances, objectIds) {
+        const inst = makeProxmoxInstance();
+        inst.proxmoxInstances = instances;
+        inst.proxmox = instances[0];
+        inst.objects = Object.fromEntries(objectIds.map(id => [`proxmox.0.${id}`, channel]));
+        return inst;
+    }
+
+    const deletedIds = inst => (inst._calls['delObjectAsync'] || []).map(c => c[0]);
+
+    const hostAId = ['node_a', 'qemu_vm-a'];
+    const hostBId = ['node_b', 'qemu_vm-b'];
+
+    it('Einzel-Hosts löschen nicht gegenseitig ihre Objekte (#697)', async () => {
+        const inst = makeInstance([host('a', 'vm-a'), host('b', 'vm-b')], [...hostAId, ...hostBId]);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+    });
+
+    it('nach dem Start erkennt setNodes/setMachines keine "neuen" Objekte, also kein Neustart (#697)', async () => {
+        const a = host('a', 'vm-a');
+        const b = host('b', 'vm-b');
+        const inst = makeInstance([a, b], [...hostAId, ...hostBId]);
+
+        await inst.getNodes();
+        for (const mock of [a, b]) {
+            inst.proxmox = mock;
+            await inst.setNodes(await mock.getNodes());
+            await inst.setMachines();
+        }
+
+        assert.equal((inst._calls['restart'] || []).length, 0);
+    });
+
+    it('löscht Objekte, die keine Instanz mehr kennt, auch rekursiv und aus dem RAM', async () => {
+        const inst = makeInstance(
+            [host('a', 'vm-a'), host('b', 'vm-b')],
+            [...hostAId, ...hostBId, 'node_old', 'qemu_old', 'lxc_old', 'storage_old', 'qemu.old2'],
+        );
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), ['node_old', 'qemu_old', 'lxc_old', 'storage_old', 'qemu.old2']);
+        assert.deepEqual(inst._calls['delObjectAsync'][0][1], { recursive: true });
+        assert.equal(inst.objects['proxmox.0.node_old'], undefined);
+        assert.ok(inst.objects['proxmox.0.node_a']);
+    });
+
+    it('fasst Channels anderer Bereiche nicht an', async () => {
+        const inst = makeInstance([host('a', 'vm-a')], [...hostAId, 'ceph', 'ha', 'info']);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+    });
+
+    it('löscht nichts, wenn eine Instanz keine Nodes liefert', async () => {
+        const offline = host('b', 'vm-b', { getNodes: async () => { throw new Error('ECONNREFUSED'); } });
+        const inst = makeInstance([host('a', 'vm-a'), offline], [...hostAId, ...hostBId, 'node_old']);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+        assert.ok(inst._logs.error.some(m => m.includes('Could not create nodes')));
+    });
+
+    it('löscht nichts, wenn eine Instanz keine Ressourcen liefert', async () => {
+        const broken = host('b', 'vm-b', { getClusterResources: async () => { throw new Error('HTTP 500'); } });
+        const inst = makeInstance([broken, host('a', 'vm-a')], [...hostAId, ...hostBId, 'node_old']);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+    });
+
+    it('löscht nichts, wenn der Adapter während des Starts stoppt', async () => {
+        const stopped = host('b', 'vm-b', { getNodes: async () => { throw new Error('STOPPED'); } });
+        const inst = makeInstance([host('a', 'vm-a'), stopped], [...hostAId, ...hostBId, 'node_old']);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+        assert.equal(inst._logs.error.length, 0);
+    });
+
+    it('ein Fehler beim Löschen bricht den Start nicht ab und löscht die übrigen', async () => {
+        const inst = makeInstance([host('a', 'vm-a')], [...hostAId, 'node_old1', 'node_old2']);
+        const deleted = [];
+        inst.delObjectAsync = async id => {
+            if (id === 'node_old1') {
+                throw new Error('DB error');
+            }
+            deleted.push(id);
+        };
+
+        await inst.getNodes();
+
+        assert.deepEqual(deleted, ['node_old2']);
+        assert.ok(inst._logs.warn.some(m => m.includes('node_old1')));
     });
 });

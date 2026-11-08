@@ -142,14 +142,29 @@ describe('createVM', () => {
             assert.equal(adapter._states['proxmox.0.qemu_testvm.status'], 'offline');
         });
 
-        it('löscht veraltete Ressourcen', async () => {
+        it('gibt nur vorhandene Ressourcen zurück und löscht selbst nichts', async () => {
             const adapter = makeAdapter([makeQemuResource()]);
             // Altes Objekt vorab eintragen
             adapter.objects['proxmox.0.qemu_oldvm'] = { type: 'channel', common: { name: 'oldvm' }, native: { type: 'qemu' } };
 
-            await adapter.createVM();
+            const keep = await adapter.createVM();
 
-            assert.ok(!adapter.objects['proxmox.0.qemu_oldvm'], 'Altes Objekt soll gelöscht sein');
+            assert.deepEqual(keep, ['qemu_testvm']);
+            assert.ok(adapter.objects['proxmox.0.qemu_oldvm'], 'Gelöscht wird erst in getNodes()');
+        });
+
+        it('gibt null zurück wenn die Ressourcen nicht abrufbar sind', async () => {
+            const adapter = makeAdapter();
+            adapter.proxmox.getClusterResources = async () => { throw new Error('HTTP 500'); };
+
+            assert.equal(await adapter.createVM(), null);
+        });
+
+        it('gibt null zurück wenn der Adapter stoppt', async () => {
+            const adapter = makeAdapter();
+            adapter.proxmox.getClusterResources = async () => { throw new Error('STOPPED'); };
+
+            assert.equal(await adapter.createVM(), null);
         });
 
         it('legt Button-States (start/stop/shutdown/reboot/reset/suspend/resume) an', async () => {
@@ -200,14 +215,10 @@ describe('createVM', () => {
             );
         });
 
-        it('BUG FIX: löscht veraltete Ressourcen auch bei Punkt-Format', async () => {
+        it('BUG FIX: gibt vorhandene Ressourcen auch im Punkt-Format zurück', async () => {
             const adapter = makeAdapter([makeQemuResource()], { config: { newTreeStructure: true } });
-            // Altes Punkt-Format-Objekt vorab eintragen
-            adapter.objects['proxmox.0.qemu.oldvm'] = { type: 'channel', common: { name: 'oldvm' }, native: { type: 'qemu' } };
 
-            await adapter.createVM();
-
-            assert.ok(!adapter.objects['proxmox.0.qemu.oldvm'], 'Altes Punkt-Objekt soll gelöscht sein');
+            assert.deepEqual(await adapter.createVM(), ['qemu.testvm']);
         });
 
         it('BUG FIX: behält aktive Ressourcen bei Punkt-Format', async () => {
@@ -513,13 +524,13 @@ describe('VMs/LXC mit gleichem Namen (#702)', () => {
                 assert.equal(adapter._states[`${prefix}iobroker.mem`], undefined);
             });
 
-            it('löscht das bisher gemeinsame Objekt', async () => {
+            it('das bisher gemeinsame Objekt zählt nicht mehr als vorhanden', async () => {
                 const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
                 adapter.objects[`${prefix}iobroker`] = { type: 'channel', common: { name: 'iobroker' }, native: { type: 'lxc' } };
 
-                await adapter.createVM();
+                const keep = await adapter.createVM();
 
-                assert.ok(!adapter.objects[`${prefix}iobroker`]);
+                assert.deepEqual(keep, ['iobroker_113', 'iobroker_120'].map(name => `lxc${newTreeStructure ? '.' : '_'}${name}`));
             });
         });
     }
@@ -589,10 +600,9 @@ describe('VMs/LXC mit gleichem Namen (#702)', () => {
         await adapter.createVM();
 
         adapter.proxmox.getClusterResources = async () => [twins()[0]];
-        await adapter.createVM();
+        const keep = await adapter.createVM();
 
-        assert.ok(adapter.objects['proxmox.0.lxc_iobroker_113']);
-        assert.ok(!adapter.objects['proxmox.0.lxc_iobroker_120']);
+        assert.deepEqual(keep, ['lxc_iobroker_113']);
         assert.ok(!adapter.objects['proxmox.0.lxc_iobroker']);
     });
 

@@ -45,6 +45,8 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 
 **`create*` vs. `set*`:** `create*` run once at start (`onReady` -> `getNodes`) and create objects. `set*` run every poll cycle and only write states. If a poll finds an unknown node or VM it calls `restart()`, and the next start creates the objects.
 
+**Removing old objects:** `createNodes` and `createVM` only return the IDs their Proxmox instance still knows. `getNodes` deletes the rest after all instances are done, and only if every instance answered: a single instance does not know the objects of the others.
+
 **`lib/` functions use `this`:** they are bound to the adapter in `main.ts` and declare `this: ProxmoxAdapterContext`. The unit tests bind them to plain mocks, so they do not need a real adapter.
 
 **`this.proxmox` is the instance being processed.** There is one `ProxmoxUtils` for all nodes marked "Cluster Node" (failover between them) plus one per individual node. `sendRequest` and `getNodes` set `this.proxmox` before calling into `lib/`. `nodeInstanceMap` maps a node name to its instance, so buttons reach the right one.

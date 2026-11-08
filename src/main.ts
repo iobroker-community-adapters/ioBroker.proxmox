@@ -69,11 +69,11 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     public findState = _methods.findState;
 
     // lib/nodes
-    public createNodes: (nodes: ProxmoxNode[]) => Promise<void> = _nodes.createNodes.bind(this);
+    public createNodes: (nodes: ProxmoxNode[]) => Promise<string[] | null> = _nodes.createNodes.bind(this);
     public setNodes: (nodes: ProxmoxNode[]) => Promise<void> = _nodes.setNodes.bind(this);
 
     // lib/vms
-    public createVM: () => Promise<void> = _vms.createVM.bind(this);
+    public createVM: () => Promise<string[] | null> = _vms.createVM.bind(this);
     public setMachines: () => Promise<void> = _vms.setMachines.bind(this);
 
     // lib/ceph
@@ -323,6 +323,13 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     }
 
     public async getNodes(): Promise<void> {
+        // Vor dem Anlegen festhalten: Was dabei neu entsteht, ist nicht veraltet
+        const existingIds = Object.keys(this.objects)
+            .map(id => this.removeNamespace(id))
+            .filter(id => /^(node_|(lxc|qemu|storage)[._])/.test(id));
+        const keepIds = new Set<string>();
+        let complete = true;
+
         for (const inst of this.proxmoxInstances) {
             this.proxmox = inst;
             try {
@@ -334,14 +341,38 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                     this.nodeInstanceMap[n.node] = inst;
                 }
 
-                await this.createNodes(nodes);
+                const keep = await this.createNodes(nodes);
+                if (keep) {
+                    keep.forEach(id => keepIds.add(id));
+                } else {
+                    complete = false;
+                }
             } catch (e) {
                 if ((e as Error).message === 'STOPPED') {
                     return; // Adapter wird beendet – kein Logging nötig
                 }
+                complete = false;
                 this.log.error(
                     `Could not create nodes [${inst.nodeURL}], please restart adapter: ${(e as Error).message}`,
                 );
+            }
+        }
+
+        // Erst hier löschen: Eine einzelne Instanz kennt die Objekte der anderen nicht. Fehlt die Antwort
+        // einer Instanz, ist unbekannt, was zu ihr gehört, und ein kurzer Ausfall würde Objekte löschen.
+        if (!complete) {
+            this.log.info('Not all Proxmox instances answered, old objects are not removed during this start');
+            return;
+        }
+        for (const id of existingIds) {
+            if (!keepIds.has(id)) {
+                try {
+                    await this.delObjectAsync(id, { recursive: true });
+                    delete this.objects[`${this.namespace}.${id}`];
+                    this.log.info(`Deleted old object "${id}"`);
+                } catch (e) {
+                    this.log.warn(`Could not delete old object "${id}": ${(e as Error).message}`);
+                }
             }
         }
     }

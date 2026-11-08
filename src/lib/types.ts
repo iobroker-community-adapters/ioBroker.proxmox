@@ -158,5 +158,5 @@ export interface ProxmoxAdapterContext extends ioBroker.Adapter {
 
     createCeph(): Promise<void>;
     createHA(): Promise<void>;
-    createVM(): Promise<void>;
+    createVM(): Promise<string[] | null>;
 }

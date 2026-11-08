@@ -74,7 +74,7 @@ function makeAdapter(overrides = {}) {
 
         createCeph: async () => {},
         createHA:   async () => {},
-        createVM:   async () => {},
+        createVM:   async () => [],
 
         ...overrides,
     };
@@ -146,14 +146,20 @@ describe('createNodes', () => {
         assert.equal(adapter._states['proxmox.0.node_pve.memory.used'], undefined);
     });
 
-    it('löscht nicht mehr vorhandene Nodes', async () => {
-        const adapter = makeAdapter();
+    it('gibt nur vorhandene Nodes und VMs zurück und löscht selbst nichts', async () => {
+        const adapter = makeAdapter({ createVM: async () => ['qemu_vm'] });
         adapter.objects['proxmox.0.node_oldpve'] = { type: 'channel', native: { type: 'node' } };
 
-        await adapter.createNodes([makeNode()]);
+        const keep = await adapter.createNodes([makeNode()]);
 
-        assert.ok(!adapter.objects['proxmox.0.node_oldpve'], 'Alten Node löschen');
-        assert.ok(adapter._logs.info.some(m => m.includes('Deleted old node')));
+        assert.deepEqual(keep, ['node_pve', 'qemu_vm']);
+        assert.ok(adapter.objects['proxmox.0.node_oldpve'], 'Gelöscht wird erst in getNodes()');
+    });
+
+    it('gibt null zurück wenn createVM nicht vollständig war', async () => {
+        const adapter = makeAdapter({ createVM: async () => null });
+
+        assert.equal(await adapter.createNodes([makeNode()]), null);
     });
 
     it('verarbeitet mehrere Nodes', async () => {

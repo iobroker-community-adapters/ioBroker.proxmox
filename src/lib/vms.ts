@@ -65,22 +65,11 @@ export function getMachineIdNames(
 
 /**
  * createVM – legt VM/LXC/Storage-Channels + States beim Adapter-Start an.
+ *
+ * @returns IDs der Channels (ohne Namespace), die diese Proxmox-Instanz noch kennt, oder `null`, wenn
+ * das nicht vollständig ermittelt werden konnte. Gelöscht wird in getNodes(), wenn alle Instanzen durch sind.
  */
-export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
-    // BUG FIX: Mit newTreeStructure werden Objekte mit Punkt gespeichert (lxc.name),
-    // daher müssen beide Präfix-Formate berücksichtigt werden.
-    const resourcesAll = Object.keys(this.objects)
-        .map(id => this.removeNamespace(id))
-        .filter(
-            id =>
-                id.startsWith('lxc_') ||
-                id.startsWith('qemu_') ||
-                id.startsWith('storage_') ||
-                id.startsWith('lxc.') ||
-                id.startsWith('qemu.') ||
-                id.startsWith('storage.'),
-        );
-
+export async function createVM(this: ProxmoxAdapterContext): Promise<string[] | null> {
     const resourcesKeep: string[] = [];
 
     try {
@@ -250,7 +239,7 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
                             }
                         } catch (err) {
                             if ((err as Error).message === 'STOPPED') {
-                                return; // Adapter wird beendet – kein Logging nötig
+                                return null; // Adapter wird beendet – kein Logging nötig
                             }
                             this.log.error(
                                 `Storageerror createVM: ${res.storage} on ${res.node} (status: ${res.status}): ${(err as Error).message}`,
@@ -262,19 +251,12 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
             }
         }
 
-        // Nicht mehr vorhandene Ressourcen löschen
-        for (const res of resourcesAll) {
-            if (!resourcesKeep.includes(res)) {
-                await this.delObjectAsync(res, { recursive: true });
-                delete this.objects[`${this.namespace}.${res}`];
-                this.log.info(`Deleted old resource "${res}"`);
-            }
-        }
+        return resourcesKeep;
     } catch (err) {
-        if ((err as Error).message === 'STOPPED') {
-            return; // Adapter wird beendet – kein Logging nötig
+        if ((err as Error).message !== 'STOPPED') {
+            this.log.debug(`Unable to get cluster resources: ${err as string}`);
         }
-        this.log.debug(`Unable to get cluster resources: ${err as string}`);
+        return null;
     }
 }
 
