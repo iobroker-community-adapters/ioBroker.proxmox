@@ -13,6 +13,7 @@ const {
     used_level,
     prepareNameForId,
     findState,
+    formatUptime,
 } = require('../build/lib/methods');
 
 // findState braucht this.used_level / this.bytetoMb nicht mehr (direkte Funktionsaufrufe)
@@ -353,5 +354,41 @@ describe('findState() – null/undefined Werte', () => {
         const avail = result.find(r => r[1] === 'avail');
         assert.ok(avail);
         assert.equal(avail[3], 1);
+    });
+});
+
+// ─── formatUptime ──────────────────────────────────────────────
+
+describe('formatUptime()', () => {
+    it('zeigt die zwei größten Einheiten', () => {
+        assert.equal(formatUptime(3 * 86400 + 4 * 3600 + 59), '3 d 4 h');
+        assert.equal(formatUptime(86400), '1 d 0 h');
+        assert.equal(formatUptime(4 * 3600 + 12 * 60), '4 h 12 min');
+        assert.equal(formatUptime(12 * 60 + 5), '12 min');
+    });
+
+    it('unter einer Minute', () => {
+        assert.equal(formatUptime(59), '< 1 min');
+    });
+
+    it('eine Maschine, die nicht läuft, hat keine Laufzeit', () => {
+        assert.equal(formatUptime(0), '');
+        assert.equal(formatUptime(undefined), '');
+    });
+});
+
+describe('findState() – uptime_text', () => {
+    const textOf = states => findState('proxmox.0.qemu_vm', states).find(s => s[1] === 'uptime_text');
+
+    it('liefert die Laufzeit zusätzlich als Text', () => {
+        assert.deepEqual(textOf({ uptime: 3700 }), ['proxmox.0.qemu_vm', 'uptime_text', 'text', '1 h 1 min']);
+    });
+
+    it('leert den Text, wenn die Maschine stoppt', () => {
+        assert.deepEqual(textOf({ uptime: 0 }), ['proxmox.0.qemu_vm', 'uptime_text', 'text', '']);
+    });
+
+    it('ohne Laufzeit gibt es keinen Text, zum Beispiel bei einem Storage', () => {
+        assert.equal(textOf({ used: 1, total: 2 }), undefined);
     });
 });

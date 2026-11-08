@@ -219,6 +219,25 @@ describe('setNodes', () => {
         assert.equal(offlineStatusCalls.length, 1, 'Status soll genau 1× gesetzt werden (kein Doppel-Set)');
     });
 
+    it('leert die Laufzeit als Text, wenn der Node offline geht', async () => {
+        const adapter = makeAdapter();
+        adapter.objects['proxmox.0.node_pve'] = { type: 'channel', native: { type: 'node' } };
+
+        const calls = [];
+        const origFn = adapter.setStateChangedAsync.bind(adapter);
+        adapter.setStateChangedAsync = async (id, val) => {
+            calls.push([id, val]);
+            return origFn(id, val);
+        };
+
+        await adapter.setNodes([makeNode({ status: 'offline' })]);
+
+        assert.deepEqual(
+            calls.find(([id]) => id === 'proxmox.0.node_pve.uptime_text'),
+            ['proxmox.0.node_pve.uptime_text', { val: '', ack: true }],
+        );
+    });
+
     it('aktualisiert CPU-State für Online-Node', async () => {
         const adapter = makeAdapter();
         adapter.objects['proxmox.0.node_pve'] = { type: 'channel', native: { type: 'node' } };

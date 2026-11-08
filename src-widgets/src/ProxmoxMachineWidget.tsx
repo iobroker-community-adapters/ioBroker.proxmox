@@ -9,10 +9,12 @@
 import type React from 'react';
 import { Box, Typography } from '@mui/material';
 import { I18n } from '@iobroker/gui-components';
+import type { Connection } from '@iobroker/gui-components';
 import type { RxRenderWidgetProps, RxWidgetInfo, VisRxWidgetState } from '@iobroker/types-vis-2';
 import type VisRxWidget from '@iobroker/types-vis-2/visRxWidget';
 
 import { MachineCard, type StopCommand } from './MachineCard';
+import MachineField from './MachineField';
 
 interface MachineRxData {
     /** Full ID of the channel of the machine */
@@ -21,6 +23,12 @@ interface MachineRxData {
     machineTitle: string;
     showControls: boolean;
     showDetails: boolean;
+    showUptime: boolean;
+    showIcon: boolean;
+    /** Icon from the selector of vis-2. Without it, the symbol of the type is shown. */
+    icon: string;
+    /** Image file, it takes precedence over the icon */
+    image: string;
     stopCommand: StopCommand;
     askConfirmation: boolean;
     noCard: boolean;
@@ -53,11 +61,15 @@ export default class ProxmoxMachineWidget extends (window.visRxWidget as typeof 
                             name: 'machine',
                             label: 'machine',
                             tooltip: 'machine_help',
-                            type: 'id',
-                            filter: { type: 'channel' },
-                            // The channel has no state to subscribe to, the card does that itself
-                            noSubscribe: true,
-                            noInit: true,
+                            type: 'custom',
+                            // A list of the VMs and containers, instead of searching the channel in the objects
+                            component: (_field, data, setData, props) => (
+                                <MachineField
+                                    socket={props.context.socket as unknown as Connection}
+                                    value={typeof data.machine === 'string' ? data.machine : ''}
+                                    onChange={machine => setData({ ...data, machine })}
+                                />
+                            ),
                         },
                         {
                             name: 'machineTitle',
@@ -97,6 +109,32 @@ export default class ProxmoxMachineWidget extends (window.visRxWidget as typeof 
                             default: true,
                         },
                         {
+                            name: 'showUptime',
+                            label: 'show_uptime',
+                            type: 'checkbox',
+                            default: true,
+                        },
+                        {
+                            name: 'showIcon',
+                            label: 'show_icon',
+                            type: 'checkbox',
+                            default: true,
+                        },
+                        {
+                            name: 'icon',
+                            label: 'icon',
+                            tooltip: 'icon_help',
+                            type: 'icon64',
+                            hidden: 'data.showIcon === false || !!data.image',
+                        },
+                        {
+                            name: 'image',
+                            label: 'image',
+                            tooltip: 'image_help',
+                            type: 'image',
+                            hidden: 'data.showIcon === false',
+                        },
+                        {
                             name: 'noCard',
                             label: 'no_card',
                             type: 'checkbox',
@@ -105,8 +143,8 @@ export default class ProxmoxMachineWidget extends (window.visRxWidget as typeof 
                 },
             ],
             visDefaultStyle: {
-                width: 260,
-                height: 130,
+                width: 300,
+                height: 165,
                 position: 'relative',
             },
             visPrev: 'widgets/proxmox/img/prev_machine.svg',
@@ -117,11 +155,26 @@ export default class ProxmoxMachineWidget extends (window.visRxWidget as typeof 
         return ProxmoxMachineWidget.getWidgetInfo();
     }
 
+    /**
+     * URL of an attribute of the type `image`: `_PRJ_NAME/` is the folder of the vis-2 project
+     *
+     * @param src value of the attribute
+     */
+    private getImageUrl(src: string | undefined): string {
+        const value = (src || '').trim();
+        if (value.startsWith('_PRJ_NAME/')) {
+            const { adapterName, instance, projectName } = this.props.context;
+            return value.replace('_PRJ_NAME/', `../${adapterName}.${instance}/${projectName || 'main'}/`);
+        }
+        return value;
+    }
+
     public renderWidgetBody(props: RxRenderWidgetProps): React.JSX.Element | React.JSX.Element[] | null {
         super.renderWidgetBody(props);
 
         const { machine, machineTitle, showControls, showDetails, stopCommand, askConfirmation, noCard } =
             this.state.rxData;
+        const { showUptime, showIcon, icon, image } = this.state.rxData;
 
         const content = (
             <Box
@@ -141,6 +194,10 @@ export default class ProxmoxMachineWidget extends (window.visRxWidget as typeof 
                         title={machineTitle}
                         showControls={showControls !== false}
                         showDetails={showDetails !== false}
+                        showUptime={showUptime !== false}
+                        showIcon={showIcon !== false}
+                        icon={icon}
+                        image={this.getImageUrl(image)}
                         stopCommand={stopCommand === 'stop' ? 'stop' : 'shutdown'}
                         askConfirmation={askConfirmation !== false}
                         readOnly={!!this.props.editMode}

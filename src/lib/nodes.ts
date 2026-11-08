@@ -1,4 +1,4 @@
-import { getHostSuffix, withTimeout } from './methods';
+import { formatUptime, getHostSuffix, withTimeout } from './methods';
 import { nodeButtonLabels, stateNames } from './translations';
 import type { ProxmoxAdapterContext, ProxmoxNode } from './types';
 
@@ -172,6 +172,7 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
                 if (nodeStatus) {
                     if (nodeStatus.uptime !== undefined) {
                         await this.createCustomState(sid, 'uptime', 'time', nodeStatus.uptime);
+                        await this.createCustomState(sid, 'uptime_text', 'text', formatUptime(nodeStatus.uptime));
                     }
                     if (nodeStatus.wait !== undefined) {
                         await this.createCustomState(sid, 'iowait', 'level', Math.round(nodeStatus.wait * 10000) / 100);
@@ -256,6 +257,9 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
                     );
                 }
             }
+        } else {
+            // setNodes leert den State, sobald der Node offline ist. Dafür muss es ihn auch dann geben.
+            await this.createCustomState(sid, 'uptime_text', 'text', '');
         }
     }
 
@@ -309,6 +313,10 @@ export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]
                 if (nodeStatus) {
                     if (nodeStatus.uptime !== undefined) {
                         await this.setStateChangedAsync(`${sid}.uptime`, { val: nodeStatus.uptime, ack: true });
+                        await this.setStateChangedAsync(`${sid}.uptime_text`, {
+                            val: formatUptime(nodeStatus.uptime),
+                            ack: true,
+                        });
                     }
                     if (nodeStatus.wait !== undefined) {
                         await this.setStateChangedAsync(`${sid}.iowait`, {
@@ -396,6 +404,9 @@ export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]
                     `setNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${(err as Error).message}`,
                 );
             }
+        }
+        if (node.status === 'offline') {
+            await this.setStateChangedAsync(`${sid}.uptime_text`, { val: '', ack: true });
         }
     }
 }
