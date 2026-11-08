@@ -526,3 +526,25 @@ describe('ProxmoxUtils.ticket() – Token-Auth', () => {
 });
 
 
+
+// ─── hostId ───────────────────────────────────────────────────────────────────
+
+describe('ProxmoxUtils.hostId', () => {
+    const { ProxmoxUtils } = require('../build/lib/proxmox');
+    const hostId = (realmIp, realmPort, id) =>
+        new ProxmoxUtils(makeAdapter(), [{ realmIp, realmPort, realmUser: 'root', realm: 'pam' }], id).hostId;
+
+    it('bildet sich aus der Adresse, ohne Punkte', () => {
+        assert.equal(hostId('192.168.1.10', 8006), '192-168-1-10');
+        assert.equal(hostId('pve.fritz.box', 8006), 'pve-fritz-box');
+    });
+
+    it('enthält den Port nur, wenn er vom Standard abweicht', () => {
+        assert.equal(hostId('10.0.0.1', 8007), '10-0-0-1-8007');
+        assert.equal(hostId('10.0.0.1', '8006'), '10-0-0-1');
+    });
+
+    it('eine angegebene Kennung hat Vorrang', () => {
+        assert.equal(hostId('10.0.0.1', 8006, 'cluster'), 'cluster');
+    });
+});

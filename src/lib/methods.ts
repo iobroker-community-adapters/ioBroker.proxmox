@@ -1,4 +1,5 @@
-import type { StateDefinition, StatusRecord } from './types';
+import type { ProxmoxUtils } from './proxmox';
+import type { ProxmoxAdapterContext, StateDefinition, StatusRecord } from './types';
 
 const API_TIMEOUT_MS = 10000;
 
@@ -101,6 +102,34 @@ export function removeNamespace(this: { namespace: string }, id: string): string
  */
 export function prepareNameForId(val: unknown): string {
     return String(val).replace(/\./g, '-');
+}
+
+/**
+ * Ermittelt den Host-Zusatz einer Objekt-ID.
+ *
+ * Einzel-Hosts wissen nichts voneinander und heißen oft gleich (`pve`). Melden mehrere Instanzen dieselbe
+ * ID, bekommen alle `_<hostId>`, sonst bleibt die ID unverändert. Einmal vergeben, bleibt der Zusatz,
+ * solange der Channel existiert: Sonst wechselte die ID, sobald der andere Host nicht antwortet.
+ *
+ * @param ctx - Adapter-Instanz
+ * @param inst - Proxmox-Instanz, zu der die ID gehört
+ * @param relativeId - ID ohne Namespace und ohne Host-Zusatz
+ * @returns `_<hostId>` oder eine leere Zeichenkette
+ */
+export function getHostSuffix(ctx: ProxmoxAdapterContext, inst: ProxmoxUtils | null, relativeId: string): string {
+    if (!inst) {
+        return '';
+    }
+    const suffix = `_${inst.hostId}`;
+    if (ctx.objects[`${ctx.namespace}.${relativeId}${suffix}`]) {
+        return suffix;
+    }
+    for (const [other, ids] of ctx.instanceIds) {
+        if (other !== inst && ids.has(relativeId)) {
+            return suffix;
+        }
+    }
+    return '';
 }
 
 /**

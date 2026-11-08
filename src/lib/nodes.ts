@@ -1,4 +1,4 @@
-import { withTimeout } from './methods';
+import { getHostSuffix, withTimeout } from './methods';
 import { nodeButtonLabels, stateNames } from './translations';
 import type { ProxmoxAdapterContext, ProxmoxNode } from './types';
 
@@ -100,7 +100,8 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
     const nodesKeep: string[] = [];
 
     for (const node of nodes) {
-        const nodeName = this.prepareNameForId(node.node);
+        const plainName = this.prepareNameForId(node.node);
+        const nodeName = `${plainName}${getHostSuffix(this, this.proxmox, `node_${plainName}`)}`;
 
         this.log.debug(`Node: ${JSON.stringify(node)}`);
         nodesKeep.push(`node_${nodeName}`);
@@ -108,6 +109,9 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
         const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
         if (!this.objects[sid]) {
+            if (nodeName !== plainName) {
+                this.log.info(`Several Proxmox hosts use the node name "${node.node}", using "${sid}"`);
+            }
             this.objects[sid] = {
                 type: 'channel',
                 common: { name: node.node },
@@ -125,7 +129,7 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
                 read: true,
                 write: true,
             },
-            native: { node: node.node, type: node.type },
+            native: { node: node.node, type: node.type, host: this.proxmox?.hostId },
         });
 
         await this.extendObjectAsync(`${sid}.reboot`, {
@@ -137,7 +141,7 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
                 read: true,
                 write: true,
             },
-            native: { node: node.node, type: node.type },
+            native: { node: node.node, type: node.type, host: this.proxmox?.hostId },
         });
 
         await this.extendObjectAsync(`${sid}.status`, {
@@ -278,7 +282,8 @@ export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]
         this.log.debug(`Node: ${JSON.stringify(node)}`);
 
         // FIX: prepareNameForId verwenden – identisch zu createNodes, sonst falsche sid bei Sonderzeichen
-        const nodeName = this.prepareNameForId(node.node);
+        const plainName = this.prepareNameForId(node.node);
+        const nodeName = `${plainName}${getHostSuffix(this, this.proxmox, `node_${plainName}`)}`;
         const sid = `${this.namespace}.${node.type}_${nodeName}`;
 
         if (!knownObjIds.includes(sid) && node.status === 'online') {

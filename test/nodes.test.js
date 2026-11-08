@@ -39,6 +39,7 @@ function makeAdapter(overrides = {}) {
             ...overrides.config,
         },
         objects,
+        instanceIds: new Map(),
         // Die lib-Module nutzen die Adapter-Timer, im Mock laufen sie als echte Timer
         setTimeout:   (fn, ms) => setTimeout(fn, ms),
         clearTimeout: (t) => clearTimeout(t),

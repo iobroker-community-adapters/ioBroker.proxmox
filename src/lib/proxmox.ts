@@ -27,6 +27,9 @@ export class ProxmoxUtils {
     private password = '';
     public nodeURL = '';
 
+    /** Kennung dieser Instanz für Objekt-IDs und `native.host` der Buttons. Darf keine Punkte enthalten. */
+    public readonly hostId: string;
+
     private _ticket = '';
     private _csrf = '';
 
@@ -42,9 +45,17 @@ export class ProxmoxUtils {
 
     private readonly httpsAgent: Agent;
 
-    public constructor(adapter: ioBroker.Adapter, nodeList: ProxmoxNodeConfig[]) {
+    /**
+     * @param adapter - Adapter-Instanz
+     * @param nodeList - Knoten dieser Instanz. Mehrere nur bei einem Cluster (Failover).
+     * @param hostId - feste Kennung. Ohne Angabe wird sie aus Adresse und Port des ersten Knotens gebildet.
+     */
+    public constructor(adapter: ioBroker.Adapter, nodeList: ProxmoxNodeConfig[], hostId?: string) {
         this.adapter = adapter;
         this.nodeList = nodeList;
+        const { realmIp, realmPort } = nodeList[0];
+        const address = Number(realmPort) === 8006 ? String(realmIp) : `${realmIp}-${realmPort}`;
+        this.hostId = hostId ?? address.replace(/[^\w-]/g, '-');
 
         this._initUrlMain(); // stiller Initialaufruf – kein warn-Log
 

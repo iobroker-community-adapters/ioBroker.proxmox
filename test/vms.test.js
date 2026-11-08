@@ -34,6 +34,7 @@ function makeAdapter(resources = [], overrides = {}) {
             ...overrides.config,
         },
         objects,
+        instanceIds: new Map(),
         log: {
             debug: (m) => logs.debug.push(m),
             info:  (m) => logs.info.push(m),
@@ -507,8 +508,10 @@ describe('VMs/LXC mit gleichem Namen (#702)', () => {
                 const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
                 await adapter.createVM();
 
-                assert.deepEqual(adapter.objects[`${prefix}iobroker_113.stop`].native, { node: 'pve1', type: 'lxc', vmid: 113 });
-                assert.deepEqual(adapter.objects[`${prefix}iobroker_120.stop`].native, { node: 'pve2', type: 'lxc', vmid: 120 });
+                const native113 = adapter.objects[`${prefix}iobroker_113.stop`].native;
+                const native120 = adapter.objects[`${prefix}iobroker_120.stop`].native;
+                assert.deepEqual([native113.vmid, native113.node], [113, 'pve1']);
+                assert.deepEqual([native120.vmid, native120.node], [120, 'pve2']);
             });
 
             it('setMachines schreibt in die eigenen States, ohne Neustart', async () => {

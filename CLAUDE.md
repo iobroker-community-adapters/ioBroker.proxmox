@@ -49,7 +49,7 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 
 **`lib/` functions use `this`:** they are bound to the adapter in `main.ts` and declare `this: ProxmoxAdapterContext`. The unit tests bind them to plain mocks, so they do not need a real adapter.
 
-**`this.proxmox` is the instance being processed.** There is one `ProxmoxUtils` for all nodes marked "Cluster Node" (failover between them) plus one per individual node. `sendRequest` and `getNodes` set `this.proxmox` before calling into `lib/`. `nodeInstanceMap` maps a node name to its instance, so buttons reach the right one.
+**`this.proxmox` is the instance being processed.** There is one `ProxmoxUtils` for all nodes marked "Cluster Node" (failover between them) plus one per individual node. `sendRequest` and `getNodes` set `this.proxmox` before calling into `lib/`. Buttons store their instance in `native.host` (`ProxmoxUtils.hostId`), because a node name is not unique across individual hosts. `nodeInstanceMap` is the fallback for buttons created by older versions.
 
 **Polling** is a self-rescheduling `setTimeout` in `sendRequest`, not an interval. Pressing a button reschedules the next poll to 10 s.
 
@@ -66,7 +66,7 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | `qemu_<name>.*`, `lxc_<name>.*`, `storage_<name>.*` | `vms.ts` (with `newTreeStructure`: `qemu.<name>.*` etc.) |
 | `ceph.*`, `ha.*` | `ceph.ts`, `ha.ts` |
 
-Machines of the same type and name get `<name>_<vmid>` instead of `<name>`, see `getMachineIdNames` in `vms.ts`. Everything that builds a machine ID has to use it, otherwise `cleanup` or `setMachines` no longer match the objects. It works per Proxmox instance: two individual hosts can still collide.
+Machines of the same type and name get `<name>_<vmid>` instead of `<name>`, see `getMachineIdNames` in `vms.ts`. Everything that builds a machine ID has to use it, otherwise `cleanup` or `setMachines` no longer match the objects. If several Proxmox instances report the same ID (individual hosts are often all called `pve`), all of them get `_<hostId>` on top, see `getHostSuffix` in `methods.ts`. Both are kept while the channel exists. `ceph.*` and `ha.*` are not separated per instance.
 
 ## Conventions
 
