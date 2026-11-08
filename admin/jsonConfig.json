@@ -227,6 +227,32 @@
                 }
             }
         },
+        "_deviceManager": {
+            "type": "panel",
+            "label": "Device manager",
+            "items": {
+                "_dm": {
+                    "type": "deviceManager",
+                    "xs": 12,
+                    "sm": 12,
+                    "style": {
+                        "width": "100%",
+                        "height": "100%",
+                        "overflow": "hidden"
+                    }
+                }
+            },
+            "style": {
+                "width": "100%",
+                "height": "100%",
+                "overflow": "hidden"
+            },
+            "innerStyle": {
+                "width": "100%",
+                "height": "100%",
+                "overflow": "hidden"
+            }
+        },
         "tab_notifications": {
             "type": "panel",
             "label": "settings",

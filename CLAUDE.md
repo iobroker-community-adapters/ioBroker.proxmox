@@ -37,6 +37,7 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | `src/lib/proxmox.ts` | `ProxmoxUtils`, the HTTP client: login, 5xx retries, failover |
 | `src/lib/nodes.ts` | `createNodes` / `setNodes`, node and disk states |
 | `src/lib/vms.ts` | `createVM` / `setMachines`, VM, LXC and storage states |
+| `src/lib/DeviceManagement.ts` | Device manager (`@iobroker/dm-utils`), reads the channels in `objects` and the button objects, runs commands through `getButtonAction` |
 | `src/lib/ceph.ts`, `src/lib/ha.ts` | Ceph and HA trees, generated from whatever the API returns |
 | `src/lib/methods.ts` | helpers: unit conversion, `findState`, `withTimeout`, `withRetry` |
 | `src/lib/translations.ts` | object names and log messages in all languages |

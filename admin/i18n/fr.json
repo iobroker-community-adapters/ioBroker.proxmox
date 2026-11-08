@@ -30,5 +30,6 @@
     "authType": "Type d'authentification",
     "API Token": "Jeton API",
     "tokenId": "ID du token",
-    "tokenSecret": "Secret du token"
+    "tokenSecret": "Secret du token",
+    "Device manager": "Gestionnaire d'appareils"
 }

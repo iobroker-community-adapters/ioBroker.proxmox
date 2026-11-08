@@ -1,5 +1,6 @@
 import * as utils from '@iobroker/adapter-core';
 import * as _ceph from './lib/ceph';
+import ProxmoxDeviceManagement from './lib/DeviceManagement';
 import * as _ha from './lib/ha';
 import * as _methods from './lib/methods';
 import * as _nodes from './lib/nodes';
@@ -88,6 +89,9 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     public createHA: () => Promise<void> = _ha.createHA.bind(this);
     public setHA: () => Promise<void> = _ha.setHA.bind(this);
 
+    /** Hört selbst auf `dm:`-Nachrichten */
+    public readonly deviceManagement: ProxmoxDeviceManagement;
+
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({ ...options, name: ADAPTER_NAME });
 
@@ -95,6 +99,8 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
         this.on('stateChange', this.onStateChange.bind(this));
         this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
+
+        this.deviceManagement = new ProxmoxDeviceManagement(this);
     }
 
     private async onReady(): Promise<void> {
@@ -180,19 +186,8 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
                 if (type === 'lxc' || type === 'qemu') {
                     const vmid = obj.native?.vmid as number;
-                    const inst = this.getButtonInstance(obj.native);
 
-                    const actions: Record<string, () => Promise<unknown> | undefined> = {
-                        start: () => inst?.qemuStart(node, type, vmid),
-                        stop: () => inst?.qemuStop(node, type, vmid),
-                        reset: () => inst?.qemuReset(node, type, vmid),
-                        resume: () => inst?.qemuResume(node, type, vmid),
-                        shutdown: () => inst?.qemuShutdown(node, type, vmid),
-                        suspend: () => inst?.qemuSuspend(node, type, vmid),
-                        reboot: () => inst?.qemuReboot(node, type, vmid),
-                    };
-
-                    const action = actions[command];
+                    const action = this.getButtonAction(obj.native, command);
                     if (!action) {
                         return;
                     }
@@ -207,14 +202,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                         );
                     }
                 } else if (type === 'node') {
-                    const inst = this.getButtonInstance(obj.native);
-
-                    const actions: Record<string, () => Promise<unknown> | undefined> = {
-                        shutdown: () => inst?.nodeShutdown(node),
-                        reboot: () => inst?.nodeReboot(node),
-                    };
-
-                    const action = actions[command];
+                    const action = this.getButtonAction(obj.native, command);
                     if (!action) {
                         return;
                     }
@@ -259,6 +247,43 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
             this.nodeInstanceMap[native.node as string] ??
             this.proxmox
         );
+    }
+
+    /**
+     * Liefert den Befehl eines Buttons. Ihn nutzen die Button-States und der Device Manager.
+     *
+     * @param native - `native` des Button-Objekts
+     * @param command - Name des Buttons
+     * @returns der Befehl, oder `undefined` wenn es ihn für diesen Typ nicht gibt
+     */
+    public getButtonAction(
+        native: Record<string, unknown>,
+        command: string,
+    ): (() => Promise<unknown> | undefined) | undefined {
+        const inst = this.getButtonInstance(native);
+        const node = native.node as string;
+        const type = native.type as string;
+        const vmid = native.vmid as number;
+
+        const actions: Record<string, () => Promise<unknown> | undefined> =
+            type === 'lxc' || type === 'qemu'
+                ? {
+                      start: () => inst?.qemuStart(node, type, vmid),
+                      stop: () => inst?.qemuStop(node, type, vmid),
+                      reset: () => inst?.qemuReset(node, type, vmid),
+                      resume: () => inst?.qemuResume(node, type, vmid),
+                      shutdown: () => inst?.qemuShutdown(node, type, vmid),
+                      suspend: () => inst?.qemuSuspend(node, type, vmid),
+                      reboot: () => inst?.qemuReboot(node, type, vmid),
+                  }
+                : type === 'node'
+                  ? {
+                        shutdown: () => inst?.nodeShutdown(node),
+                        reboot: () => inst?.nodeReboot(node),
+                    }
+                  : {};
+
+        return actions[command];
     }
 
     /**

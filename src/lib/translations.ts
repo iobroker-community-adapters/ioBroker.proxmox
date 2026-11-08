@@ -25,57 +25,57 @@ export const STATUS = {
 export const SHUTDOWN = {
     en: 'Shutdown',
     de: 'Herunterfahren',
-    ru: 'Закрыть',
-    pt: 'Desligamento',
-    nl: 'Vertaling',
-    fr: 'Tais-toi',
-    it: 'Chiusura',
-    es: 'Apago',
-    pl: 'Shutdown',
-    uk: 'Відправити',
-    'zh-cn': '舒适',
+    ru: 'Выключить',
+    pt: 'Desligar',
+    nl: 'Afsluiten',
+    fr: 'Éteindre',
+    it: 'Arresta',
+    es: 'Apagar',
+    pl: 'Wyłącz',
+    uk: 'Вимкнути',
+    'zh-cn': '关机',
 };
 
 export const REBOOT = {
     en: 'Reboot',
     de: 'Neustart',
-    ru: 'Перезагрузка',
+    ru: 'Перезагрузить',
     pt: 'Reiniciar',
-    nl: 'Reboot',
-    fr: 'Reboot',
-    it: 'Reboot',
-    es: 'Reboot',
-    pl: 'Reboot',
-    uk: 'Перезавантаження',
-    'zh-cn': 'Reboot',
+    nl: 'Opnieuw opstarten',
+    fr: 'Redémarrer',
+    it: 'Riavvia',
+    es: 'Reiniciar',
+    pl: 'Uruchom ponownie',
+    uk: 'Перезавантажити',
+    'zh-cn': '重启',
 };
 
 export const START = {
     en: 'Start',
     de: 'Start',
-    ru: 'Начало',
-    pt: 'Começar',
-    nl: 'Begin',
-    fr: 'Commencez',
-    it: 'Inizio',
-    es: 'Comienzo',
-    pl: 'Start',
-    uk: 'Почати',
-    'zh-cn': '导 言',
+    ru: 'Запустить',
+    pt: 'Iniciar',
+    nl: 'Starten',
+    fr: 'Démarrer',
+    it: 'Avvia',
+    es: 'Iniciar',
+    pl: 'Uruchom',
+    uk: 'Запустити',
+    'zh-cn': '启动',
 };
 
 export const STOP = {
     en: 'Stop',
     de: 'Stopp',
-    ru: 'Стоп',
-    pt: 'Pára',
-    nl: 'Stop',
-    fr: 'Arrête',
-    it: 'Fermati',
-    es: 'Para',
-    pl: 'Stop',
-    uk: 'Зареєструватися',
-    'zh-cn': '禁止',
+    ru: 'Остановить',
+    pt: 'Parar',
+    nl: 'Stoppen',
+    fr: 'Arrêter',
+    it: 'Ferma',
+    es: 'Detener',
+    pl: 'Zatrzymaj',
+    uk: 'Зупинити',
+    'zh-cn': '停止',
 };
 
 export const RESET = {
@@ -161,6 +161,93 @@ export const nodeButtonLabels = { shutdown: SHUTDOWN, reboot: REBOOT };
  * Allgemeine State-Namen (Status, Available).
  */
 export const stateNames = { status: STATUS, available: AVAILABLE };
+
+// ─── Device Manager ─────────────────────────────────────────────────────────
+
+export const CONFIRM_SHUTDOWN = {
+    en: 'Really shut down?',
+    de: 'Wirklich herunterfahren?',
+    ru: 'Действительно выключить?',
+    pt: 'Desligar mesmo?',
+    nl: 'Echt afsluiten?',
+    fr: 'Vraiment éteindre ?',
+    it: 'Arrestare davvero?',
+    es: '¿Apagar realmente?',
+    pl: 'Na pewno wyłączyć?',
+    uk: 'Дійсно вимкнути?',
+    'zh-cn': '确定要关机吗？',
+};
+
+export const CONFIRM_REBOOT = {
+    en: 'Really reboot?',
+    de: 'Wirklich neu starten?',
+    ru: 'Действительно перезагрузить?',
+    pt: 'Reiniciar mesmo?',
+    nl: 'Echt opnieuw opstarten?',
+    fr: 'Vraiment redémarrer ?',
+    it: 'Riavviare davvero?',
+    es: '¿Reiniciar realmente?',
+    pl: 'Na pewno uruchomić ponownie?',
+    uk: 'Дійсно перезавантажити?',
+    'zh-cn': '确定要重启吗？',
+};
+
+export const CONFIRM_STOP = {
+    en: 'Really power off immediately, without a clean shutdown? Unsaved data can be lost.',
+    de: 'Wirklich sofort ausschalten, ohne sauberes Herunterfahren? Nicht gespeicherte Daten können verloren gehen.',
+    ru: 'Действительно немедленно отключить без корректного завершения работы? Несохранённые данные могут быть потеряны.',
+    pt: 'Desligar mesmo de imediato, sem um encerramento correto? Os dados não guardados podem ser perdidos.',
+    nl: 'Echt direct uitschakelen, zonder correct af te sluiten? Niet-opgeslagen gegevens kunnen verloren gaan.',
+    fr: 'Vraiment couper immédiatement, sans arrêt propre ? Les données non enregistrées peuvent être perdues.',
+    it: 'Spegnere davvero subito, senza un arresto regolare? I dati non salvati possono andare persi.',
+    es: '¿Apagar realmente de inmediato, sin un apagado correcto? Los datos no guardados pueden perderse.',
+    pl: 'Na pewno wyłączyć natychmiast, bez prawidłowego zamknięcia? Niezapisane dane mogą zostać utracone.',
+    uk: 'Дійсно негайно вимкнути без коректного завершення роботи? Незбережені дані можуть бути втрачені.',
+    'zh-cn': '确定要立即断电，而不正常关机吗？未保存的数据可能会丢失。',
+};
+
+/** Gruppen im Device Manager, Schlüssel ist `native.type` des Channels */
+export const DEVICE_GROUPS = {
+    node: {
+        en: 'Nodes',
+        de: 'Nodes',
+        ru: 'Узлы',
+        pt: 'Nós',
+        nl: 'Nodes',
+        fr: 'Nœuds',
+        it: 'Nodi',
+        es: 'Nodos',
+        pl: 'Węzły',
+        uk: 'Вузли',
+        'zh-cn': '节点',
+    },
+    qemu: {
+        en: 'Virtual machines',
+        de: 'Virtuelle Maschinen',
+        ru: 'Виртуальные машины',
+        pt: 'Máquinas virtuais',
+        nl: 'Virtuele machines',
+        fr: 'Machines virtuelles',
+        it: 'Macchine virtuali',
+        es: 'Máquinas virtuales',
+        pl: 'Maszyny wirtualne',
+        uk: 'Віртуальні машини',
+        'zh-cn': '虚拟机',
+    },
+    lxc: {
+        en: 'Containers',
+        de: 'Container',
+        ru: 'Контейнеры',
+        pt: 'Contentores',
+        nl: 'Containers',
+        fr: 'Conteneurs',
+        it: 'Container',
+        es: 'Contenedores',
+        pl: 'Kontenery',
+        uk: 'Контейнери',
+        'zh-cn': '容器',
+    },
+};
 
 // ─── Auth-Typ Labels ───────────────────────────────────────────────────────
 

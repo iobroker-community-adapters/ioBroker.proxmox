@@ -30,5 +30,6 @@
     "authType": "Authentifizierungstyp",
     "API Token": "API-Token",
     "tokenId": "Token-ID",
-    "tokenSecret": "Token-Secret"
+    "tokenSecret": "Token-Secret",
+    "Device manager": "Gerätemanager"
 }
