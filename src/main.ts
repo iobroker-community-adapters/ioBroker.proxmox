@@ -250,6 +250,18 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     }
 
     /**
+     * Die Adresse, unter der ein Node erreichbar ist. Eine Cluster-Instanz gilt für mehrere Nodes, sie hat
+     * deshalb keine Adresse für einen einzelnen.
+     *
+     * @param native - `native` des Button-Objekts
+     * @returns die Adresse, oder `undefined` bei einem Cluster
+     */
+    public getHostAddress(native: Record<string, unknown>): string | undefined {
+        const inst = this.getButtonInstance(native);
+        return inst && inst.hostId !== 'cluster' ? inst.address : undefined;
+    }
+
+    /**
      * Liefert den Befehl eines Buttons. Ihn nutzen die Button-States und der Device Manager.
      *
      * @param native - `native` des Button-Objekts

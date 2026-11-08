@@ -42,6 +42,9 @@ Control and use data from your Proxmox VE
 - (bluefox) Individual hosts with the same node name, or with VMs and storages of the same name, no longer share their objects: all of them get `_<host>` added to the object ID, for example `node_pve_192-168-1-10`. A button now always reaches the host it belongs to. Other object IDs do not change
 - (bluefox) Added the device manager: nodes, VMs and containers with status, CPU and RAM, and start, shutdown, reboot and stop with a confirmation
 - (bluefox) Added a vis-2 widget that shows the state of a VM or container and can start and stop it. An option hides the controls
+- (bluefox) The device manager cards show an icon per type, the status in color, the uptime, the load with warning colors and a details dialog
+- (bluefox) The widget selects the machine from a list and shows the uptime and load bars. An own icon or image can be selected
+- (bluefox) Added the state `uptime_text` to nodes, VMs and containers, for example `3 d 4 h`
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**

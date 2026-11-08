@@ -547,4 +547,12 @@ describe('ProxmoxUtils.hostId', () => {
     it('eine angegebene Kennung hat Vorrang', () => {
         assert.equal(hostId('10.0.0.1', 8006, 'cluster'), 'cluster');
     });
+
+    it('die Adresse zum Anzeigen behält die Punkte und nennt nur einen abweichenden Port', () => {
+        const address = (realmIp, realmPort) =>
+            new ProxmoxUtils(makeAdapter(), [{ realmIp, realmPort, realmUser: 'root', realm: 'pam' }]).address;
+
+        assert.equal(address('192.168.1.10', 8006), '192.168.1.10');
+        assert.equal(address('192.168.1.10', '8007'), '192.168.1.10:8007');
+    });
 });

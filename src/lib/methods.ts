@@ -79,6 +79,29 @@ export function used_level(vala: number, valb: number): number {
 }
 
 /**
+ * Macht aus einer Laufzeit in Sekunden einen Text für die Anzeige. Er zeigt die zwei größten Einheiten und
+ * ändert sich deshalb selten, auch wenn der Adapter im Sekundentakt abfragt.
+ *
+ * @param seconds - Laufzeit in Sekunden
+ * @returns zum Beispiel `3 d 4 h`, `4 h 12 min` oder `< 1 min`. Leer, wenn die Maschine nicht läuft.
+ */
+export function formatUptime(seconds: number): string {
+    if (!seconds || seconds < 0) {
+        return '';
+    }
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (days) {
+        return `${days} d ${hours} h`;
+    }
+    if (hours) {
+        return `${hours} h ${minutes} min`;
+    }
+    return minutes ? `${minutes} min` : '< 1 min';
+}
+
+/**
  * Entfernt den Adapter-Namespace-Prefix aus einer State-ID.
  *
  * @param this - Adapter-Instanz
@@ -186,6 +209,9 @@ export function findState(sid: string, states: StatusRecord): StateDefinition[] 
         }
         if (key === 'swap' && states.maxswap) {
             result.push([sid, 'swap_lev', 'level', used_level(states.swap as number, states.maxswap as number)]);
+        }
+        if (key === 'uptime') {
+            result.push([sid, 'uptime_text', 'text', formatUptime(value as number)]);
         }
 
         // ── Primäre Werte ─────────────────────────────────────────────────

@@ -160,6 +160,8 @@ export interface ProxmoxAdapterContext extends ioBroker.Adapter {
 
     /** Liefert den Befehl eines Buttons, siehe `native` der Button-Objekte */
     getButtonAction(native: Record<string, unknown>, command: string): (() => Promise<unknown> | undefined) | undefined;
+    /** Adresse des Hosts zu einem Button, siehe `native` der Button-Objekte. Bei einem Cluster `undefined`. */
+    getHostAddress(native: Record<string, unknown>): string | undefined;
     sendRequest(nextRunTimeout?: number): void;
 
     createCeph(): Promise<void>;

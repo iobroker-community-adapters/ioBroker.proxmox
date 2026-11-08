@@ -30,6 +30,9 @@ export class ProxmoxUtils {
     /** Kennung dieser Instanz für Objekt-IDs und `native.host` der Buttons. Darf keine Punkte enthalten. */
     public readonly hostId: string;
 
+    /** Adresse des ersten Knotens, zum Anzeigen. Der Port steht nur dabei, wenn er nicht 8006 ist. */
+    public readonly address: string;
+
     private _ticket = '';
     private _csrf = '';
 
@@ -54,8 +57,8 @@ export class ProxmoxUtils {
         this.adapter = adapter;
         this.nodeList = nodeList;
         const { realmIp, realmPort } = nodeList[0];
-        const address = Number(realmPort) === 8006 ? String(realmIp) : `${realmIp}-${realmPort}`;
-        this.hostId = hostId ?? address.replace(/[^\w-]/g, '-');
+        this.address = Number(realmPort) === 8006 ? String(realmIp) : `${realmIp}:${realmPort}`;
+        this.hostId = hostId ?? this.address.replace(/[^\w-]/g, '-');
 
         this._initUrlMain(); // stiller Initialaufruf – kein warn-Log
 
