@@ -61,6 +61,8 @@ Control and use data from your Proxmox VE
 * (arteck) fix ceph info
 * (arteck) fix ceph tree limit
 
+Older changes can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md)
+
 ## License
 
 The MIT License (MIT)

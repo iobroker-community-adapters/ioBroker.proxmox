@@ -203,13 +203,8 @@
       }
     ]
   },
-  "protectedNative": [
-    "pwd",
-    "name"
-  ],
-  "encryptedNative": [
-    "pwd"
-  ],
+  "protectedNative": [],
+  "encryptedNative": [],
   "native": {
     "requestInterval": 30,
     "requestDiskInformation": false,
