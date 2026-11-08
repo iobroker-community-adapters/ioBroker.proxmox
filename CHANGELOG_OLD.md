@@ -1,4 +1,9 @@
 # Older changes
+## 2.5.5 (2026-05-09)
+* (arteck) fix ceph info
+* (arteck) fix ceph tree limit
+
+
 ## 2.5.4 (2026-04-23)
 * (arteck) fix erro local on storage/pve/local
 

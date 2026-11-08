@@ -29,8 +29,11 @@ Control and use data from your Proxmox VE
 [🇩🇪 Dokumentation](./docs/de/README.md)
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+<!--
+	Placeholder for the next version (at the beginning of the line):
+	### **WORK IN PROGRESS**
+-->
+### 3.0.0 (2026-11-08)
 - (copilot) Adapter requires node.js >= 22.19.0 now
 - (bluefox) The adapter was refactored to TypeScript. It can only be installed from npm now, not from GitHub
 - (bluefox) Fixed the cleanup button in the configuration dialog, it never got an answer from the adapter
@@ -45,10 +48,7 @@ Control and use data from your Proxmox VE
 - (bluefox) The device manager cards show an icon per type, the status in color, the uptime, the load with warning colors and a details dialog
 - (bluefox) The widget selects the machine from a list and shows the uptime and load bars. An own icon or image can be selected
 - (bluefox) Added the state `uptime_text` to nodes, VMs and containers, for example `3 d 4 h`
-<!--
-	Placeholder for the next version (at the beginning of the line):
-	### **WORK IN PROGRESS**
--->
+
 ### 2.6.3 (2026-07-31)
 * (arteck) fix next node reconnect
 * (arteck) add state info.node for actual node ip
@@ -62,10 +62,6 @@ Control and use data from your Proxmox VE
 ### 2.6.0 (2026-05-13)
 * (arteck) fix high i/o
 * (copilot) Adapter requires node.js >= 22 now
-
-### 2.5.5 (2026-05-09)
-* (arteck) fix ceph info
-* (arteck) fix ceph tree limit
 
 Older changes can be found in [CHANGELOG_OLD.md](CHANGELOG_OLD.md)
 

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.proxmox",
-  "version": "2.6.3",
+  "version": "3.0.0",
   "description": "ioBroker Proxmox Adapter",
   "author": "MeisterTR <meistertr.smarthome@gmail.com>",
   "contributors": [
