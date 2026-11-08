@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Tests für lib/vms.js (createVM + setMachines)
+ * Tests für src/lib/vms.ts (createVM + setMachines)
  *
  * Ausführen:  node --test test/vms.test.js
  */
 
 const { describe, it, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
-const { createVM, setMachines } = require('../lib/vms');
-const { findState, bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../lib/methods');
+const { createVM, setMachines } = require('../build/lib/vms');
+const { findState, bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../build/lib/methods');
 
 // ─── Adapter-Mock ─────────────────────────────────────────────────────────────
 
@@ -142,14 +142,29 @@ describe('createVM', () => {
             assert.equal(adapter._states['proxmox.0.qemu_testvm.status'], 'offline');
         });
 
-        it('löscht veraltete Ressourcen', async () => {
+        it('gibt nur vorhandene Ressourcen zurück und löscht selbst nichts', async () => {
             const adapter = makeAdapter([makeQemuResource()]);
             // Altes Objekt vorab eintragen
             adapter.objects['proxmox.0.qemu_oldvm'] = { type: 'channel', common: { name: 'oldvm' }, native: { type: 'qemu' } };
 
-            await adapter.createVM();
+            const keep = await adapter.createVM();
 
-            assert.ok(!adapter.objects['proxmox.0.qemu_oldvm'], 'Altes Objekt soll gelöscht sein');
+            assert.deepEqual(keep, ['qemu_testvm']);
+            assert.ok(adapter.objects['proxmox.0.qemu_oldvm'], 'Gelöscht wird erst in getNodes()');
+        });
+
+        it('gibt null zurück wenn die Ressourcen nicht abrufbar sind', async () => {
+            const adapter = makeAdapter();
+            adapter.proxmox.getClusterResources = async () => { throw new Error('HTTP 500'); };
+
+            assert.equal(await adapter.createVM(), null);
+        });
+
+        it('gibt null zurück wenn der Adapter stoppt', async () => {
+            const adapter = makeAdapter();
+            adapter.proxmox.getClusterResources = async () => { throw new Error('STOPPED'); };
+
+            assert.equal(await adapter.createVM(), null);
         });
 
         it('legt Button-States (start/stop/shutdown/reboot/reset/suspend/resume) an', async () => {
@@ -200,14 +215,10 @@ describe('createVM', () => {
             );
         });
 
-        it('BUG FIX: löscht veraltete Ressourcen auch bei Punkt-Format', async () => {
+        it('BUG FIX: gibt vorhandene Ressourcen auch im Punkt-Format zurück', async () => {
             const adapter = makeAdapter([makeQemuResource()], { config: { newTreeStructure: true } });
-            // Altes Punkt-Format-Objekt vorab eintragen
-            adapter.objects['proxmox.0.qemu.oldvm'] = { type: 'channel', common: { name: 'oldvm' }, native: { type: 'qemu' } };
 
-            await adapter.createVM();
-
-            assert.ok(!adapter.objects['proxmox.0.qemu.oldvm'], 'Altes Punkt-Objekt soll gelöscht sein');
+            assert.deepEqual(await adapter.createVM(), ['qemu.testvm']);
         });
 
         it('BUG FIX: behält aktive Ressourcen bei Punkt-Format', async () => {
@@ -468,5 +479,177 @@ describe('setMachines', () => {
             await assert.doesNotReject(() => adapter.setMachines());
             assert.ok(adapter._logs.warn.some(m => m.includes('setMachines backupStatus')), 'warn-Log soll bei echtem Backup-Fehler erscheinen');
         });
+    });
+});
+
+// ─── Gleiche Namen (#702) ─────────────────────────────────────────────────────
+
+describe('VMs/LXC mit gleichem Namen (#702)', () => {
+    const twins = () => [
+        makeLxcResource({ id: 'lxc/113', vmid: 113, name: 'iobroker', node: 'pve1' }),
+        makeLxcResource({ id: 'lxc/120', vmid: 120, name: 'iobroker', node: 'pve2' }),
+    ];
+
+    for (const newTreeStructure of [false, true]) {
+        const prefix = `proxmox.0.lxc${newTreeStructure ? '.' : '_'}`;
+
+        describe(`newTreeStructure=${newTreeStructure}`, () => {
+            it('legt für jede Maschine eigene Objekte an', async () => {
+                const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
+                await adapter.createVM();
+
+                assert.ok(adapter.objects[`${prefix}iobroker_113`]);
+                assert.ok(adapter.objects[`${prefix}iobroker_120`]);
+                assert.ok(!adapter.objects[`${prefix}iobroker`]);
+            });
+
+            it('jeder Button zeigt auf seine eigene VMID und seinen Node', async () => {
+                const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
+                await adapter.createVM();
+
+                assert.deepEqual(adapter.objects[`${prefix}iobroker_113.stop`].native, { node: 'pve1', type: 'lxc', vmid: 113 });
+                assert.deepEqual(adapter.objects[`${prefix}iobroker_120.stop`].native, { node: 'pve2', type: 'lxc', vmid: 120 });
+            });
+
+            it('setMachines schreibt in die eigenen States, ohne Neustart', async () => {
+                const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
+                await adapter.createVM();
+                adapter.proxmox.getResourceStatus = async (node, type, vmid) => ({ mem: vmid * 1024 * 1024, maxmem: 1024 * 1024 * 1024 });
+
+                await adapter.setMachines();
+
+                assert.equal(adapter._restarted, false);
+                assert.equal(adapter._states[`${prefix}iobroker_113.mem`], 113);
+                assert.equal(adapter._states[`${prefix}iobroker_120.mem`], 120);
+                assert.equal(adapter._states[`${prefix}iobroker.mem`], undefined);
+            });
+
+            it('das bisher gemeinsame Objekt zählt nicht mehr als vorhanden', async () => {
+                const adapter = makeAdapter(twins(), { config: { newTreeStructure } });
+                adapter.objects[`${prefix}iobroker`] = { type: 'channel', common: { name: 'iobroker' }, native: { type: 'lxc' } };
+
+                const keep = await adapter.createVM();
+
+                assert.deepEqual(keep, ['iobroker_113', 'iobroker_120'].map(name => `lxc${newTreeStructure ? '.' : '_'}${name}`));
+            });
+        });
+    }
+
+    it('die Reihenfolge der Ressourcen ändert die IDs nicht', async () => {
+        const adapter = makeAdapter(twins().reverse());
+        await adapter.createVM();
+
+        assert.equal(adapter.objects['proxmox.0.lxc_iobroker_113.stop'].native.vmid, 113);
+        assert.equal(adapter.objects['proxmox.0.lxc_iobroker_120.stop'].native.vmid, 120);
+    });
+
+    it('der Offline-Status behält den echten Namen', async () => {
+        const adapter = makeAdapter([
+            makeLxcResource({ vmid: 113, name: 'iobroker', status: 'stopped' }),
+            makeLxcResource({ vmid: 120, name: 'iobroker', status: 'stopped' }),
+        ]);
+        await adapter.createVM();
+
+        assert.ok(adapter.objects['proxmox.0.lxc_iobroker_113']);
+        assert.equal(adapter.offlineResourceStatus.name, 'iobroker');
+    });
+
+    it('ohne Kollision bleibt die ID beim Namen', async () => {
+        const adapter = makeAdapter([makeLxcResource({ vmid: 113, name: 'a' }), makeLxcResource({ vmid: 120, name: 'b' })]);
+        await adapter.createVM();
+
+        assert.ok(adapter.objects['proxmox.0.lxc_a']);
+        assert.ok(adapter.objects['proxmox.0.lxc_b']);
+    });
+
+    it('qemu und lxc mit gleichem Namen kollidieren nicht', async () => {
+        const adapter = makeAdapter([makeQemuResource({ vmid: 100, name: 'same' }), makeLxcResource({ vmid: 200, name: 'same' })]);
+        await adapter.createVM();
+
+        assert.ok(adapter.objects['proxmox.0.qemu_same']);
+        assert.ok(adapter.objects['proxmox.0.lxc_same']);
+    });
+
+    it('Maschinen ohne Namen bleiben bei "undefined"', async () => {
+        const adapter = makeAdapter([
+            makeLxcResource({ id: 'lxc/113', vmid: 113, name: undefined, status: 'unknown' }),
+            makeLxcResource({ id: 'lxc/120', vmid: 120, name: undefined, status: 'unknown' }),
+        ]);
+        await adapter.setMachines();
+
+        assert.equal(adapter._restarted, false);
+        assert.deepEqual(JSON.parse(adapter._states['info.offlineMachines']), { 'lxc/113': 'offline', 'lxc/120': 'offline' });
+    });
+
+    it('die ID bleibt, wenn Proxmox den Namen der anderen Maschine nicht mehr liefert', async () => {
+        const adapter = makeAdapter(twins());
+        await adapter.createVM();
+
+        const onlyOneNamed = twins();
+        onlyOneNamed[1].name = undefined;
+        adapter.proxmox.getClusterResources = async () => onlyOneNamed;
+        await adapter.setMachines();
+
+        assert.equal(adapter._restarted, false);
+        assert.ok(adapter._states['proxmox.0.lxc_iobroker_113.status']);
+        assert.equal(adapter._states['proxmox.0.lxc_iobroker.status'], undefined);
+    });
+
+    it('die ID bleibt beim Neustart, auch wenn die andere Maschine entfernt wurde', async () => {
+        const adapter = makeAdapter(twins());
+        await adapter.createVM();
+
+        adapter.proxmox.getClusterResources = async () => [twins()[0]];
+        const keep = await adapter.createVM();
+
+        assert.deepEqual(keep, ['lxc_iobroker_113']);
+        assert.ok(!adapter.objects['proxmox.0.lxc_iobroker']);
+    });
+
+    it('eine zweite Maschine mit gleichem Namen führt zum Neustart', async () => {
+        const adapter = makeAdapter([twins()[0]]);
+        await adapter.createVM();
+        assert.ok(adapter.objects['proxmox.0.lxc_iobroker']);
+
+        adapter.proxmox.getClusterResources = async () => twins();
+        await adapter.setMachines();
+
+        assert.equal(adapter._restarted, true);
+    });
+
+    it('ein echter Name wie "web_100" fällt nicht mit "web" + VMID 100 zusammen', async () => {
+        const adapter = makeAdapter([
+            makeLxcResource({ vmid: 100, name: 'web' }),
+            makeLxcResource({ vmid: 200, name: 'web' }),
+            makeLxcResource({ vmid: 7, name: 'web_100' }),
+        ]);
+        await adapter.createVM();
+
+        assert.equal(adapter.objects['proxmox.0.lxc_web_100.stop'].native.vmid, 100);
+        assert.equal(adapter.objects['proxmox.0.lxc_web_200.stop'].native.vmid, 200);
+        assert.equal(adapter.objects['proxmox.0.lxc_web_100_7.stop'].native.vmid, 7);
+    });
+
+    it('ein vorhandener Channel "web_100" einer anderen Maschine wird nicht übernommen', async () => {
+        const adapter = makeAdapter([makeLxcResource({ vmid: 100, name: 'web' }), makeLxcResource({ vmid: 7, name: 'web_100' })]);
+        adapter.objects['proxmox.0.lxc_web_100'] = { type: 'channel', common: { name: 'web_100' }, native: { type: 'lxc' } };
+
+        await adapter.createVM();
+
+        assert.equal(adapter.objects['proxmox.0.lxc_web.stop'].native.vmid, 100);
+        assert.equal(adapter.objects['proxmox.0.lxc_web_100.stop'].native.vmid, 7);
+    });
+});
+
+// ─── Abos (#703) ──────────────────────────────────────────────────────────────
+
+describe('Button-Abos (#703)', () => {
+    it('createVM abonniert keine einzelnen Buttons, subscribeStates("*") deckt sie ab', async () => {
+        const subscribed = [];
+        const adapter = makeAdapter([makeQemuResource()], { subscribeForeignStates: id => subscribed.push(id) });
+
+        await adapter.createVM();
+
+        assert.deepEqual(subscribed, []);
     });
 });

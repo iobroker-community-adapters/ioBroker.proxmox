@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Tests für lib/nodes.js (createNodes + setNodes)
+ * Tests für src/lib/nodes.ts (createNodes + setNodes)
  *
  * Ausführen:  node --test test/nodes.test.js
  */
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { createNodes, setNodes } = require('../lib/nodes');
-const { bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../lib/methods');
+const { createNodes, setNodes } = require('../build/lib/nodes');
+const { bytetoMb, used_level, prepareNameForId, removeNamespace } = require('../build/lib/methods');
 
 // ─── Adapter-Mock ─────────────────────────────────────────────────────────────
 
@@ -39,6 +39,9 @@ function makeAdapter(overrides = {}) {
             ...overrides.config,
         },
         objects,
+        // Die lib-Module nutzen die Adapter-Timer, im Mock laufen sie als echte Timer
+        setTimeout:   (fn, ms) => setTimeout(fn, ms),
+        clearTimeout: (t) => clearTimeout(t),
         log: {
             debug: (m) => logs.debug.push(m),
             info:  (m) => logs.info.push(m),
@@ -71,7 +74,7 @@ function makeAdapter(overrides = {}) {
 
         createCeph: async () => {},
         createHA:   async () => {},
-        createVM:   async () => {},
+        createVM:   async () => [],
 
         ...overrides,
     };
@@ -143,14 +146,20 @@ describe('createNodes', () => {
         assert.equal(adapter._states['proxmox.0.node_pve.memory.used'], undefined);
     });
 
-    it('löscht nicht mehr vorhandene Nodes', async () => {
-        const adapter = makeAdapter();
+    it('gibt nur vorhandene Nodes und VMs zurück und löscht selbst nichts', async () => {
+        const adapter = makeAdapter({ createVM: async () => ['qemu_vm'] });
         adapter.objects['proxmox.0.node_oldpve'] = { type: 'channel', native: { type: 'node' } };
 
-        await adapter.createNodes([makeNode()]);
+        const keep = await adapter.createNodes([makeNode()]);
 
-        assert.ok(!adapter.objects['proxmox.0.node_oldpve'], 'Alten Node löschen');
-        assert.ok(adapter._logs.info.some(m => m.includes('Deleted old node')));
+        assert.deepEqual(keep, ['node_pve', 'qemu_vm']);
+        assert.ok(adapter.objects['proxmox.0.node_oldpve'], 'Gelöscht wird erst in getNodes()');
+    });
+
+    it('gibt null zurück wenn createVM nicht vollständig war', async () => {
+        const adapter = makeAdapter({ createVM: async () => null });
+
+        assert.equal(await adapter.createNodes([makeNode()]), null);
     });
 
     it('verarbeitet mehrere Nodes', async () => {
@@ -166,7 +175,7 @@ describe('createNodes', () => {
         adapter.proxmox.getNodeStatus = async () => { throw new Error('Connection refused'); };
 
         await assert.doesNotReject(() => adapter.createNodes([makeNode()]));
-        assert.ok(adapter._logs.warn.some(m => m.includes('Unable to get status of node')));
+        assert.ok(adapter._logs.error.some(m => m.includes('Fehler beim Abrufen des Node-Status')));
     });
 });
 
@@ -242,6 +251,19 @@ describe('setNodes', () => {
         adapter.proxmox.getNodeStatus = async () => { throw new Error('timeout'); };
 
         await assert.doesNotReject(() => adapter.setNodes([makeNode()]));
-        assert.ok(adapter._logs.warn.some(m => m.includes('Unable to get status of node')));
+        assert.ok(adapter._logs.error.some(m => m.includes('Fehler beim Abrufen des Node-Status')));
+    });
+});
+
+// ─── Abos (#703) ──────────────────────────────────────────────────────────────
+
+describe('Button-Abos (#703)', () => {
+    it('createNodes abonniert keine einzelnen Buttons, subscribeStates("*") deckt sie ab', async () => {
+        const subscribed = [];
+        const adapter = makeAdapter({ subscribeForeignStates: id => subscribed.push(id) });
+
+        await adapter.createNodes([makeNode()]);
+
+        assert.deepEqual(subscribed, []);
     });
 });
