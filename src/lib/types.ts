@@ -158,6 +158,10 @@ export interface ProxmoxAdapterContext extends ioBroker.Adapter {
 
     createCustomState(sid: string, name: string, type: CustomStateType, val: ioBroker.StateValue): Promise<void>;
 
+    /** Liefert den Befehl eines Buttons, siehe `native` der Button-Objekte */
+    getButtonAction(native: Record<string, unknown>, command: string): (() => Promise<unknown> | undefined) | undefined;
+    sendRequest(nextRunTimeout?: number): void;
+
     createCeph(): Promise<void>;
     createHA(): Promise<void>;
     createVM(): Promise<string[] | null>;

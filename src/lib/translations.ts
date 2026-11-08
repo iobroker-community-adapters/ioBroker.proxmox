@@ -162,6 +162,93 @@ export const nodeButtonLabels = { shutdown: SHUTDOWN, reboot: REBOOT };
  */
 export const stateNames = { status: STATUS, available: AVAILABLE };
 
+// ─── Device Manager ─────────────────────────────────────────────────────────
+
+export const CONFIRM_SHUTDOWN = {
+    en: 'Really shut down?',
+    de: 'Wirklich herunterfahren?',
+    ru: 'Действительно выключить?',
+    pt: 'Desligar mesmo?',
+    nl: 'Echt afsluiten?',
+    fr: 'Vraiment éteindre ?',
+    it: 'Arrestare davvero?',
+    es: '¿Apagar realmente?',
+    pl: 'Na pewno wyłączyć?',
+    uk: 'Дійсно вимкнути?',
+    'zh-cn': '确定要关机吗？',
+};
+
+export const CONFIRM_REBOOT = {
+    en: 'Really reboot?',
+    de: 'Wirklich neu starten?',
+    ru: 'Действительно перезагрузить?',
+    pt: 'Reiniciar mesmo?',
+    nl: 'Echt opnieuw opstarten?',
+    fr: 'Vraiment redémarrer ?',
+    it: 'Riavviare davvero?',
+    es: '¿Reiniciar realmente?',
+    pl: 'Na pewno uruchomić ponownie?',
+    uk: 'Дійсно перезавантажити?',
+    'zh-cn': '确定要重启吗？',
+};
+
+export const CONFIRM_STOP = {
+    en: 'Really power off immediately, without a clean shutdown? Unsaved data can be lost.',
+    de: 'Wirklich sofort ausschalten, ohne sauberes Herunterfahren? Nicht gespeicherte Daten können verloren gehen.',
+    ru: 'Действительно немедленно отключить без корректного завершения работы? Несохранённые данные могут быть потеряны.',
+    pt: 'Desligar mesmo de imediato, sem um encerramento correto? Os dados não guardados podem ser perdidos.',
+    nl: 'Echt direct uitschakelen, zonder correct af te sluiten? Niet-opgeslagen gegevens kunnen verloren gaan.',
+    fr: 'Vraiment couper immédiatement, sans arrêt propre ? Les données non enregistrées peuvent être perdues.',
+    it: 'Spegnere davvero subito, senza un arresto regolare? I dati non salvati possono andare persi.',
+    es: '¿Apagar realmente de inmediato, sin un apagado correcto? Los datos no guardados pueden perderse.',
+    pl: 'Na pewno wyłączyć natychmiast, bez prawidłowego zamknięcia? Niezapisane dane mogą zostać utracone.',
+    uk: 'Дійсно негайно вимкнути без коректного завершення роботи? Незбережені дані можуть бути втрачені.',
+    'zh-cn': '确定要立即断电，而不正常关机吗？未保存的数据可能会丢失。',
+};
+
+/** Gruppen im Device Manager, Schlüssel ist `native.type` des Channels */
+export const DEVICE_GROUPS = {
+    node: {
+        en: 'Nodes',
+        de: 'Nodes',
+        ru: 'Узлы',
+        pt: 'Nós',
+        nl: 'Nodes',
+        fr: 'Nœuds',
+        it: 'Nodi',
+        es: 'Nodos',
+        pl: 'Węzły',
+        uk: 'Вузли',
+        'zh-cn': '节点',
+    },
+    qemu: {
+        en: 'Virtual machines',
+        de: 'Virtuelle Maschinen',
+        ru: 'Виртуальные машины',
+        pt: 'Máquinas virtuais',
+        nl: 'Virtuele machines',
+        fr: 'Machines virtuelles',
+        it: 'Macchine virtuali',
+        es: 'Máquinas virtuales',
+        pl: 'Maszyny wirtualne',
+        uk: 'Віртуальні машини',
+        'zh-cn': '虚拟机',
+    },
+    lxc: {
+        en: 'Containers',
+        de: 'Container',
+        ru: 'Контейнеры',
+        pt: 'Contentores',
+        nl: 'Containers',
+        fr: 'Conteneurs',
+        it: 'Container',
+        es: 'Contenedores',
+        pl: 'Kontenery',
+        uk: 'Контейнери',
+        'zh-cn': '容器',
+    },
+};
+
 // ─── Auth-Typ Labels ───────────────────────────────────────────────────────
 
 export const AUTH_TYPE = {

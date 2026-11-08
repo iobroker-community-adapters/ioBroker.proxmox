@@ -30,5 +30,6 @@
     "authType": "认证类型",
     "API Token": "API 令牌",
     "tokenId": "Token ID",
-    "tokenSecret": "Token 密钥"
+    "tokenSecret": "Token 密钥",
+    "Device manager": "设备管理器"
 }

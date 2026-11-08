@@ -30,5 +30,6 @@
     "authType": "Тип аутентификации",
     "API Token": "API-токен",
     "tokenId": "Идентификатор токена",
-    "tokenSecret": "Секрет токена"
+    "tokenSecret": "Секрет токена",
+    "Device manager": "Менеджер устройств"
 }
