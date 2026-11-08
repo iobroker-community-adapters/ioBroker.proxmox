@@ -181,6 +181,7 @@ function makeProxmoxInstance(configOverrides = {}, proxmoxApiMock = null) {
 
 function makeProxmoxMock(overrides = {}) {
     return {
+        nodeURL:            'https://10.0.0.1:8006/api2/json',
         ticket:             async () => {},
         stop:               () => {},
         resetResponseCache: () => {},
@@ -205,6 +206,15 @@ function makeProxmoxMock(overrides = {}) {
         nodeReboot:          async () => ({ data: 'UPID:...' }),
         ...overrides,
     };
+}
+
+/**
+ * Hängt einen ProxmoxUtils-Mock so ein, wie es onReady() mit echten Instanzen tut.
+ */
+function useProxmoxMock(inst, mock) {
+    inst.proxmox = mock;
+    inst.proxmoxInstances = [mock];
+    return mock;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -622,12 +632,15 @@ describe('readObjects()', () => {
 // ─── sendRequest ──────────────────────────────────────────────────────────────
 
 describe('sendRequest()', () => {
-    it('setzt info.lastUpdate', async () => {
+    it('setzt info.lastUpdate im Timer-Callback', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock();
+        useProxmoxMock(inst, makeProxmoxMock());
         inst.config.requestInterval = 60;
 
-        await inst.sendRequest(999999); // langer Delay → Timer läuft nicht sofort
+        inst.sendRequest(999999);
+        assert.equal((inst._calls['setStateAsync'] || []).length, 0, 'vor dem Timer noch nichts setzen');
+
+        await inst._timers.find(t => t.delay === 999999).fn();
 
         const calls = inst._calls['setStateAsync'] || [];
         assert.ok(calls.some(c => c[0] === 'info.lastUpdate'));
@@ -687,11 +700,11 @@ describe('onMessage() – cleanup', () => {
 
     it('löscht verwaiste qemu/lxc-Channels und gibt ok zurück', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({
+        useProxmoxMock(inst, makeProxmoxMock({
             getClusterResources: async () => [
                 { type: 'qemu', name: 'vm-existing', node: 'pve', vmid: 100, status: 'running' },
             ],
-        });
+        }));
 
         // Vorhandene Channels: einer aktiv, einer veraltet
         inst.getForeignObjectsAsync = async () => ({
@@ -719,11 +732,11 @@ describe('onMessage() – cleanup', () => {
 
     it('gibt ok mit deleted=0 zurück wenn alles aktuell', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({
+        useProxmoxMock(inst, makeProxmoxMock({
             getClusterResources: async () => [
                 { type: 'qemu', name: 'myvm', node: 'pve', vmid: 100, status: 'running' },
             ],
-        });
+        }));
         inst.getForeignObjectsAsync = async () => ({
             'proxmox.0.qemu_myvm': { type: 'channel', native: { type: 'qemu' } },
         });
@@ -740,9 +753,11 @@ describe('onMessage() – cleanup', () => {
 
     it('ignoriert node/storage/ceph/ha Channels beim Cleanup', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({
-            getClusterResources: async () => [],
-        });
+        useProxmoxMock(inst, makeProxmoxMock({
+            getClusterResources: async () => [
+                { type: 'qemu', name: 'live', node: 'pve', vmid: 100, status: 'running' },
+            ],
+        }));
         inst.getForeignObjectsAsync = async () => ({
             'proxmox.0.node_pve':          { type: 'channel', native: { type: 'node' } },
             'proxmox.0.storage_local':     { type: 'channel', native: { type: 'storage' } },
@@ -758,12 +773,17 @@ describe('onMessage() – cleanup', () => {
 
         await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
 
+        assert.equal(response?.result, 'ok');
         assert.equal(deleted, 0, 'node/storage/ceph sollen nicht gelöscht werden');
     });
 
     it('startet Adapter neu wenn Channels gelöscht wurden', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({ getClusterResources: async () => [] });
+        useProxmoxMock(inst, makeProxmoxMock({
+            getClusterResources: async () => [
+                { type: 'qemu', name: 'live', node: 'pve', vmid: 100, status: 'running' },
+            ],
+        }));
         inst.getForeignObjectsAsync = async () => ({
             'proxmox.0.qemu_zombie': { type: 'channel', native: { type: 'qemu' } },
         });
@@ -773,24 +793,35 @@ describe('onMessage() – cleanup', () => {
 
         await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
 
+        assert.equal((inst._calls['restart'] || []).length, 0, 'erst nach dem Delay neu starten');
+        inst._timers.find(t => t.delay === 1500).fn();
         assert.ok((inst._calls['restart'] || []).length > 0, 'restart() soll aufgerufen werden');
     });
 
     it('startet Adapter NICHT neu wenn nichts gelöscht wurde', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({ getClusterResources: async () => [] });
+        useProxmoxMock(inst, makeProxmoxMock({
+            getClusterResources: async () => [
+                { type: 'qemu', name: 'live', node: 'pve', vmid: 100, status: 'running' },
+            ],
+        }));
         inst.getForeignObjectsAsync = async () => ({});
         inst.objects = {};
         inst.sendTo = () => {};
 
         await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
 
+        assert.ok(!inst._timers.some(t => t.delay === 1500), 'kein verzögerter Neustart geplant');
         assert.equal((inst._calls['restart'] || []).length, 0);
     });
 
     it('sendet kein sendTo wenn kein callback gesetzt', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({ getClusterResources: async () => [] });
+        useProxmoxMock(inst, makeProxmoxMock({
+            getClusterResources: async () => [
+                { type: 'qemu', name: 'live', node: 'pve', vmid: 100, status: 'running' },
+            ],
+        }));
         inst.getForeignObjectsAsync = async () => ({});
         inst.objects = {};
 
@@ -801,11 +832,11 @@ describe('onMessage() – cleanup', () => {
         assert.equal(called, false);
     });
 
-    it('gibt error zurück wenn getClusterResources fehlschlägt', async () => {
+    it('gibt error zurück wenn keine Instanz Ressourcen liefert', async () => {
         const inst = makeProxmoxInstance();
-        inst.proxmox = makeProxmoxMock({
+        useProxmoxMock(inst, makeProxmoxMock({
             getClusterResources: async () => { throw new Error('API down'); },
-        });
+        }));
 
         let response = null;
         inst.sendTo = (from, cmd, data) => { response = data; };
@@ -813,16 +844,17 @@ describe('onMessage() – cleanup', () => {
         await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
 
         assert.equal(response?.result, 'error');
-        assert.ok(response?.error?.includes('API down'));
+        assert.ok(response?.error?.includes('Keine Ressourcen'));
+        assert.ok(inst._logs.warn.some(m => m.includes('API down')), 'Instanzfehler soll geloggt werden');
     });
 
     it('berücksichtigt newTreeStructure bei Namensbildung', async () => {
         const inst = makeProxmoxInstance({ newTreeStructure: true });
-        inst.proxmox = makeProxmoxMock({
+        useProxmoxMock(inst, makeProxmoxMock({
             getClusterResources: async () => [
                 { type: 'qemu', name: 'myvm', node: 'pve', vmid: 100, status: 'running' },
             ],
-        });
+        }));
         // Mit newTreeStructure ist der Pfad qemu.myvm statt qemu_myvm
         inst.getForeignObjectsAsync = async () => ({
             'proxmox.0.qemu.myvm':     { type: 'channel', native: { type: 'qemu' } },

@@ -169,7 +169,7 @@ describe('createNodes', () => {
         adapter.proxmox.getNodeStatus = async () => { throw new Error('Connection refused'); };
 
         await assert.doesNotReject(() => adapter.createNodes([makeNode()]));
-        assert.ok(adapter._logs.warn.some(m => m.includes('Unable to get status of node')));
+        assert.ok(adapter._logs.error.some(m => m.includes('Fehler beim Abrufen des Node-Status')));
     });
 });
 
@@ -245,6 +245,6 @@ describe('setNodes', () => {
         adapter.proxmox.getNodeStatus = async () => { throw new Error('timeout'); };
 
         await assert.doesNotReject(() => adapter.setNodes([makeNode()]));
-        assert.ok(adapter._logs.warn.some(m => m.includes('Unable to get status of node')));
+        assert.ok(adapter._logs.error.some(m => m.includes('Fehler beim Abrufen des Node-Status')));
     });
 });

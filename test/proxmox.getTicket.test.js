@@ -168,7 +168,7 @@ describe('ProxmoxUtils._getTicket', () => {
     // ── 3. Axios-Fehler mit HTTP-Response (z.B. 401, 403, 500) ───────────────
     describe('Axios-Fehler mit HTTP-Response', () => {
         for (const status of [401, 403, 500]) {
-            it(`HTTP ${status} → wirft Error(${status}) und loggt warn`, async () => {
+            it(`HTTP ${status} → wirft Error(HTTP_${status}) und loggt warn`, async () => {
                 const { inst, adapter } = makeInstance(
                     axiosThrowsWithResponse(status, { message: 'unauthorized' }),
                 );
@@ -176,7 +176,7 @@ describe('ProxmoxUtils._getTicket', () => {
                 await assert.rejects(
                     () => inst._getTicket(),
                     (err) => {
-                        assert.equal(err.message, String(status));
+                        assert.equal(err.message, `HTTP_${status}`);
                         return true;
                     },
                 );
@@ -193,13 +193,13 @@ describe('ProxmoxUtils._getTicket', () => {
 
     // ── 4. Netzwerkfehler / Timeout (kein Response) ───────────────────────────
     describe('Netzwerkfehler / Timeout', () => {
-        it('wirft Error(-1) und loggt warn', async () => {
+        it('wirft Error(NETWORK_ERROR) und loggt warn', async () => {
             const { inst, adapter } = makeInstance(axiosThrowsWithRequest());
 
             await assert.rejects(
                 () => inst._getTicket(),
                 (err) => {
-                    assert.equal(err.message, '-1');
+                    assert.ok(err.message.startsWith('NETWORK_ERROR: '));
                     return true;
                 },
             );
@@ -213,13 +213,13 @@ describe('ProxmoxUtils._getTicket', () => {
 
     // ── 5. Generischer Fehler (kein axios, kein response, kein request) ───────
     describe('generischer Fehler (z.B. DNS, SSL)', () => {
-        it('wirft Error(-2) und loggt error', async () => {
+        it('wirft Error(REQUEST_ERROR) und loggt error', async () => {
             const { inst, adapter } = makeInstance(axiosThrowsGeneric('getaddrinfo ENOTFOUND'));
 
             await assert.rejects(
                 () => inst._getTicket(),
                 (err) => {
-                    assert.equal(err.message, '-2');
+                    assert.equal(err.message, 'REQUEST_ERROR: getaddrinfo ENOTFOUND');
                     return true;
                 },
             );
