@@ -680,6 +680,12 @@ describe('sendRequest()', () => {
 // ─── onMessage (cleanup) ──────────────────────────────────────────────────────
 
 describe('onMessage() – cleanup', () => {
+    it('io-package.json aktiviert die Messagebox', () => {
+        // Ohne common.messagebox abonniert der Controller keine Nachrichten: Der Cleanup-Button
+        // im Admin bliebe ohne Antwort, obwohl onMessage() implementiert ist.
+        assert.equal(require('../io-package.json').common.messagebox, true);
+    });
+
     it('macht nichts bei msg ohne command', async () => {
         const inst = makeProxmoxInstance();
         await inst.onMessage({});

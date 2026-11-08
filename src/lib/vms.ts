@@ -207,6 +207,9 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
             }
         }
     } catch (err) {
+        if ((err as Error).message === 'STOPPED') {
+            return; // Adapter wird beendet – kein Logging nötig
+        }
         this.log.debug(`Unable to get cluster resources: ${err as string}`);
     }
 }
@@ -336,6 +339,9 @@ export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
         // BUG FIX: State erst nach vollständiger Iteration setzen
         await this.setStateAsync('info.offlineMachines', JSON.stringify(offlineMachines), true);
     } catch (err) {
+        if ((err as Error).message === 'STOPPED') {
+            return; // Adapter wird beendet – kein Logging nötig
+        }
         this.log.debug(`Unable to get cluster resources: ${(err as Error).message}`);
     }
 }

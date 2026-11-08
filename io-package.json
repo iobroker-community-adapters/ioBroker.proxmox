@@ -161,6 +161,7 @@
     "mode": "daemon",
     "icon": "proxmox.png",
     "compact": true,
+    "messagebox": true,
     "nogit": true,
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
