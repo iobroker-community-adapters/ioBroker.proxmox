@@ -13,7 +13,18 @@ export default [
         },
     },
     {
-        ignores: ['admin/**/*', 'node_modules/**/*', 'test/**/*', 'build/**/*', 'tmp/**/*', '.**/*'],
+        ignores: [
+            'admin/**/*',
+            'node_modules/**/*',
+            'test/**/*',
+            'build/**/*',
+            'tmp/**/*',
+            '.**/*',
+            // Has its own TypeScript project and toolchain, see `npm run check:widgets`
+            'src-widgets/**/*',
+            'widgets/**/*',
+            'tasks.ts',
+        ],
     },
     {
         rules: {

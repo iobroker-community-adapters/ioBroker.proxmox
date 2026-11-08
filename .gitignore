@@ -21,4 +21,7 @@ admin/i18n/*/flat.txt
 
 # TypeScript build output (see common.nogit in io-package.json)
 build
+
+# Intermediate output of the widget build, the result is copied to widgets/proxmox and committed
+src-widgets/.__mf__temp
 *.tsbuildinfo

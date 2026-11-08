@@ -103,3 +103,10 @@ zum Beispiel
   },
 ```
 
+## vis-2-Widget
+
+Der Widget-Satz „Proxmox“ enthält ein Widget für eine VM oder einen Container. Wähle den Channel der Maschine aus, zum Beispiel `proxmox.0.qemu_web`. Es zeigt Zustand, CPU und RAM und hat Tasten zum Starten und Stoppen.
+
+- **Steuerung anzeigen:** Ohne diese Option zeigt das Widget nur den Zustand an. Das ist sinnvoll, wenn ein vis-Projekt für Personen erreichbar ist, die keine Maschinen stoppen sollen. Die Rückfrage ist kein Zugriffsschutz.
+- **Stopp-Taste:** Standardmäßig fährt sie die Maschine sauber herunter. „Sofort ausschalten“ nutzt den Proxmox-Befehl `stop`, dabei können nicht gespeicherte Daten verloren gehen.
+- Nach einem Befehl aktualisiert sich der Zustand mit der nächsten Abfrage, also nach etwa 10 Sekunden. Bis dahin zeigt das Widget „Wird ausgeführt“.

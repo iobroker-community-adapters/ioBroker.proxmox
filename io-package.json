@@ -165,6 +165,22 @@
     "supportedMessages": {
       "deviceManager": true
     },
+    "restartAdapters": [
+      "vis-2"
+    ],
+    "visWidgets": {
+      "vis2ProxmoxWidgets": {
+        "i18n": "component",
+        "name": "vis2ProxmoxWidgets",
+        "url": "proxmox/customWidgets.js",
+        "color": "#e57000",
+        "bundlerType": "module",
+        "label": "proxmox_set_label",
+        "components": [
+          "ProxmoxMachine"
+        ]
+      }
+    },
     "nogit": true,
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
