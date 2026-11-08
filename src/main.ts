@@ -19,6 +19,9 @@ import * as _vms from './lib/vms';
 
 const ADAPTER_NAME = 'proxmox';
 
+/** Abstand der ersten Abfrage zum Start: getNodes() hat die Daten gerade erst abgefragt */
+const FIRST_POLL_DELAY_MS = 1000;
+
 class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     /** Die aktuell verarbeitete Instanz. Wird in sendRequest() und getNodes() umgesetzt. */
     public proxmox: ProxmoxUtils | null = null;
@@ -148,7 +151,9 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
             // Muster eine Nachricht, Befehle würden doppelt ausgeführt.
             await this.subscribeStatesAsync('*');
 
-            this.sendRequest(); // start interval with configured delay
+            // Nicht erst nach dem Intervall: Bis zur ersten Abfrage steht info.connection auf false.
+            // Ab der zweiten Abfrage gilt das konfigurierte Intervall.
+            this.sendRequest(FIRST_POLL_DELAY_MS);
         } catch (e) {
             const err = e as Error | undefined;
             const reason = err?.message || String(err);

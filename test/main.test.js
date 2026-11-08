@@ -1262,3 +1262,32 @@ describe('getNodes() – veraltete Objekte', () => {
         assert.ok(inst._logs.warn.some(m => m.includes('node_old1')));
     });
 });
+
+// ─── onReady: erste Abfrage (#678) ────────────────────────────────────────────
+
+describe('onReady() – erste Abfrage (#678)', () => {
+    it('startet die erste Abfrage kurz nach dem Start, nicht erst nach dem Intervall', async () => {
+        const { ProxmoxUtils } = require('../build/lib/proxmox');
+        const originalTicket = ProxmoxUtils.prototype.ticket;
+        ProxmoxUtils.prototype.ticket = async () => {};
+
+        try {
+            const inst = makeProxmoxInstance();
+            inst.config.requestInterval = 600;
+            inst.initConfig = async () => {
+                inst.individualNodesList = [{ realmIp: '10.0.0.1', realmPort: 8006, realmUser: 'root', realmPassword: 'x', realm: 'pam' }];
+                return true;
+            };
+            inst.readObjects = async () => {};
+            inst.getNodes = async () => {};
+            const delays = [];
+            inst.sendRequest = delay => delays.push(delay);
+
+            await inst.onReady();
+
+            assert.deepEqual(delays, [1000]);
+        } finally {
+            ProxmoxUtils.prototype.ticket = originalTicket;
+        }
+    });
+});

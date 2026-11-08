@@ -38,6 +38,7 @@ Control and use data from your Proxmox VE
 - (bluefox) VMs and containers with the same name no longer share their states and buttons: all of them get the object ID `<name>_<vmid>`. Other object IDs do not change (#702)
 - (bluefox) Buttons no longer execute their command twice when the states are stored in Redis (#703)
 - (bluefox) With several individual nodes, the instances no longer delete each other's objects, which caused a restart loop and missing data. If a node does not answer during the start, old objects are kept until the next start (#697, #622, #612)
+- (bluefox) The first poll runs right after the start instead of after the configured interval, so the instance turns green sooner (#678)
 <!--
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
