@@ -1,3 +1,5 @@
+import { getHostSuffix } from './methods';
+import type { ProxmoxUtils } from './proxmox';
 import { stateNames, vmButtonLabels } from './translations';
 import type {
     OfflineResourceStatus,
@@ -10,7 +12,7 @@ import type {
 const VM_COMMANDS = ['start', 'stop', 'shutdown', 'reboot', 'reset', 'suspend', 'resume'] as const;
 
 /**
- * Ermittelt je VM/LXC den Namensteil der Objekt-ID.
+ * Ermittelt je VM/LXC den Namensteil der Objekt-ID innerhalb EINER Proxmox-Instanz, ohne Host-Zusatz.
  *
  * Proxmox erlaubt gleiche Namen, eindeutig ist nur die VMID. Die ID bleibt beim Namen, damit Skripte
  * und Historien bestehender Installationen weiter passen. Nur wenn Typ und Name mehrerer Maschinen
@@ -21,12 +23,14 @@ const VM_COMMANDS = ['start', 'stop', 'shutdown', 'reboot', 'reset', 'suspend', 
  * etwa weil deren Node offline ist, oder diese Maschine entfernt wird.
  *
  * @param ctx - Adapter-Instanz
- * @param resources - Ressourcen EINER Proxmox-Instanz
+ * @param resources - Ressourcen der Proxmox-Instanz
+ * @param inst - die Proxmox-Instanz
  * @returns Namensteil je Maschine. Maschinen ohne Namen sind nicht enthalten.
  */
-export function getMachineIdNames(
+function getLocalMachineNames(
     ctx: ProxmoxAdapterContext,
     resources: ProxmoxClusterResource[],
+    inst: ProxmoxUtils | null,
 ): Map<ProxmoxClusterResource, string> {
     const separator = ctx.config.newTreeStructure ? '.' : '_';
     const machines = resources.filter(res => (res.type === 'qemu' || res.type === 'lxc') && res.name !== undefined);
@@ -38,8 +42,10 @@ export function getMachineIdNames(
         const plainName = ctx.prepareNameForId(res.name);
         const vmidName = `${plainName}_${res.vmid}`;
         const id = relativeId(res, vmidName);
+        const channelExists =
+            ctx.objects[`${ctx.namespace}.${id}`] || ctx.objects[`${ctx.namespace}.${id}_${inst?.hostId}`];
         // Heißt eine andere Maschine tatsächlich so, gehört der Channel ihr
-        idNames.set(res, ctx.objects[`${ctx.namespace}.${id}`] && !plainIds.has(id) ? vmidName : plainName);
+        idNames.set(res, channelExists && !plainIds.has(id) ? vmidName : plainName);
     }
 
     // In einer Schleife, weil auch `web_100` mit `web` + VMID 100 zusammenfallen kann. Jede Maschine
@@ -64,6 +70,71 @@ export function getMachineIdNames(
 }
 
 /**
+ * Ermittelt je VM/LXC den vollständigen Namensteil der Objekt-ID, siehe getLocalMachineNames() und
+ * getHostSuffix().
+ *
+ * @param ctx - Adapter-Instanz
+ * @param resources - Ressourcen der Proxmox-Instanz
+ * @param inst - die Proxmox-Instanz
+ * @returns Namensteil je Maschine. Maschinen ohne Namen sind nicht enthalten.
+ */
+export function getMachineIdNames(
+    ctx: ProxmoxAdapterContext,
+    resources: ProxmoxClusterResource[],
+    inst: ProxmoxUtils | null,
+): Map<ProxmoxClusterResource, string> {
+    const separator = ctx.config.newTreeStructure ? '.' : '_';
+    const idNames = getLocalMachineNames(ctx, resources, inst);
+    for (const [res, name] of idNames) {
+        idNames.set(res, `${name}${getHostSuffix(ctx, inst, `${res.type}${separator}${name}`)}`);
+    }
+    return idNames;
+}
+
+/**
+ * @param ctx - Adapter-Instanz
+ * @param res - Storage-Ressource
+ * @returns Namensteil der Objekt-ID ohne Host-Zusatz
+ */
+function getPlainStorageName(ctx: ProxmoxAdapterContext, res: ProxmoxClusterResource): string {
+    return !res.shared ? `${res.node}_${ctx.prepareNameForId(res.storage)}` : ctx.prepareNameForId(res.storage);
+}
+
+/**
+ * @param ctx - Adapter-Instanz
+ * @param res - Storage-Ressource
+ * @returns vollständiger Namensteil der Objekt-ID
+ */
+function getStorageIdName(ctx: ProxmoxAdapterContext, res: ProxmoxClusterResource): string {
+    const name = getPlainStorageName(ctx, res);
+    const separator = ctx.config.newTreeStructure ? '.' : '_';
+    return `${name}${getHostSuffix(ctx, ctx.proxmox, `${res.type}${separator}${name}`)}`;
+}
+
+/**
+ * Liefert die Objekt-IDs, die eine Proxmox-Instanz ohne Host-Zusatz belegen würde.
+ *
+ * @param ctx - Adapter-Instanz
+ * @param resources - Ressourcen der Proxmox-Instanz
+ * @param inst - die Proxmox-Instanz
+ * @returns IDs ohne Namespace
+ */
+export function getInstanceResourceIds(
+    ctx: ProxmoxAdapterContext,
+    resources: ProxmoxClusterResource[],
+    inst: ProxmoxUtils,
+): string[] {
+    const separator = ctx.config.newTreeStructure ? '.' : '_';
+    const ids = [...getLocalMachineNames(ctx, resources, inst)].map(([res, name]) => `${res.type}${separator}${name}`);
+    for (const res of resources) {
+        if (res.type === 'storage') {
+            ids.push(`${res.type}${separator}${getPlainStorageName(ctx, res)}`);
+        }
+    }
+    return ids;
+}
+
+/**
  * createVM – legt VM/LXC/Storage-Channels + States beim Adapter-Start an.
  *
  * @returns IDs der Channels (ohne Namespace), die diese Proxmox-Instanz noch kennt, oder `null`, wenn
@@ -74,7 +145,7 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<string[] | 
 
     try {
         const resources = await this.proxmox!.getClusterResources();
-        const idNames = getMachineIdNames(this, resources);
+        const idNames = getMachineIdNames(this, resources, this.proxmox);
 
         for (const res of resources) {
             let sid = '';
@@ -113,7 +184,7 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<string[] | 
                     await this.setObjectNotExistsAsync(sid, this.objects[sid]);
                 }
 
-                const vmNative = { node: res.node, type: res.type, vmid: res.vmid };
+                const vmNative = { node: res.node, type: res.type, vmid: res.vmid, host: this.proxmox!.hostId };
 
                 for (const cmd of VM_COMMANDS) {
                     await this.extendObjectAsync(`${sid}.${cmd}`, {
@@ -174,9 +245,7 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<string[] | 
 
             // ── storage ────────────────────────────────────────────────────
             if (res.type === 'storage' && this.config.requestStorageInformation) {
-                const storageName = !res.shared
-                    ? `${res.node}_${this.prepareNameForId(res.storage)}`
-                    : this.prepareNameForId(res.storage);
+                const storageName = getStorageIdName(this, res);
 
                 if (
                     !resourcesKeep.includes(`${type}_${storageName}`) &&
@@ -265,8 +334,9 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<string[] | 
  */
 export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
     try {
-        const resources = await this.proxmox!.getClusterResources();
-        const idNames = getMachineIdNames(this, resources);
+        // Bei mehreren Instanzen hat sie registerInstanceIds() in diesem Zyklus schon abgefragt
+        const resources = await this.proxmox!.getClusterResources(true);
+        const idNames = getMachineIdNames(this, resources, this.proxmox);
         const knownObjIds = Object.keys(this.objects);
         const offlineMachines: Record<string, string> = {};
         const storageKeep: string[] = [];
@@ -327,9 +397,7 @@ export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
 
             // ── storage ────────────────────────────────────────────────────
             if (res.type === 'storage' && this.config.requestStorageInformation) {
-                const storageName = !res.shared
-                    ? `${res.node}_${this.prepareNameForId(res.storage)}`
-                    : this.prepareNameForId(res.storage);
+                const storageName = getStorageIdName(this, res);
 
                 if (!storageKeep.includes(storageName)) {
                     storageKeep.push(storageName);

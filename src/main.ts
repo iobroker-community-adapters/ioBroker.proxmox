@@ -41,6 +41,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
      * Wird nach getNodes() befüllt, damit onStateChange die richtige Instanz nutzt.
      */
     public nodeInstanceMap: Record<string, ProxmoxUtils> = {};
+    public instanceIds = new Map<ProxmoxUtils, Set<string>>();
 
     public offlineResourceStatus: OfflineResourceStatus = {
         uptime: 0,
@@ -115,7 +116,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
             // Cluster-Nodes → eine gemeinsame Instanz (Round-Robin Failover)
             if (this.clusterNodesList.length > 0) {
-                this.proxmoxInstances.push(new ProxmoxUtils(this, this.clusterNodesList));
+                this.proxmoxInstances.push(new ProxmoxUtils(this, this.clusterNodesList, 'cluster'));
                 this.log.debug(`Cluster-Instanz mit ${this.clusterNodesList.length} Node(s) erstellt`);
             }
 
@@ -179,7 +180,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
                 if (type === 'lxc' || type === 'qemu') {
                     const vmid = obj.native?.vmid as number;
-                    const inst = this.nodeInstanceMap[node] ?? this.proxmox;
+                    const inst = this.getButtonInstance(obj.native);
 
                     const actions: Record<string, () => Promise<unknown> | undefined> = {
                         start: () => inst?.qemuStart(node, type, vmid),
@@ -206,7 +207,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                         );
                     }
                 } else if (type === 'node') {
-                    const inst = this.nodeInstanceMap[node] ?? this.proxmox;
+                    const inst = this.getButtonInstance(obj.native);
 
                     const actions: Record<string, () => Promise<unknown> | undefined> = {
                         shutdown: () => inst?.nodeShutdown(node),
@@ -243,6 +244,49 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                     });
                 }
             }
+        }
+    }
+
+    /**
+     * Ermittelt die Proxmox-Instanz, an die ein Button seinen Befehl schickt. Der Node-Name reicht dafür
+     * nicht, Einzel-Hosts können gleich heißen. Buttons älterer Versionen haben noch kein `host`.
+     *
+     * @param native - `native` des Button-Objekts
+     */
+    private getButtonInstance(native: Record<string, unknown>): ProxmoxUtils | null {
+        return (
+            this.proxmoxInstances.find(inst => native.host !== undefined && inst.hostId === native.host) ??
+            this.nodeInstanceMap[native.node as string] ??
+            this.proxmox
+        );
+    }
+
+    /**
+     * Merkt sich, welche Objekt-IDs eine Instanz belegen würde, damit getHostSuffix() Kollisionen erkennt.
+     * Mit nur einer Instanz gibt es keine, dann entfällt auch die Abfrage. Antwortet die Instanz nicht,
+     * bleibt der letzte bekannte Stand.
+     *
+     * @param inst - die Proxmox-Instanz
+     * @param nodes - ihre Nodes
+     */
+    private async registerInstanceIds(inst: ProxmoxUtils, nodes: ProxmoxNode[]): Promise<void> {
+        if (this.proxmoxInstances.length < 2) {
+            return;
+        }
+        try {
+            const resources = await inst.getClusterResources();
+            this.instanceIds.set(
+                inst,
+                new Set([
+                    ...nodes.map(node => `node_${this.prepareNameForId(node.node)}`),
+                    ..._vms.getInstanceResourceIds(this, resources, inst),
+                ]),
+            );
+        } catch (err) {
+            if ((err as Error).message === 'STOPPED') {
+                throw err;
+            }
+            this.log.debug(`registerInstanceIds [${inst.nodeURL}]: ${(err as Error).message}`);
         }
     }
 
@@ -285,6 +329,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                         this.nodeInstanceMap[n.node] = inst;
                     }
 
+                    await this.registerInstanceIds(inst, nodes);
                     await this.setNodes(nodes);
 
                     if (this.config.requestCephInformation) {
@@ -334,6 +379,20 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
             .filter(id => /^(node_|(lxc|qemu|storage)[._])/.test(id));
         const keepIds = new Set<string>();
         let complete = true;
+
+        // Vor dem Anlegen: Die IDs hängen davon ab, was die anderen Instanzen melden
+        if (this.proxmoxInstances.length > 1) {
+            for (const inst of this.proxmoxInstances) {
+                try {
+                    await this.registerInstanceIds(inst, await inst.getNodes());
+                } catch (e) {
+                    if ((e as Error).message === 'STOPPED') {
+                        return;
+                    }
+                    // Der Fehler wird unten bei createNodes gemeldet
+                }
+            }
+        }
 
         for (const inst of this.proxmoxInstances) {
             this.proxmox = inst;
@@ -590,7 +649,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                         const r = await inst.getClusterResources();
                         resources = resources.concat(r);
                         // Je Instanz ermitteln, genau wie createVM() und setMachines()
-                        for (const [res, name] of _vms.getMachineIdNames(this, r)) {
+                        for (const [res, name] of _vms.getMachineIdNames(this, r, inst)) {
                             idNames.set(res, name);
                         }
                     } catch (instErr) {

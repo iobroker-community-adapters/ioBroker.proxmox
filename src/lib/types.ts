@@ -146,6 +146,8 @@ export interface ProxmoxAdapterContext extends ioBroker.Adapter {
     /** Die aktuell verarbeitete Instanz. Wird in sendRequest() und getNodes() umgesetzt. */
     proxmox: ProxmoxUtils | null;
     objects: KnownObjects;
+    /** Objekt-IDs, die jede Instanz ohne Host-Zusatz belegen würde. Erkennt Kollisionen zwischen Instanzen. */
+    instanceIds: Map<ProxmoxUtils, Set<string>>;
     offlineResourceStatus: OfflineResourceStatus;
 
     used_level(vala: number, valb: number): number;

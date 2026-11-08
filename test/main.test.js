@@ -1291,3 +1291,256 @@ describe('onReady() – erste Abfrage (#678)', () => {
         }
     });
 });
+
+// ─── Gleich benannte Hosts ────────────────────────────────────────────────────
+
+describe('Einzel-Hosts mit gleichen Namen', () => {
+    /** Ein Einzel-Host namens "pve" mit einer VM "web" (VMID 100) und einem lokalen Storage */
+    function pve(hostId, overrides = {}) {
+        return makeProxmoxMock({
+            hostId,
+            nodeURL: `https://${hostId}:8006/api2/json`,
+            getNodes: async () => [{ node: 'pve', type: 'node', status: 'offline' }],
+            getClusterResources: async () => [
+                { type: 'qemu', id: 'qemu/100', name: 'web', node: 'pve', vmid: 100, status: 'stopped' },
+                { type: 'storage', id: 'storage/pve/local', storage: 'local', node: 'pve', status: 'unknown' },
+            ],
+            ...overrides,
+        });
+    }
+
+    function makeInstance(instances, objectIds = [], config = {}) {
+        const inst = makeProxmoxInstance({ requestStorageInformation: true, ...config });
+        inst.proxmoxInstances = instances;
+        inst.proxmox = instances[0];
+        inst.objects = Object.fromEntries(
+            objectIds.map(id => [`proxmox.0.${id}`, { type: 'channel', common: { name: 'x' }, native: {} }]),
+        );
+        return inst;
+    }
+
+    const hostAIds = ['node_pve_a', 'qemu_web_a', 'storage_pve_local_a'];
+    const hostBIds = ['node_pve_b', 'qemu_web_b', 'storage_pve_local_b'];
+    const deletedIds = inst => (inst._calls['delObjectAsync'] || []).map(c => c[0]);
+
+    it('jeder Host bekommt eigene Node-, VM- und Storage-Objekte', async () => {
+        const inst = makeInstance([pve('a'), pve('b')]);
+
+        await inst.getNodes();
+
+        for (const id of [...hostAIds, ...hostBIds]) {
+            assert.ok(inst.objects[`proxmox.0.${id}`], `${id} fehlt`);
+        }
+        assert.equal(inst.objects['proxmox.0.node_pve'], undefined);
+        assert.equal(inst.objects['proxmox.0.qemu_web'], undefined);
+    });
+
+    it('funktioniert auch mit newTreeStructure', async () => {
+        const inst = makeInstance([pve('a'), pve('b')], [], { newTreeStructure: true });
+
+        await inst.getNodes();
+
+        assert.ok(inst.objects['proxmox.0.qemu.web_a']);
+        assert.ok(inst.objects['proxmox.0.qemu.web_b']);
+        assert.ok(inst.objects['proxmox.0.storage.pve_local_b']);
+    });
+
+    it('die bisher gemeinsamen Objekte werden gelöscht', async () => {
+        const inst = makeInstance([pve('a'), pve('b')], ['node_pve', 'qemu_web', 'storage_pve_local']);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), ['node_pve', 'qemu_web', 'storage_pve_local']);
+    });
+
+    it('keine Neustarts im Betrieb', async () => {
+        const a = pve('a');
+        const b = pve('b');
+        const inst = makeInstance([a, b]);
+
+        await inst.getNodes();
+        for (const mock of [a, b]) {
+            inst.proxmox = mock;
+            await inst.setNodes(await mock.getNodes());
+            await inst.setMachines();
+        }
+
+        assert.equal((inst._calls['restart'] || []).length, 0);
+    });
+
+    it('Buttons merken sich ihren Host', async () => {
+        const inst = makeInstance([pve('a'), pve('b')]);
+
+        await inst.getNodes();
+
+        assert.equal(inst._objects['proxmox.0.node_pve_b.reboot'].native.host, 'b');
+        assert.equal(inst._objects['proxmox.0.qemu_web_b.stop'].native.host, 'b');
+    });
+
+    for (const [button, native, method] of [
+        ['node_pve_a.reboot', { type: 'node', node: 'pve', host: 'a' }, 'nodeReboot'],
+        ['qemu_web_a.stop', { type: 'qemu', node: 'pve', vmid: 100, host: 'a' }, 'qemuStop'],
+    ]) {
+        it(`${method} geht an den Host des Buttons, nicht an den zuletzt gelisteten`, async () => {
+            const called = [];
+            const a = pve('a', { [method]: async () => { called.push('a'); return {}; } });
+            const b = pve('b', { [method]: async () => { called.push('b'); return {}; } });
+            const inst = makeInstance([a, b]);
+            inst.nodeInstanceMap = { pve: b };
+            inst.sendRequest = () => {};
+            inst.getForeignObjectAsync = async () => ({ native });
+
+            await inst.onStateChange(`proxmox.0.${button}`, { val: true, ack: false });
+
+            assert.deepEqual(called, ['a']);
+        });
+    }
+
+    it('Buttons älterer Versionen ohne host gehen weiter über den Node-Namen', async () => {
+        const called = [];
+        const b = pve('b', { nodeReboot: async () => { called.push('b'); return {}; } });
+        const inst = makeInstance([pve('a'), b]);
+        inst.nodeInstanceMap = { pve: b };
+        inst.sendRequest = () => {};
+        inst.getForeignObjectAsync = async () => ({ native: { type: 'node', node: 'pve' } });
+
+        await inst.onStateChange('proxmox.0.node_pve.reboot', { val: true, ack: false });
+
+        assert.deepEqual(called, ['b']);
+    });
+
+    it('verschiedene Namen behalten ihre IDs, auch mit mehreren Hosts', async () => {
+        const other = pve('b', {
+            getNodes: async () => [{ node: 'pve2', type: 'node', status: 'offline' }],
+            getClusterResources: async () => [{ type: 'qemu', name: 'db', node: 'pve2', vmid: 100, status: 'stopped' }],
+        });
+        const inst = makeInstance([pve('a'), other]);
+
+        await inst.getNodes();
+
+        assert.ok(inst.objects['proxmox.0.node_pve']);
+        assert.ok(inst.objects['proxmox.0.node_pve2']);
+        assert.ok(inst.objects['proxmox.0.qemu_web']);
+        assert.ok(inst.objects['proxmox.0.qemu_db']);
+    });
+
+    it('nur die betroffene ID bekommt den Zusatz', async () => {
+        const other = pve('b', {
+            getNodes: async () => [{ node: 'pve2', type: 'node', status: 'offline' }],
+            getClusterResources: async () => [{ type: 'qemu', name: 'web', node: 'pve2', vmid: 200, status: 'stopped' }],
+        });
+        const inst = makeInstance([pve('a'), other]);
+
+        await inst.getNodes();
+
+        assert.ok(inst.objects['proxmox.0.node_pve']);
+        assert.ok(inst.objects['proxmox.0.node_pve2']);
+        assert.ok(inst.objects['proxmox.0.qemu_web_a']);
+        assert.ok(inst.objects['proxmox.0.qemu_web_b']);
+    });
+
+    it('gleiche Namen auf einem Host und auf dem anderen: VMID und Host', async () => {
+        const twins = pve('a', {
+            getClusterResources: async () => [
+                { type: 'qemu', name: 'web', node: 'pve', vmid: 100, status: 'stopped' },
+                { type: 'qemu', name: 'web', node: 'pve', vmid: 101, status: 'stopped' },
+                { type: 'qemu', name: 'web_100', node: 'pve', vmid: 7, status: 'stopped' },
+            ],
+        });
+        const inst = makeInstance([twins, pve('b')]);
+
+        await inst.getNodes();
+
+        assert.ok(inst.objects['proxmox.0.qemu_web_100']);
+        assert.ok(inst.objects['proxmox.0.qemu_web_101']);
+        assert.ok(inst.objects['proxmox.0.qemu_web_100_7']);
+        assert.equal(inst._objects['proxmox.0.qemu_web_100.stop'].native.vmid, 100);
+    });
+
+    it('die IDs bleiben, wenn der andere Host beim Start nicht antwortet', async () => {
+        const offline = pve('b', { getNodes: async () => { throw new Error('ECONNREFUSED'); } });
+        const a = pve('a');
+        const inst = makeInstance([a, offline], [...hostAIds, ...hostBIds]);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), []);
+        assert.equal(inst.objects['proxmox.0.node_pve'], undefined);
+
+        inst.proxmox = a;
+        await inst.setNodes(await a.getNodes());
+        await inst.setMachines();
+        assert.equal((inst._calls['restart'] || []).length, 0);
+    });
+
+    it('die IDs bleiben, wenn der andere Host aus der Konfiguration entfernt wird', async () => {
+        const inst = makeInstance([pve('a')], [...hostAIds, ...hostBIds]);
+
+        await inst.getNodes();
+
+        assert.deepEqual(deletedIds(inst), hostBIds);
+        assert.ok(inst.objects['proxmox.0.node_pve_a']);
+    });
+
+    it('antwortet der zweite Host erst im Betrieb, startet der Adapter neu', async () => {
+        let online = false;
+        const a = pve('a', { getNodes: async () => [{ node: 'pve', type: 'node', status: 'online' }] });
+        const b = pve('b', {
+            getNodes: async () => {
+                if (!online) throw new Error('ECONNREFUSED');
+                return [{ node: 'pve', type: 'node', status: 'offline' }];
+            },
+        });
+        const inst = makeInstance([a, b]);
+
+        await inst.getNodes();
+        assert.ok(inst.objects['proxmox.0.node_pve']);
+
+        online = true;
+        await inst.registerInstanceIds(b, await b.getNodes());
+        inst.proxmox = a;
+        await inst.setNodes(await a.getNodes());
+
+        assert.equal((inst._calls['restart'] || []).length, 1);
+    });
+
+    it('der Cleanup-Button behält die IDs mit Host-Zusatz', async () => {
+        const a = pve('a');
+        const b = pve('b');
+        const inst = makeInstance([a, b]);
+        await inst.getNodes();
+
+        const channels = {
+            'proxmox.0.qemu_web_a': { type: 'channel', native: { type: 'qemu' } },
+            'proxmox.0.qemu_web_b': { type: 'channel', native: { type: 'qemu' } },
+        };
+        inst.getForeignObjectsAsync = async () => channels;
+        let deleted = 0;
+        inst.delObjectAsync = async () => { deleted++; };
+        inst.restart = () => {};
+        let response = null;
+        inst.sendTo = (from, cmd, data) => { response = data; };
+
+        await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
+
+        assert.equal(response?.result, 'ok');
+        assert.equal(deleted, 0);
+    });
+
+    it('mit nur einer Instanz keine zusätzliche Abfrage', async () => {
+        let calls = 0;
+        const single = pve('a', {
+            getClusterResources: async () => {
+                calls++;
+                return [];
+            },
+        });
+        const inst = makeInstance([single]);
+
+        await inst.getNodes();
+
+        assert.equal(calls, 1);
+        assert.equal(inst.instanceIds.size, 0);
+        assert.ok(inst.objects['proxmox.0.node_pve']);
+    });
+});
