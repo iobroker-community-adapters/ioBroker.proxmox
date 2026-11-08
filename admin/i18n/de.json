@@ -1,9 +1,7 @@
 {
     "Options": "Optionen",
-    "IP Aaddress": "IP-Adresse",
     "Port": "Port",
     "Request Interval": "Abfrageintervall",
-    "User name": "Benutzername",
     "Password": "Passwort",
     "Realm": "Realm",
     "Additional information": "Zusätzliche Informationen",
@@ -24,9 +22,13 @@
     "Backup on Storage information": "Speicherinformationen Backup",
     "settings": "Einstellungen",
     "cleanup": "Aufräumen",
-    "tooltip_clusterNode": "Aktivieren wenn dieser Node Teil eines Proxmox-Clusters ist. Alle als \"Cluster Node\" markierten Nodes bilden eine Failover-Gruppe fällt einer aus, übernimmt der nächste automatisch. Nodes OHNE dieses Häkchen werden einzeln und unabhängig abgefragt. ACHTUNG: Mehrere Einzel-Nodes aus demselben Cluster führen zu Doppelverarbeitung aller VMs/LXCs!",
+    "tooltip_clusterNode": "Aktivieren wenn dieser Node Teil eines Proxmox-Clusters ist. Alle als \"Cluster Node\" markierten Nodes bilden eine Failover-Gruppe – fällt einer aus, übernimmt der nächste automatisch. Nodes OHNE dieses Häkchen werden einzeln und unabhängig abgefragt. ACHTUNG: Mehrere Einzel-Nodes aus demselben Cluster führen zu Doppelverarbeitung aller VMs/LXCs!",
     "cleanup_confirm_text": "Alle Datenpunkte von VMs und LXC-Containern, die in Proxmox nicht mehr vorhanden sind, werden gelöscht. Fortfahren?",
     "cleanup_confirm_title": "Smart-Cleanup bestätigen",
     "cleanup_confirm_ok": "Ja, löschen",
-    "cleanup_confirm_cancel": "Abbrechen"
+    "cleanup_confirm_cancel": "Abbrechen",
+    "authType": "Authentifizierungstyp",
+    "API Token": "API-Token",
+    "tokenId": "Token-ID",
+    "tokenSecret": "Token-Secret"
 }

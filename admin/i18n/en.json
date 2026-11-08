@@ -1,9 +1,7 @@
 {
     "Options": "Options",
-    "IP Aaddress": "IP Address",
     "Port": "Port",
     "Request Interval": "Request Interval",
-    "User name": "User name",
     "Password": "Password",
     "Realm": "Realm",
     "Additional information": "Additional information",
@@ -24,9 +22,13 @@
     "Backup on Storage information": "Backup on Storage information",
     "settings": "Settings",
     "cleanup": "Cleanup",
-    "tooltip_clusterNode": "Enable if this node is part of a Proxmox cluster. All nodes marked as \"Cluster Node\" form a failover group � if one fails, the next one automatically takes over. Nodes WITHOUT this checkmark will be queried individually and independently. WARNING: Multiple single nodes from the same cluster will lead to duplicate processing of all VMs/LXCs!",
+    "tooltip_clusterNode": "Enable if this node is part of a Proxmox cluster. All nodes marked as \"Cluster Node\" form a failover group – if one fails, the next one automatically takes over. Nodes WITHOUT this checkmark will be queried individually and independently. WARNING: Multiple single nodes from the same cluster will lead to duplicate processing of all VMs/LXCs!",
     "cleanup_confirm_text": "All datapoints of VMs and LXC containers that no longer exist in Proxmox will be deleted. Continue?",
     "cleanup_confirm_title": "Confirm Smart-Cleanup",
     "cleanup_confirm_ok": "Yes, delete",
-    "cleanup_confirm_cancel": "Cancel"
+    "cleanup_confirm_cancel": "Cancel",
+    "authType": "Authentication Type",
+    "API Token": "API Token",
+    "tokenId": "Token ID",
+    "tokenSecret": "Token Secret"
 }

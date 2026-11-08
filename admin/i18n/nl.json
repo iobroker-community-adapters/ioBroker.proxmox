@@ -1,9 +1,7 @@
 {
     "Options": "Opties",
-    "IP Aaddress": "IP Adres",
     "Port": "Poort",
     "Request Interval": "Aanvraag interval",
-    "User name": "Gebruikersnaam",
     "Password": "Wachtwoord",
     "Realm": "Domein",
     "Additional information": "Extra informatie",
@@ -24,9 +22,13 @@
     "Backup on Storage information": "Back-up opslag informatie",
     "settings": "Instellingen",
     "cleanup": "Opruimen",
-    "tooltip_clusterNode": "Schakel in als dit knooppunt deel uitmaakt van een Proxmox-cluster. Alle knooppunten gemarkeerd als \"Cluster Node\" vormen een failover-groep � als er ��n uitvalt, neemt de volgende het automatisch over. Knooppunten ZONDER dit vinkje worden afzonderlijk en onafhankelijk bevraagd. WAARSCHUWING: Meerdere afzonderlijke knooppunten uit hetzelfde cluster leiden tot dubbele verwerking van alle VM's/LXC's!",
+    "tooltip_clusterNode": "Schakel in als dit knooppunt deel uitmaakt van een Proxmox-cluster. Alle knooppunten gemarkeerd als \"Cluster Node\" vormen een failovergroep: als er een uitvalt, neemt het volgende automatisch over. Knooppunten ZONDER dit vinkje worden afzonderlijk en onafhankelijk opgevraagd. WAARSCHUWING: Meerdere afzonderlijke knooppunten uit hetzelfde cluster leiden tot dubbele verwerking van alle VM's/LXC's!",
     "cleanup_confirm_text": "Alle gegevenspunten van VM's en LXC-containers die niet meer bestaan in Proxmox, worden verwijderd. Doorgaan?",
     "cleanup_confirm_title": "Smart-Cleanup bevestigen",
     "cleanup_confirm_ok": "Ja, verwijderen",
-    "cleanup_confirm_cancel": "Annuleren"
+    "cleanup_confirm_cancel": "Annuleren",
+    "authType": "Authenticatietype",
+    "API Token": "API-token",
+    "tokenId": "Token-ID",
+    "tokenSecret": "Token-geheim"
 }

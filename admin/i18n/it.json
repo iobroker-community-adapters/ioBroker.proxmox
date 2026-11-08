@@ -1,9 +1,7 @@
 {
     "Options": "Opzioni",
-    "IP Aaddress": "Indirizzo IP",
     "Port": "Porta",
     "Request Interval": "Intervallo di richiesta",
-    "User name": "Nome utente",
     "Password": "Password",
     "Realm": "Dominio",
     "Additional information": "Informazioni aggiuntive",
@@ -12,7 +10,7 @@
     "Request HA information": "Richiedi informazioni HA",
     "new tree structure": "Nuova struttura ad albero",
     "Cluster Nodes": "Nodi cluster",
-    "Add new devices by clicking the plus (+) symbol...": "Aggiungi nuovi dispositivi facendo clic sul simbolo pi� (+)...",
+    "Add new devices by clicking the plus (+) symbol...": "Aggiungi nuovi dispositivi facendo clic sul simbolo più (+)...",
     "Active": "Attivo",
     "Cluster Node": "Nodo cluster",
     "IP Address": "Indirizzo IP",
@@ -24,9 +22,13 @@
     "Backup on Storage information": "Backup delle informazioni di archiviazione",
     "settings": "Impostazioni",
     "cleanup": "Pulisci",
-    "tooltip_clusterNode": "Abilita se questo nodo fa parte di un cluster Proxmox. Tutti i nodi contrassegnati come \"Cluster Node\" formano un gruppo di failover: se uno si guasta, il successivo subentra automaticamente. I nodi SENZA questo segno di spunta verranno interrogati singolarmente e in modo indipendente. ATTENZIONE: Pi� nodi singoli dello stesso cluster porteranno all'elaborazione duplicata di tutte le VM/LXC!",
-    "cleanup_confirm_text": "Tutti i punti dati delle VM e dei contenitori LXC che non esistono pi� in Proxmox verranno eliminati. Continuare?",
+    "tooltip_clusterNode": "Abilita se questo nodo fa parte di un cluster Proxmox. Tutti i nodi contrassegnati come \"Cluster Node\" formano un gruppo di failover: se uno si guasta, il successivo subentra automaticamente. I nodi SENZA questo segno di spunta vengono interrogati singolarmente e in modo indipendente. ATTENZIONE: più nodi singoli dello stesso cluster causano l'elaborazione doppia di tutte le VM/LXC!",
+    "cleanup_confirm_text": "Tutti i punti dati delle VM e dei contenitori LXC che non esistono più in Proxmox verranno eliminati. Continuare?",
     "cleanup_confirm_title": "Conferma Smart-Cleanup",
-    "cleanup_confirm_ok": "S�, elimina",
-    "cleanup_confirm_cancel": "Annulla"
+    "cleanup_confirm_ok": "Sì, elimina",
+    "cleanup_confirm_cancel": "Annulla",
+    "authType": "Tipo di autenticazione",
+    "API Token": "Token API",
+    "tokenId": "ID token",
+    "tokenSecret": "Segreto del token"
 }
