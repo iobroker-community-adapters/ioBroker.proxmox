@@ -1,0 +1,30 @@
+{
+    "name": "iobroker.vis-2-widgets-proxmox",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "description": "vis-2 widget set of ioBroker.proxmox. Built into ../widgets/proxmox.",
+    "scripts": {
+        "build": "vite build",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@iobroker/gui-components": "^10.3.14",
+        "@iobroker/types": "^7.2.5",
+        "@iobroker/types-vis-2": "~2.20.5",
+        "@module-federation/vite": "^1.23.5",
+        "@mui/icons-material": "^9.5.0",
+        "@mui/material": "^9.5.0",
+        "@mui/system": "^9.5.0",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "@vitejs/plugin-react": "^6.1.2",
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "typescript": "~7.0.2",
+        "vite": "^8.3.5"
+    }
+}

@@ -21,11 +21,13 @@ npm run test:package                      # validates package.json / io-package.
 npm run test:unit                         # node --test test/*.test.js against build/ (needs npm run build first)
 node --test test/vms.test.js              # single test file
 npm run test:integration                  # starts a real js-controller + adapter instance
+npm run build:widgets                     # builds src-widgets into widgets/proxmox, commit the result
+npm run check:widgets                     # type check of the widgets (needs npm i in src-widgets)
 npm run translate                         # fills the other languages from admin/i18n/en.json
 npm run release-patch                     # @alcalzone/release-script, moves the README changelog into io-package news
 ```
 
-There is deliberately **no `prepare` script**: `npm ci` does not build. Because `build/` is neither committed nor built on install, `common.nogit` is `true`, so the adapter can only be installed from npm. There is also no `tasks.ts`: the build is plain `tsc`, nothing is copied or generated.
+There is deliberately **no `prepare` script**: `npm ci` does not build. Because `build/` is neither committed nor built on install, `common.nogit` is `true`, so the adapter can only be installed from npm. The backend build is plain `tsc`. `tasks.ts` only builds the vis-2 widgets, and `widgets/` is committed, so a change in `src-widgets` needs `npm run build:widgets` before the commit. CI does not build or check the widgets.
 
 The integration test aborts with "JS-Controller is already running!" if a js-controller runs on the machine.
 
@@ -37,6 +39,7 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | `src/lib/proxmox.ts` | `ProxmoxUtils`, the HTTP client: login, 5xx retries, failover |
 | `src/lib/nodes.ts` | `createNodes` / `setNodes`, node and disk states |
 | `src/lib/vms.ts` | `createVM` / `setMachines`, VM, LXC and storage states |
+| `src-widgets/src/MachineCard.tsx` | vis-2 widget of a VM or container, uses only its states. `ProxmoxMachineWidget.tsx` declares the settings, `translations.ts` holds the words |
 | `src/lib/DeviceManagement.ts` | Device manager (`@iobroker/dm-utils`), reads the channels in `objects` and the button objects, runs commands through `getButtonAction` |
 | `src/lib/ceph.ts`, `src/lib/ha.ts` | Ceph and HA trees, generated from whatever the API returns |
 | `src/lib/methods.ts` | helpers: unit conversion, `findState`, `withTimeout`, `withRetry` |
