@@ -547,10 +547,15 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
                 // Aktuelle Ressourcen von ALLEN Proxmox-Instanzen holen
                 let resources: ProxmoxClusterResource[] = [];
+                const idNames = new Map<ProxmoxClusterResource, string>();
                 for (const inst of this.proxmoxInstances) {
                     try {
                         const r = await inst.getClusterResources();
                         resources = resources.concat(r);
+                        // Je Instanz ermitteln, genau wie createVM() und setMachines()
+                        for (const [res, name] of _vms.getMachineIdNames(this, r)) {
+                            idNames.set(res, name);
+                        }
                     } catch (instErr) {
                         this.log.warn(
                             `Smart-Cleanup: Instanz [${inst.nodeURL}] nicht erreichbar – wird übersprungen: ${(instErr as Error).message}`,
@@ -565,7 +570,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                 const activeNames = new Set<string>();
                 for (const res of resources) {
                     if (res.type === 'qemu' || res.type === 'lxc') {
-                        const resName = this.prepareNameForId(res.name);
+                        const resName = idNames.get(res) ?? this.prepareNameForId(res.name);
                         if (this.config.newTreeStructure) {
                             activeNames.add(`${res.type}.${resName}`);
                         } else {

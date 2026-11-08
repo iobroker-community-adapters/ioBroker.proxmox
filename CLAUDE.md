@@ -64,6 +64,8 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | `qemu_<name>.*`, `lxc_<name>.*`, `storage_<name>.*` | `vms.ts` (with `newTreeStructure`: `qemu.<name>.*` etc.) |
 | `ceph.*`, `ha.*` | `ceph.ts`, `ha.ts` |
 
+Machines of the same type and name get `<name>_<vmid>` instead of `<name>`, see `getMachineIdNames` in `vms.ts`. Everything that builds a machine ID has to use it, otherwise `cleanup` or `setMachines` no longer match the objects. It works per Proxmox instance: two individual hosts can still collide.
+
 ## Conventions
 
 - **Config in three places:** `src/lib/adapter-config.d.ts`, `native` in `io-package.json` and `admin/jsonConfig.json` must match. A field missing from jsonConfig is deleted from `native` on the next save.

@@ -1,7 +1,67 @@
 import { stateNames, vmButtonLabels } from './translations';
-import type { OfflineResourceStatus, ProxmoxAdapterContext, ProxmoxBackupEntry, StatusRecord } from './types';
+import type {
+    OfflineResourceStatus,
+    ProxmoxAdapterContext,
+    ProxmoxBackupEntry,
+    ProxmoxClusterResource,
+    StatusRecord,
+} from './types';
 
 const VM_COMMANDS = ['start', 'stop', 'shutdown', 'reboot', 'reset', 'suspend', 'resume'] as const;
+
+/**
+ * Ermittelt je VM/LXC den Namensteil der Objekt-ID.
+ *
+ * Proxmox erlaubt gleiche Namen, eindeutig ist nur die VMID. Die ID bleibt beim Namen, damit Skripte
+ * und Historien bestehender Installationen weiter passen. Nur wenn Typ und Name mehrerer Maschinen
+ * übereinstimmen, bekommen alle betroffenen `<name>_<vmid>`, unabhängig von ihrer Reihenfolge.
+ *
+ * Eine vergebene ID mit VMID bleibt, solange ihr Channel existiert. Sonst würde sie sich ändern (und
+ * die Historie verloren gehen), sobald Proxmox den Namen der anderen Maschine nicht liefert,
+ * etwa weil deren Node offline ist, oder diese Maschine entfernt wird.
+ *
+ * @param ctx - Adapter-Instanz
+ * @param resources - Ressourcen EINER Proxmox-Instanz
+ * @returns Namensteil je Maschine. Maschinen ohne Namen sind nicht enthalten.
+ */
+export function getMachineIdNames(
+    ctx: ProxmoxAdapterContext,
+    resources: ProxmoxClusterResource[],
+): Map<ProxmoxClusterResource, string> {
+    const separator = ctx.config.newTreeStructure ? '.' : '_';
+    const machines = resources.filter(res => (res.type === 'qemu' || res.type === 'lxc') && res.name !== undefined);
+    const relativeId = (res: ProxmoxClusterResource, name: string): string => `${res.type}${separator}${name}`;
+    const plainIds = new Set(machines.map(res => relativeId(res, ctx.prepareNameForId(res.name))));
+
+    const idNames = new Map<ProxmoxClusterResource, string>();
+    for (const res of machines) {
+        const plainName = ctx.prepareNameForId(res.name);
+        const vmidName = `${plainName}_${res.vmid}`;
+        const id = relativeId(res, vmidName);
+        // Heißt eine andere Maschine tatsächlich so, gehört der Channel ihr
+        idNames.set(res, ctx.objects[`${ctx.namespace}.${id}`] && !plainIds.has(id) ? vmidName : plainName);
+    }
+
+    // In einer Schleife, weil auch `web_100` mit `web` + VMID 100 zusammenfallen kann. Jede Maschine
+    // kann nur einmal umbenannt werden, die Schleife endet also.
+    let renamed = true;
+    while (renamed) {
+        renamed = false;
+        const count = new Map<string, number>();
+        for (const [res, name] of idNames) {
+            const id = relativeId(res, name);
+            count.set(id, (count.get(id) ?? 0) + 1);
+        }
+        for (const [res, name] of idNames) {
+            if (count.get(relativeId(res, name))! > 1 && name === ctx.prepareNameForId(res.name)) {
+                idNames.set(res, `${name}_${res.vmid}`);
+                renamed = true;
+            }
+        }
+    }
+
+    return idNames;
+}
 
 /**
  * createVM – legt VM/LXC/Storage-Channels + States beim Adapter-Start an.
@@ -25,16 +85,18 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
 
     try {
         const resources = await this.proxmox!.getClusterResources();
+        const idNames = getMachineIdNames(this, resources);
 
         for (const res of resources) {
             let sid = '';
             const type = res.type;
             const resName = this.prepareNameForId(res.name);
+            const idName = idNames.get(res) ?? resName;
 
             if (this.config.newTreeStructure) {
-                sid = `${this.namespace}.${type}.${resName}`;
+                sid = `${this.namespace}.${type}.${idName}`;
             } else {
-                sid = `${this.namespace}.${type}_${resName}`;
+                sid = `${this.namespace}.${type}_${idName}`;
             }
 
             if (res.status === 'unknown') {
@@ -44,9 +106,12 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
             // ── qemu / lxc ─────────────────────────────────────────────────
             if (res.type === 'qemu' || res.type === 'lxc') {
                 // BUG FIX: Separator muss zum Format in resourcesAll passen
-                resourcesKeep.push(this.config.newTreeStructure ? `${type}.${resName}` : `${type}_${resName}`);
+                resourcesKeep.push(this.config.newTreeStructure ? `${type}.${idName}` : `${type}_${idName}`);
 
                 if (!this.objects[sid]) {
+                    if (idName !== resName) {
+                        this.log.info(`The name "${res.name}" is used more than once, using "${sid}" for ${res.id}`);
+                    }
                     this.objects[sid] = {
                         type: 'channel',
                         // statusStates wertet der Admin aus, fehlt aber im Typ ChannelCommon
@@ -220,6 +285,7 @@ export async function createVM(this: ProxmoxAdapterContext): Promise<void> {
 export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
     try {
         const resources = await this.proxmox!.getClusterResources();
+        const idNames = getMachineIdNames(this, resources);
         const knownObjIds = Object.keys(this.objects);
         const offlineMachines: Record<string, string> = {};
         const storageKeep: string[] = [];
@@ -232,10 +298,11 @@ export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
             // ── qemu / lxc ─────────────────────────────────────────────────
             if (res.type === 'qemu' || res.type === 'lxc') {
                 const resName = this.prepareNameForId(res.name);
+                const idName = idNames.get(res) ?? resName;
 
                 sid = this.config.newTreeStructure
-                    ? `${this.namespace}.${res.type}.${resName}`
-                    : `${this.namespace}.${res.type}_${resName}`;
+                    ? `${this.namespace}.${res.type}.${idName}`
+                    : `${this.namespace}.${res.type}_${idName}`;
 
                 if (res.status === 'unknown') {
                     res.status = 'offline';
@@ -249,7 +316,7 @@ export async function setMachines(this: ProxmoxAdapterContext): Promise<void> {
                 await this.setStateChangedAsync(`${sid}.status`, { val: res.status, ack: true });
 
                 if (!knownObjIds.includes(sid)) {
-                    this.log.info(`Detected new VM/storage "${res.name}" (${resName}) - restarting instance`);
+                    this.log.info(`Detected new VM/storage "${res.name}" (${idName}) - restarting instance`);
                     this.restart();
                     return;
                 }

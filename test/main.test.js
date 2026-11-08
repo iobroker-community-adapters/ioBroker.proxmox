@@ -736,6 +736,35 @@ describe('onMessage() – cleanup', () => {
         assert.equal(deleted, 1);
     });
 
+    it('behält die IDs mit VMID von Maschinen mit gleichem Namen (#702)', async () => {
+        const inst = makeProxmoxInstance();
+        useProxmoxMock(inst, makeProxmoxMock({
+            getClusterResources: async () => [
+                { type: 'lxc', name: 'iobroker', node: 'pve', vmid: 113, status: 'running' },
+                { type: 'lxc', name: 'iobroker', node: 'pve', vmid: 120, status: 'running' },
+            ],
+        }));
+
+        const channels = {
+            'proxmox.0.lxc_iobroker_113': { type: 'channel', native: { type: 'lxc' } },
+            'proxmox.0.lxc_iobroker_120': { type: 'channel', native: { type: 'lxc' } },
+        };
+        inst.getForeignObjectsAsync = async () => channels;
+        inst.objects = { ...channels };
+
+        let deleted = 0;
+        inst.delObjectAsync = async () => { deleted++; };
+        inst.restart = () => {};
+
+        let response = null;
+        inst.sendTo = (from, cmd, data) => { response = data; };
+
+        await inst.onMessage({ command: 'cleanup', from: 'admin.0', callback: true });
+
+        assert.equal(response?.result, 'ok');
+        assert.equal(deleted, 0);
+    });
+
     it('gibt ok mit deleted=0 zurück wenn alles aktuell', async () => {
         const inst = makeProxmoxInstance();
         useProxmoxMock(inst, makeProxmoxMock({
