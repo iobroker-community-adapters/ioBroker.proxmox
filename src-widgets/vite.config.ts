@@ -26,6 +26,7 @@ const config = {
             filename: 'customWidgets.js',
             exposes: {
                 './ProxmoxMachine': './src/ProxmoxMachineWidget.tsx',
+                './ProxmoxNode': './src/ProxmoxNodeWidget.tsx',
                 './translations': './src/translations',
             },
             remotes: {},

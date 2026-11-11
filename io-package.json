@@ -190,10 +190,79 @@
         "bundlerType": "module",
         "label": "proxmox_set_label",
         "components": [
-          "ProxmoxMachine"
+          "ProxmoxMachine",
+          "ProxmoxNode"
         ]
       }
     },
+    "deviceWidgets": {
+      "components": [
+        {
+          "name": "ProxmoxMachineComponent",
+          "label": {
+            "en": "Proxmox VM or container",
+            "de": "Proxmox-VM oder -Container",
+            "ru": "ВМ или контейнер Proxmox",
+            "pt": "VM ou contêiner Proxmox",
+            "nl": "Proxmox-VM of -container",
+            "fr": "VM ou conteneur Proxmox",
+            "it": "VM o container Proxmox",
+            "es": "VM o contenedor de Proxmox",
+            "pl": "Maszyna wirtualna lub kontener Proxmox",
+            "uk": "ВМ або контейнер Proxmox",
+            "zh-cn": "Proxmox 虚拟机或容器"
+          },
+          "description": {
+            "en": "State, uptime, CPU and RAM of a VM or container, with buttons to start and stop it",
+            "de": "Zustand, Laufzeit, CPU und RAM einer VM oder eines Containers, mit Tasten zum Starten und Stoppen",
+            "ru": "Состояние, время работы, ЦП и ОЗУ ВМ или контейнера, с кнопками запуска и остановки",
+            "pt": "Estado, tempo de atividade, CPU e RAM de uma VM ou contêiner, com botões para iniciar e parar",
+            "nl": "Status, uptime, CPU en RAM van een VM of container, met knoppen om te starten en te stoppen",
+            "fr": "État, durée de fonctionnement, CPU et RAM d'une VM ou d'un conteneur, avec des boutons pour démarrer et arrêter",
+            "it": "Stato, tempo di attività, CPU e RAM di una VM o di un container, con pulsanti per avviare e arrestare",
+            "es": "Estado, tiempo de actividad, CPU y RAM de una VM o contenedor, con botones para iniciar y detener",
+            "pl": "Stan, czas pracy, CPU i RAM maszyny wirtualnej lub kontenera, z przyciskami do uruchamiania i zatrzymywania",
+            "uk": "Стан, час роботи, ЦП і ОЗП ВМ або контейнера, з кнопками запуску та зупинки",
+            "zh-cn": "虚拟机或容器的状态、运行时间、CPU 和内存，带有启动和停止按钮"
+          },
+          "icon": "machine.svg"
+        },
+        {
+          "name": "ProxmoxNodeComponent",
+          "label": {
+            "en": "Proxmox node",
+            "de": "Proxmox-Node",
+            "ru": "Узел Proxmox",
+            "pt": "Nó Proxmox",
+            "nl": "Proxmox-node",
+            "fr": "Nœud Proxmox",
+            "it": "Nodo Proxmox",
+            "es": "Nodo de Proxmox",
+            "pl": "Węzeł Proxmox",
+            "uk": "Вузол Proxmox",
+            "zh-cn": "Proxmox 节点"
+          },
+          "description": {
+            "en": "State, CPU and RAM of a Proxmox node and its available updates, with a button to refresh them",
+            "de": "Zustand, CPU und RAM eines Proxmox-Nodes und seine verfügbaren Updates, mit einer Taste zum Aktualisieren",
+            "ru": "Состояние, ЦП и ОЗУ узла Proxmox и доступные обновления, с кнопкой их обновления",
+            "pt": "Estado, CPU e RAM de um nó Proxmox e as suas atualizações disponíveis, com um botão para as atualizar",
+            "nl": "Status, CPU en RAM van een Proxmox-node en de beschikbare updates, met een knop om ze te vernieuwen",
+            "fr": "État, CPU et RAM d'un nœud Proxmox et ses mises à jour disponibles, avec un bouton pour les actualiser",
+            "it": "Stato, CPU e RAM di un nodo Proxmox e i suoi aggiornamenti disponibili, con un pulsante per aggiornarli",
+            "es": "Estado, CPU y RAM de un nodo de Proxmox y sus actualizaciones disponibles, con un botón para actualizarlas",
+            "pl": "Stan, CPU i RAM węzła Proxmox oraz dostępne aktualizacje, z przyciskiem do ich odświeżenia",
+            "uk": "Стан, ЦП і ОЗП вузла Proxmox та доступні оновлення, з кнопкою їх оновлення",
+            "zh-cn": "Proxmox 节点的状态、CPU 和内存及其可用更新，带有刷新按钮"
+          },
+          "icon": "node.svg"
+        }
+      ]
+    },
+    "webComponents": [
+      "webcomponents/proxmox-machine.json",
+      "webcomponents/proxmox-node.json"
+    ],
     "nogit": true,
     "enabled": false,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.proxmox/master/admin/proxmox.png",
@@ -244,6 +313,8 @@
     "requestCephInformation": false,
     "requestStorageInformation": true,
     "requestStorageInformationBackup": false,
+    "requestUpdateInformation": false,
+    "updateCheckInterval": 60,
     "tableDevices": []
   },
   "instanceObjects": [

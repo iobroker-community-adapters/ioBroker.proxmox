@@ -14,6 +14,7 @@ import {
     CONFIRM_STOP,
     DEVICE_GROUPS,
     DEVICE_STATUS,
+    UPDATES,
     UPTIME,
     nodeButtonLabels,
     vmButtonLabels,
@@ -138,6 +139,8 @@ const NODE_DETAILS: DetailGroup[] = [
     [
         ['uptime_text', UPTIME],
         ['cpu_max', 'CPU cores'],
+        // Nur mit der Option "Verfügbare Updates abfragen", sonst gibt es den State nicht
+        ['updates.count', UPDATES],
     ],
     [
         ['cpu', 'CPU'],

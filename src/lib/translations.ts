@@ -162,6 +162,79 @@ export const nodeButtonLabels = { shutdown: SHUTDOWN, reboot: REBOOT };
  */
 export const stateNames = { status: STATUS, available: AVAILABLE };
 
+// ─── Verfügbare Updates der Nodes ─────────────────────────────────────────────
+
+/** Kurze Beschriftung, zum Beispiel in den Details des Device Managers */
+export const UPDATES = {
+    en: 'Updates',
+    de: 'Updates',
+    ru: 'Обновления',
+    pt: 'Atualizações',
+    nl: 'Updates',
+    fr: 'Mises à jour',
+    it: 'Aggiornamenti',
+    es: 'Actualizaciones',
+    pl: 'Aktualizacje',
+    uk: 'Оновлення',
+    'zh-cn': '更新',
+};
+
+/** Namen der Objekte unter `node_<name>.updates` */
+export const updateStateNames = {
+    folder: {
+        en: 'Available updates',
+        de: 'Verfügbare Updates',
+        ru: 'Доступные обновления',
+        pt: 'Atualizações disponíveis',
+        nl: 'Beschikbare updates',
+        fr: 'Mises à jour disponibles',
+        it: 'Aggiornamenti disponibili',
+        es: 'Actualizaciones disponibles',
+        pl: 'Dostępne aktualizacje',
+        uk: 'Доступні оновлення',
+        'zh-cn': '可用更新',
+    },
+    count: {
+        en: 'Number of available updates',
+        de: 'Anzahl verfügbarer Updates',
+        ru: 'Количество доступных обновлений',
+        pt: 'Número de atualizações disponíveis',
+        nl: 'Aantal beschikbare updates',
+        fr: 'Nombre de mises à jour disponibles',
+        it: 'Numero di aggiornamenti disponibili',
+        es: 'Número de actualizaciones disponibles',
+        pl: 'Liczba dostępnych aktualizacji',
+        uk: 'Кількість доступних оновлень',
+        'zh-cn': '可用更新数量',
+    },
+    list: {
+        en: 'List of available updates',
+        de: 'Liste verfügbarer Updates',
+        ru: 'Список доступных обновлений',
+        pt: 'Lista de atualizações disponíveis',
+        nl: 'Lijst met beschikbare updates',
+        fr: 'Liste des mises à jour disponibles',
+        it: 'Elenco degli aggiornamenti disponibili',
+        es: 'Lista de actualizaciones disponibles',
+        pl: 'Lista dostępnych aktualizacji',
+        uk: 'Список доступних оновлень',
+        'zh-cn': '可用更新列表',
+    },
+    refresh: {
+        en: 'Refresh package index',
+        de: 'Paketliste aktualisieren',
+        ru: 'Обновить список пакетов',
+        pt: 'Atualizar lista de pacotes',
+        nl: 'Pakketlijst vernieuwen',
+        fr: 'Actualiser la liste des paquets',
+        it: 'Aggiorna elenco pacchetti',
+        es: 'Actualizar lista de paquetes',
+        pl: 'Odśwież listę pakietów',
+        uk: 'Оновити список пакетів',
+        'zh-cn': '刷新软件包列表',
+    },
+};
+
 // ─── Device Manager ─────────────────────────────────────────────────────────
 
 export const CONFIRM_SHUTDOWN = {

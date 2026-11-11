@@ -913,6 +913,56 @@ describe('onMessage() – cleanup', () => {
     });
 });
 
+// ─── onMessage (Listen der devices-Widgets) ───────────────────────────────────
+
+describe('onMessage() – getMachines / getNodes', () => {
+    const CHANNELS = {
+        'proxmox.0.qemu_web':  { type: 'channel', common: { name: 'web' }, native: { type: 'qemu' } },
+        'proxmox.0.lxc_db':    { type: 'channel', common: { name: 'db' }, native: { type: 'lxc' } },
+        'proxmox.0.node_pve':  { type: 'channel', common: { name: 'pve' }, native: { type: 'node' } },
+        'proxmox.0.storage_local': { type: 'channel', common: { name: 'local' }, native: { type: 'storage' } },
+    };
+
+    async function ask(command, withCallback = true) {
+        const inst = makeProxmoxInstance();
+        inst.getForeignObjectsAsync = async () => CHANNELS;
+        const sent = [];
+        inst.sendTo = (...args) => sent.push(args);
+        await inst.onMessage({ command, from: 'system.adapter.admin.0', callback: withCallback ? { id: 1 } : undefined });
+        return { inst, sent };
+    }
+
+    it('getMachines antwortet mit den VMs und Containern', async () => {
+        const { sent } = await ask('getMachines');
+        assert.equal(sent.length, 1);
+        const [to, command, list, callback] = sent[0];
+        assert.equal(to, 'system.adapter.admin.0');
+        assert.equal(command, 'getMachines');
+        assert.deepEqual(callback, { id: 1 });
+        assert.deepEqual(list.map(o => o.value), ['proxmox.0.lxc_db', 'proxmox.0.qemu_web']);
+    });
+
+    it('getNodes antwortet nur mit den Nodes', async () => {
+        const { sent } = await ask('getNodes');
+        assert.deepEqual(sent[0][2].map(o => o.value), ['proxmox.0.node_pve']);
+    });
+
+    it('antwortet ohne callback nicht', async () => {
+        const { sent } = await ask('getMachines', false);
+        assert.equal(sent.length, 0);
+    });
+
+    it('antwortet mit einer leeren Liste, wenn die Objekte nicht lesbar sind', async () => {
+        const inst = makeProxmoxInstance();
+        inst.getForeignObjectsAsync = async () => { throw new Error('DB closed'); };
+        const sent = [];
+        inst.sendTo = (...args) => sent.push(args);
+        await inst.onMessage({ command: 'getNodes', from: 'system.adapter.admin.0', callback: { id: 2 } });
+        assert.deepEqual(sent[0][2], []);
+        assert.ok(inst._logs.warn.some(m => m.includes('DB closed')));
+    });
+});
+
 // ─── createNodes ──────────────────────────────────────────────────────────────
 
 describe('createNodes()', () => {
@@ -1542,5 +1592,81 @@ describe('Einzel-Hosts mit gleichen Namen', () => {
         assert.equal(calls, 1);
         assert.equal(inst.instanceIds.size, 0);
         assert.ok(inst.objects['proxmox.0.node_pve']);
+    });
+});
+
+// ─── Verfügbare Updates der Nodes ─────────────────────────────────────────────
+
+describe('Verfügbare Updates der Nodes', () => {
+    const NODES = [{ node: 'pve', type: 'node', status: 'online', cpu: 0.1, maxcpu: 4 }];
+
+    function setup(config = {}) {
+        const inst = makeProxmoxInstance({ requestUpdateInformation: true, updateCheckInterval: 60, ...config });
+        let reads = 0;
+        const mock = useProxmoxMock(inst, makeProxmoxMock({
+            getNodes: async () => NODES,
+            getNodeUpdates: async () => {
+                reads++;
+                return [{ Package: 'pve-manager', OldVersion: '9.0.1', Version: '9.0.2', Origin: 'Proxmox' }];
+            },
+        }));
+        inst.objects['proxmox.0.node_pve'] = { type: 'channel', common: { name: 'pve' }, native: { type: 'node' } };
+        return { inst, mock, reads: () => reads };
+    }
+
+    /** Führt die nächste geplante Abfrage aus */
+    async function poll(inst) {
+        await inst._timers.filter(t => !t.cancelled).at(-1).fn();
+    }
+
+    it('liest die Updates in der ersten Abfrage und danach erst wieder nach dem Intervall', async () => {
+        const { inst, mock, reads } = setup();
+
+        inst.sendRequest(1);
+        await poll(inst);
+        assert.equal(reads(), 1);
+        assert.equal(inst._states['proxmox.0.node_pve.updates.count'].val, 1);
+
+        await poll(inst);
+        assert.equal(reads(), 1, 'innerhalb des Intervalls nicht erneut');
+
+        inst.lastUpdateCheck.set(mock, Date.now() - 61 * 60000);
+        await poll(inst);
+        assert.equal(reads(), 2, 'nach dem Intervall erneut');
+    });
+
+    it('liest ohne die Option keine Updates', async () => {
+        const { inst, reads } = setup({ requestUpdateInformation: false });
+
+        inst.sendRequest(1);
+        await poll(inst);
+
+        assert.equal(reads(), 0);
+    });
+
+    it('Button updates.refresh aktualisiert die Paketliste des Nodes und liest die Updates neu', async () => {
+        const { inst, mock, reads } = setup();
+        let refreshed = '';
+        // Ohne UPID wartet der Button nicht auf die Aufgabe
+        mock.refreshNodeUpdates = async node => {
+            refreshed = node;
+            return { data: undefined };
+        };
+        inst.getForeignObjectAsync = async () => ({ native: { type: 'node', node: 'pve' } });
+
+        await inst.onStateChange('proxmox.0.node_pve.updates.refresh', { val: true, ack: false });
+
+        assert.equal(refreshed, 'pve');
+        assert.equal(reads(), 1);
+        assert.equal(inst._states['proxmox.0.node_pve.updates.count'].val, 1);
+        // Das Widget wartet auf die Bestätigung
+        const acks = (inst._calls['setStateAsync'] || []).filter(c => c[0] === 'proxmox.0.node_pve.updates.refresh');
+        assert.deepEqual(acks.map(c => c[1]), [{ val: true, ack: true }]);
+    });
+
+    it('setzt ein Intervall unter 10 Minuten auf 10 Minuten', async () => {
+        const inst = makeProxmoxInstance({ requestUpdateInformation: true, updateCheckInterval: 1 });
+        await inst.initConfig();
+        assert.equal(inst.config.updateCheckInterval, 10);
     });
 });

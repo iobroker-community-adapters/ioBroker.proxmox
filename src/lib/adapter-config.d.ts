@@ -13,6 +13,10 @@ declare global {
             requestCephInformation: boolean;
             requestStorageInformation: boolean;
             requestStorageInformationBackup: boolean;
+            /** Verfügbare Paket-Updates der Nodes lesen (`node_<name>.updates.*`) */
+            requestUpdateInformation: boolean;
+            /** Abstand der Update-Prüfung in Minuten (Minimum 10) */
+            updateCheckInterval: number;
             tableDevices: ProxmoxDeviceConfig[];
 
             /**

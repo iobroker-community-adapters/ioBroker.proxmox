@@ -31,5 +31,8 @@
     "API Token": "API-Token",
     "tokenId": "Token-ID",
     "tokenSecret": "Token-Secret",
-    "Device manager": "Gerätemanager"
+    "Device manager": "Gerätemanager",
+    "Request available updates": "Verfügbare Updates abfragen",
+    "Update check interval (minutes)": "Intervall der Update-Prüfung (Minuten)",
+    "Package updates of the Proxmox nodes, not of VMs or containers. The refresh button needs the permission Sys.Modify.": "Paket-Updates der Proxmox-Nodes, nicht der VMs oder Container. Der Button zum Aktualisieren benötigt das Recht Sys.Modify."
 }
