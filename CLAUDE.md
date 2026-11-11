@@ -22,12 +22,16 @@ npm run test:unit                         # node --test test/*.test.js against b
 node --test test/vms.test.js              # single test file
 npm run test:integration                  # starts a real js-controller + adapter instance
 npm run build:widgets                     # builds src-widgets into widgets/proxmox, commit the result
-npm run check:widgets                     # type check of the widgets (needs npm i in src-widgets)
+npm run build:devices                     # builds src-devices into admin/dm-widgets, commit the result
+npm run build:wc                          # builds src-webcomponents into admin/webcomponents, commit the result
+npm run check:widgets                     # type check of the vis-2 widgets (needs npm i in src-widgets)
+npm run check:devices                     # type check of the devices widgets (needs npm i in src-devices)
+npm run check:wc                          # type check of the web components (needs npm i in src-webcomponents)
 npm run translate                         # fills the other languages from admin/i18n/en.json
 npm run release-patch                     # @alcalzone/release-script, moves the README changelog into io-package news
 ```
 
-There is deliberately **no `prepare` script**: `npm ci` does not build. Because `build/` is neither committed nor built on install, `common.nogit` is `true`, so the adapter can only be installed from npm. The backend build is plain `tsc`. `tasks.ts` only builds the vis-2 widgets, and `widgets/` is committed, so a change in `src-widgets` needs `npm run build:widgets` before the commit. CI does not build or check the widgets.
+There is deliberately **no `prepare` script**: `npm ci` does not build. Because `build/` is neither committed nor built on install, `common.nogit` is `true`, so the adapter can only be installed from npm. The backend build is plain `tsc`. `tasks.ts` only builds the widgets (vis-2, `--devices`, `--wc`), and their output in `widgets/`, `admin/dm-widgets/` and `admin/webcomponents/` is committed, so a change in `src-widgets`, `src-devices`, `src-webcomponents` or `src-shared` needs the matching build before the commit (a change in `src-shared` all three). CI does not build or check the widgets. The three widget folders are excluded from ESLint, only type checked.
 
 The integration test aborts with "JS-Controller is already running!" if a js-controller runs on the machine.
 
@@ -35,13 +39,17 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 
 | Path | Content |
 | --- | --- |
-| `src/main.ts` | `Proxmox extends utils.Adapter`: lifecycle, polling loop, button handling, `cleanup` message |
+| `src/main.ts` | `Proxmox extends utils.Adapter`: lifecycle, polling loop, button handling, messages `cleanup`, `getMachines` and `getNodes` |
 | `src/lib/proxmox.ts` | `ProxmoxUtils`, the HTTP client: login, 5xx retries, failover |
 | `src/lib/nodes.ts` | `createNodes` / `setNodes`, node and disk states |
 | `src/lib/vms.ts` | `createVM` / `setMachines`, VM, LXC and storage states |
 | `src/lib/updates.ts` | available package updates of the nodes (`node_<name>.updates.*`): objects, reading, the `updates.refresh` button. `setNodes` reads them only when `isUpdateCheckDue()` in `main.ts` says so, at most every `updateCheckInterval` minutes per instance |
 | `src-widgets/src/MachineCard.tsx` | vis-2 widget of a VM or container, uses only its states. `ProxmoxMachineWidget.tsx` declares the settings, `MachineField.tsx` is the machine (or node) list in the editor, `MachineIcon.tsx` the symbol, `translations.ts` holds the words |
 | `src-widgets/src/NodeCard.tsx` | vis-2 widget of a node with its available updates, settings in `ProxmoxNodeWidget.tsx`. The refresh button waits until the adapter confirms `updates.refresh` with `ack` |
+| `src-shared/` | shared by all three widget builds: `translations.ts` (the words of all widgets, 11 languages; `src-widgets/src/translations.ts` re-exports it) and `proxmox.ts` (state names, commands, formats, status colors, SVG paths). No React, no MUI |
+| `src-devices/src/` | widgets of ioBroker.devices (`common.deviceWidgets`): Module Federation remote `DevicesWidgetProxmoxSet`, entry `customDevices.js`. `ProxmoxWidget.tsx` is the base (channel object, subscriptions, tile frame for 1x1, 2x0.5, 2x1), `ProxmoxMachineComponent.tsx` and `ProxmoxNodeComponent.tsx` the widgets. React and MUI come from the host through `@iobroker/dm-widgets`, only `Box` and `Typography` are used. The machine and the node are picked with `selectSendTo` from the instance chosen in the setting `instance`: the messages `getMachines` / `getNodes` answer with the channels of `src/lib/widgets.ts`. The stored value is the full channel ID. `vite.config.ts` shares only `@iobroker/dm-widgets` and `react`: every shared module gets a fallback bundle of several MB |
+| `src-webcomponents/src/` | web components `<iob-proxmox-machine>` and `<iob-proxmox-node>` (`@iobroker/web-components`, `common.webComponents`), one `vite build --mode <name>` each, plain React + CSS in a shadow root, React from the host (`lib/esm/react-19.js`). The build writes the manifests (`manifest.ts`); their `name` is the `label` of the devices widget in io-package.json, so devices shows its own widget instead. Layout by container queries in `styles.ts` |
+| `src/lib/widgets.ts` | `getChannelOptions`: the channels of a type as `selectSendTo` list (value = channel ID, label = name, description = type and ID) |
 | `src/lib/DeviceManagement.ts` | Device manager (`@iobroker/dm-utils`), reads the channels in `objects` and the button objects, runs commands through `getButtonAction`. Icons come from `icons.ts` as base64 SVG: the admin only knows a few `fa-*` names and draws a question mark for the others |
 | `src/lib/ceph.ts`, `src/lib/ha.ts` | Ceph and HA trees, generated from whatever the API returns |
 | `src/lib/methods.ts` | helpers: unit conversion, `findState`, `withTimeout`, `withRetry` |
@@ -78,7 +86,7 @@ Machines of the same type and name get `<name>_<vmid>` instead of `<name>`, see 
 
 - **Config in three places:** `src/lib/adapter-config.d.ts`, `native` in `io-package.json` and `admin/jsonConfig.json` must match. A field missing from jsonConfig is deleted from `native` on the next save.
 - **Timers:** only `this.setTimeout` / `adapter.setTimeout`, never the global ones. While the adapter stops, `setTimeout` returns `undefined` and no callback fires; `withTimeout` and `_delay` handle that.
-- **Compatibility:** object IDs, roles, `native` keys and the `cleanup` command are used by existing installations and user scripts.
+- **Compatibility:** object IDs, roles, `native` keys and the `cleanup` command are used by existing installations and user scripts, the messages `getMachines` and `getNodes` by the settings of the devices widgets.
 - **Passwords:** `realmPassword` and `realmTokenSecret` are stored unencrypted in `native.tableDevices`. Encrypting them would invalidate the stored credentials of existing instances, so it needs a migration.
 - **Translations:** `admin/i18n/<lang>.json` are flat, keys are the labels from `jsonConfig.json`, `en.json` is the reference. Mind the file encoding: a wrong one destroyed the texts in v2.5.0.
 - **Log messages** are partly German. The unit tests assert on some of them.

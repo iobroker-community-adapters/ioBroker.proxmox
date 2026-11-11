@@ -913,6 +913,56 @@ describe('onMessage() – cleanup', () => {
     });
 });
 
+// ─── onMessage (Listen der devices-Widgets) ───────────────────────────────────
+
+describe('onMessage() – getMachines / getNodes', () => {
+    const CHANNELS = {
+        'proxmox.0.qemu_web':  { type: 'channel', common: { name: 'web' }, native: { type: 'qemu' } },
+        'proxmox.0.lxc_db':    { type: 'channel', common: { name: 'db' }, native: { type: 'lxc' } },
+        'proxmox.0.node_pve':  { type: 'channel', common: { name: 'pve' }, native: { type: 'node' } },
+        'proxmox.0.storage_local': { type: 'channel', common: { name: 'local' }, native: { type: 'storage' } },
+    };
+
+    async function ask(command, withCallback = true) {
+        const inst = makeProxmoxInstance();
+        inst.getForeignObjectsAsync = async () => CHANNELS;
+        const sent = [];
+        inst.sendTo = (...args) => sent.push(args);
+        await inst.onMessage({ command, from: 'system.adapter.admin.0', callback: withCallback ? { id: 1 } : undefined });
+        return { inst, sent };
+    }
+
+    it('getMachines antwortet mit den VMs und Containern', async () => {
+        const { sent } = await ask('getMachines');
+        assert.equal(sent.length, 1);
+        const [to, command, list, callback] = sent[0];
+        assert.equal(to, 'system.adapter.admin.0');
+        assert.equal(command, 'getMachines');
+        assert.deepEqual(callback, { id: 1 });
+        assert.deepEqual(list.map(o => o.value), ['proxmox.0.lxc_db', 'proxmox.0.qemu_web']);
+    });
+
+    it('getNodes antwortet nur mit den Nodes', async () => {
+        const { sent } = await ask('getNodes');
+        assert.deepEqual(sent[0][2].map(o => o.value), ['proxmox.0.node_pve']);
+    });
+
+    it('antwortet ohne callback nicht', async () => {
+        const { sent } = await ask('getMachines', false);
+        assert.equal(sent.length, 0);
+    });
+
+    it('antwortet mit einer leeren Liste, wenn die Objekte nicht lesbar sind', async () => {
+        const inst = makeProxmoxInstance();
+        inst.getForeignObjectsAsync = async () => { throw new Error('DB closed'); };
+        const sent = [];
+        inst.sendTo = (...args) => sent.push(args);
+        await inst.onMessage({ command: 'getNodes', from: 'system.adapter.admin.0', callback: { id: 2 } });
+        assert.deepEqual(sent[0][2], []);
+        assert.ok(inst._logs.warn.some(m => m.includes('DB closed')));
+    });
+});
+
 // ─── createNodes ──────────────────────────────────────────────────────────────
 
 describe('createNodes()', () => {

@@ -1,0 +1,23 @@
+{
+    "name": "iobroker-web-components-proxmox",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Web components of ioBroker.proxmox. Built into ../admin/webcomponents.",
+    "scripts": {
+        "build": "vite build --mode proxmox-machine && vite build --mode proxmox-node",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@iobroker/types": "^7.2.5",
+        "@iobroker/web-components": "^0.6.0",
+        "@types/node": "^22.20.2",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
+        "@vitejs/plugin-react": "^6.1.2",
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "typescript": "~6.0.3",
+        "vite": "^8.3.5"
+    }
+}

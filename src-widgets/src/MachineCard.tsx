@@ -23,6 +23,7 @@ import { PlayArrow, Schedule, Stop } from '@mui/icons-material';
 import { I18n } from '@iobroker/gui-components';
 import type { Connection } from '@iobroker/gui-components';
 
+import { formatSize, formatUptime } from '../../src-shared/proxmox';
 import { MachineIcon } from './MachineIcon';
 
 export type StopCommand = 'shutdown' | 'stop';
@@ -79,35 +80,8 @@ const KNOWN_STATUS = ['running', 'stopped', 'paused', 'suspended', 'offline'];
 
 const STATE_NAMES = ['status', 'cpu', 'cpus', 'mem', 'maxmem', 'mem_lev', 'uptime'];
 
-const MIB_PER_GIB = 1024;
-
-/**
- * @param seconds uptime in seconds
- * @returns for example `3 d 4 h`. Empty while the machine does not run. Like `formatUptime` of the adapter.
- */
-export function formatUptime(seconds: unknown): string {
-    if (typeof seconds !== 'number' || seconds <= 0) {
-        return '';
-    }
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    if (days) {
-        return `${days} d ${hours} h`;
-    }
-    if (hours) {
-        return `${hours} h ${minutes} min`;
-    }
-    return minutes ? `${minutes} min` : '< 1 min';
-}
-
-/**
- * @param mib size in MiB
- * @returns for example `4 GiB`
- */
-export function formatSize(mib: number): string {
-    return mib < MIB_PER_GIB ? `${mib} MiB` : `${Math.round((mib / MIB_PER_GIB) * 10) / 10} GiB`;
-}
+// The devices widgets and the web components format the same way
+export { formatSize, formatUptime };
 
 /**
  * @param socket connection of vis-2

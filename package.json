@@ -53,7 +53,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:widgets": "tsx tasks.ts",
+    "build:devices": "tsx tasks.ts --devices",
+    "build:wc": "tsx tasks.ts --wc",
     "check:widgets": "npm --prefix src-widgets run typecheck",
+    "check:devices": "npm --prefix src-devices run typecheck",
+    "check:wc": "npm --prefix src-webcomponents run typecheck",
     "watch": "tsc -p tsconfig.build.json --watch",
     "check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint -c eslint.config.mjs",

@@ -1,0 +1,216 @@
+{
+    "$schema": "https://raw.githubusercontent.com/ioBroker/web-components/main/schemas/manifest.json",
+    "manifestVersion": 1,
+    "tag": "iob-proxmox-node",
+    "name": {
+        "en": "Proxmox node",
+        "de": "Proxmox-Node",
+        "ru": "Узел Proxmox",
+        "pt": "Nó Proxmox",
+        "nl": "Proxmox-node",
+        "fr": "Nœud Proxmox",
+        "it": "Nodo Proxmox",
+        "es": "Nodo de Proxmox",
+        "pl": "Węzeł Proxmox",
+        "uk": "Вузол Proxmox",
+        "zh-cn": "Proxmox 节点"
+    },
+    "description": {
+        "en": "State, CPU and RAM of a Proxmox node and its available updates, with a button to refresh them",
+        "de": "Zustand, CPU und RAM eines Proxmox-Nodes und seine verfügbaren Updates, mit einer Taste zum Aktualisieren",
+        "ru": "Состояние, ЦП и ОЗУ узла Proxmox и доступные обновления, с кнопкой их обновления",
+        "pt": "Estado, CPU e RAM de um nó Proxmox e as suas atualizações disponíveis, com um botão para as atualizar",
+        "nl": "Status, CPU en RAM van een Proxmox-node en de beschikbare updates, met een knop om ze te vernieuwen",
+        "fr": "État, CPU et RAM d'un nœud Proxmox et ses mises à jour disponibles, avec un bouton pour les actualiser",
+        "it": "Stato, CPU e RAM di un nodo Proxmox e i suoi aggiornamenti disponibili, con un pulsante per aggiornarli",
+        "es": "Estado, CPU y RAM de un nodo de Proxmox y sus actualizaciones disponibles, con un botón para actualizarlas",
+        "pl": "Stan, CPU i RAM węzła Proxmox oraz dostępne aktualizacje, z przyciskiem do ich odświeżenia",
+        "uk": "Стан, ЦП і ОЗП вузла Proxmox та доступні оновлення, з кнопкою їх оновлення",
+        "zh-cn": "Proxmox 节点的状态、CPU 和内存及其可用更新，带有刷新按钮"
+    },
+    "icon": "../dm-widgets/node.svg",
+    "module": "proxmox-node.js",
+    "size": {
+        "width": 320,
+        "height": 160
+    },
+    "settings": {
+        "type": "panel",
+        "items": {
+            "node": {
+                "type": "objectId",
+                "types": "channel",
+                "root": "proxmox",
+                "label": {
+                    "en": "Node",
+                    "de": "Node",
+                    "ru": "Узел",
+                    "pt": "Nó",
+                    "nl": "Node",
+                    "fr": "Nœud",
+                    "it": "Nodo",
+                    "es": "Nodo",
+                    "pl": "Węzeł",
+                    "uk": "Вузол",
+                    "zh-cn": "节点"
+                },
+                "help": {
+                    "en": "The channel of the node, for example proxmox.0.node_pve",
+                    "de": "Der Kanal des Nodes, zum Beispiel proxmox.0.node_pve",
+                    "ru": "Канал узла, например proxmox.0.node_pve",
+                    "pt": "O canal do nó, por exemplo proxmox.0.node_pve",
+                    "nl": "Het kanaal van de node, bijvoorbeeld proxmox.0.node_pve",
+                    "fr": "Le canal du nœud, par exemple proxmox.0.node_pve",
+                    "it": "Il canale del nodo, ad esempio proxmox.0.node_pve",
+                    "es": "El canal del nodo, por ejemplo proxmox.0.node_pve",
+                    "pl": "Kanał węzła, na przykład proxmox.0.node_pve",
+                    "uk": "Канал вузла, наприклад proxmox.0.node_pve",
+                    "zh-cn": "节点的通道，例如 proxmox.0.node_pve"
+                }
+            },
+            "name": {
+                "type": "text",
+                "label": {
+                    "en": "Title",
+                    "de": "Titel",
+                    "ru": "Заголовок",
+                    "pt": "Título",
+                    "nl": "Titel",
+                    "fr": "Titre",
+                    "it": "Titolo",
+                    "es": "Título",
+                    "pl": "Tytuł",
+                    "uk": "Заголовок",
+                    "zh-cn": "标题"
+                },
+                "help": {
+                    "en": "If empty, the name of the node is shown",
+                    "de": "Ist er leer, wird der Name des Nodes angezeigt",
+                    "ru": "Если пусто, показывается имя узла",
+                    "pt": "Se vazio, é mostrado o nome do nó",
+                    "nl": "Indien leeg, wordt de naam van de node getoond",
+                    "fr": "Si vide, le nom du nœud est affiché",
+                    "it": "Se vuoto, viene mostrato il nome del nodo",
+                    "es": "Si está vacío, se muestra el nombre del nodo",
+                    "pl": "Jeśli puste, wyświetlana jest nazwa węzła",
+                    "uk": "Якщо порожньо, показується назва вузла",
+                    "zh-cn": "如果为空，则显示节点名称"
+                }
+            },
+            "showUptime": {
+                "type": "checkbox",
+                "default": true,
+                "label": {
+                    "en": "Show uptime",
+                    "de": "Laufzeit anzeigen",
+                    "ru": "Показывать время работы",
+                    "pt": "Mostrar tempo de atividade",
+                    "nl": "Uptime tonen",
+                    "fr": "Afficher le temps de fonctionnement",
+                    "it": "Mostra tempo di attività",
+                    "es": "Mostrar tiempo de actividad",
+                    "pl": "Pokaż czas pracy",
+                    "uk": "Показувати час роботи",
+                    "zh-cn": "显示运行时间"
+                }
+            },
+            "showDetails": {
+                "type": "checkbox",
+                "default": true,
+                "label": {
+                    "en": "Show CPU and RAM",
+                    "de": "CPU und RAM anzeigen",
+                    "ru": "Показать CPU и RAM",
+                    "pt": "Mostrar CPU e RAM",
+                    "nl": "CPU en RAM tonen",
+                    "fr": "Afficher CPU et RAM",
+                    "it": "Mostra CPU e RAM",
+                    "es": "Mostrar CPU y RAM",
+                    "pl": "Pokaż CPU i RAM",
+                    "uk": "Показати CPU і RAM",
+                    "zh-cn": "显示 CPU 和内存"
+                }
+            },
+            "updates": {
+                "type": "select",
+                "default": "control",
+                "label": {
+                    "en": "Available updates",
+                    "de": "Verfügbare Updates",
+                    "ru": "Доступные обновления",
+                    "pt": "Atualizações disponíveis",
+                    "nl": "Beschikbare updates",
+                    "fr": "Mises à jour disponibles",
+                    "it": "Aggiornamenti disponibili",
+                    "es": "Actualizaciones disponibles",
+                    "pl": "Dostępne aktualizacje",
+                    "uk": "Доступні оновлення",
+                    "zh-cn": "可用更新"
+                },
+                "help": {
+                    "en": "Needs the option \"Request available updates\" in the adapter",
+                    "de": "Benötigt im Adapter die Option „Verfügbare Updates abfragen“",
+                    "ru": "Требуется опция «Запрашивать доступные обновления» в адаптере",
+                    "pt": "Requer a opção \"Solicitar atualizações disponíveis\" no adaptador",
+                    "nl": "Vereist de optie \"Beschikbare updates opvragen\" in de adapter",
+                    "fr": "Nécessite l'option « Demander les mises à jour disponibles » dans l'adaptateur",
+                    "it": "Richiede l'opzione «Richiedi aggiornamenti disponibili» nell'adattatore",
+                    "es": "Requiere la opción \"Solicitar actualizaciones disponibles\" en el adaptador",
+                    "pl": "Wymaga opcji „Pobieraj dostępne aktualizacje” w adapterze",
+                    "uk": "Потрібна опція «Запитувати доступні оновлення» в адаптері",
+                    "zh-cn": "需要在适配器中启用“获取可用更新”选项"
+                },
+                "options": [
+                    {
+                        "value": "control",
+                        "label": {
+                            "en": "Show and refresh",
+                            "de": "Anzeigen und aktualisieren",
+                            "ru": "Показывать и обновлять",
+                            "pt": "Mostrar e atualizar",
+                            "nl": "Tonen en vernieuwen",
+                            "fr": "Afficher et actualiser",
+                            "it": "Mostra e aggiorna",
+                            "es": "Mostrar y actualizar",
+                            "pl": "Pokaż i odśwież",
+                            "uk": "Показувати й оновлювати",
+                            "zh-cn": "显示并刷新"
+                        }
+                    },
+                    {
+                        "value": "show",
+                        "label": {
+                            "en": "Show only",
+                            "de": "Nur anzeigen",
+                            "ru": "Только показывать",
+                            "pt": "Apenas mostrar",
+                            "nl": "Alleen tonen",
+                            "fr": "Afficher seulement",
+                            "it": "Solo mostra",
+                            "es": "Solo mostrar",
+                            "pl": "Tylko pokaż",
+                            "uk": "Лише показувати",
+                            "zh-cn": "仅显示"
+                        }
+                    },
+                    {
+                        "value": "hidden",
+                        "label": {
+                            "en": "Do not show",
+                            "de": "Nicht anzeigen",
+                            "ru": "Не показывать",
+                            "pt": "Não mostrar",
+                            "nl": "Niet tonen",
+                            "fr": "Ne pas afficher",
+                            "it": "Non mostrare",
+                            "es": "No mostrar",
+                            "pl": "Nie pokazuj",
+                            "uk": "Не показувати",
+                            "zh-cn": "不显示"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -20,8 +20,11 @@ export default [
             'build/**/*',
             'tmp/**/*',
             '.**/*',
-            // Has its own TypeScript project and toolchain, see `npm run check:widgets`
+            // Have their own TypeScript projects and toolchains, see `npm run check:widgets`, `check:devices`, `check:wc`
             'src-widgets/**/*',
+            'src-devices/**/*',
+            'src-webcomponents/**/*',
+            'src-shared/**/*',
             'widgets/**/*',
             'tasks.ts',
         ],

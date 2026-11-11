@@ -1,0 +1,236 @@
+{
+    "$schema": "https://raw.githubusercontent.com/ioBroker/web-components/main/schemas/manifest.json",
+    "manifestVersion": 1,
+    "tag": "iob-proxmox-machine",
+    "name": {
+        "en": "Proxmox VM or container",
+        "de": "Proxmox-VM oder -Container",
+        "ru": "ВМ или контейнер Proxmox",
+        "pt": "VM ou contêiner Proxmox",
+        "nl": "Proxmox-VM of -container",
+        "fr": "VM ou conteneur Proxmox",
+        "it": "VM o container Proxmox",
+        "es": "VM o contenedor de Proxmox",
+        "pl": "Maszyna wirtualna lub kontener Proxmox",
+        "uk": "ВМ або контейнер Proxmox",
+        "zh-cn": "Proxmox 虚拟机或容器"
+    },
+    "description": {
+        "en": "State, uptime, CPU and RAM of a VM or container, with buttons to start and stop it",
+        "de": "Zustand, Laufzeit, CPU und RAM einer VM oder eines Containers, mit Tasten zum Starten und Stoppen",
+        "ru": "Состояние, время работы, ЦП и ОЗУ ВМ или контейнера, с кнопками запуска и остановки",
+        "pt": "Estado, tempo de atividade, CPU e RAM de uma VM ou contêiner, com botões para iniciar e parar",
+        "nl": "Status, uptime, CPU en RAM van een VM of container, met knoppen om te starten en te stoppen",
+        "fr": "État, durée de fonctionnement, CPU et RAM d'une VM ou d'un conteneur, avec des boutons pour démarrer et arrêter",
+        "it": "Stato, tempo di attività, CPU e RAM di una VM o di un container, con pulsanti per avviare e arrestare",
+        "es": "Estado, tiempo de actividad, CPU y RAM de una VM o contenedor, con botones para iniciar y detener",
+        "pl": "Stan, czas pracy, CPU i RAM maszyny wirtualnej lub kontenera, z przyciskami do uruchamiania i zatrzymywania",
+        "uk": "Стан, час роботи, ЦП і ОЗП ВМ або контейнера, з кнопками запуску та зупинки",
+        "zh-cn": "虚拟机或容器的状态、运行时间、CPU 和内存，带有启动和停止按钮"
+    },
+    "icon": "../dm-widgets/machine.svg",
+    "module": "proxmox-machine.js",
+    "size": {
+        "width": 320,
+        "height": 160
+    },
+    "settings": {
+        "type": "panel",
+        "items": {
+            "machine": {
+                "type": "objectId",
+                "types": "channel",
+                "root": "proxmox",
+                "label": {
+                    "en": "VM or container",
+                    "de": "VM oder Container",
+                    "ru": "ВМ или контейнер",
+                    "pt": "VM ou contentor",
+                    "nl": "VM of container",
+                    "fr": "VM ou conteneur",
+                    "it": "VM o container",
+                    "es": "VM o contenedor",
+                    "pl": "VM lub kontener",
+                    "uk": "ВМ або контейнер",
+                    "zh-cn": "虚拟机或容器"
+                },
+                "help": {
+                    "en": "The channel of the VM or container, for example proxmox.0.lxc_web",
+                    "de": "Der Kanal der VM oder des Containers, zum Beispiel proxmox.0.lxc_web",
+                    "ru": "Канал ВМ или контейнера, например proxmox.0.lxc_web",
+                    "pt": "O canal da VM ou do contêiner, por exemplo proxmox.0.lxc_web",
+                    "nl": "Het kanaal van de VM of container, bijvoorbeeld proxmox.0.lxc_web",
+                    "fr": "Le canal de la VM ou du conteneur, par exemple proxmox.0.lxc_web",
+                    "it": "Il canale della VM o del container, ad esempio proxmox.0.lxc_web",
+                    "es": "El canal de la VM o del contenedor, por ejemplo proxmox.0.lxc_web",
+                    "pl": "Kanał maszyny wirtualnej lub kontenera, na przykład proxmox.0.lxc_web",
+                    "uk": "Канал ВМ або контейнера, наприклад proxmox.0.lxc_web",
+                    "zh-cn": "虚拟机或容器的通道，例如 proxmox.0.lxc_web"
+                }
+            },
+            "name": {
+                "type": "text",
+                "label": {
+                    "en": "Title",
+                    "de": "Titel",
+                    "ru": "Заголовок",
+                    "pt": "Título",
+                    "nl": "Titel",
+                    "fr": "Titre",
+                    "it": "Titolo",
+                    "es": "Título",
+                    "pl": "Tytuł",
+                    "uk": "Заголовок",
+                    "zh-cn": "标题"
+                },
+                "help": {
+                    "en": "If empty, the name of the machine is shown",
+                    "de": "Ist er leer, wird der Name der Maschine angezeigt",
+                    "ru": "Если пусто, показывается имя машины",
+                    "pt": "Se estiver vazio, é mostrado o nome da máquina",
+                    "nl": "Indien leeg wordt de naam van de machine getoond",
+                    "fr": "Si vide, le nom de la machine est affiché",
+                    "it": "Se vuoto, viene mostrato il nome della macchina",
+                    "es": "Si está vacío, se muestra el nombre de la máquina",
+                    "pl": "Jeśli pusty, wyświetlana jest nazwa maszyny",
+                    "uk": "Якщо порожньо, показується ім'я машини",
+                    "zh-cn": "留空时显示机器名称"
+                }
+            },
+            "showUptime": {
+                "type": "checkbox",
+                "default": true,
+                "label": {
+                    "en": "Show uptime",
+                    "de": "Laufzeit anzeigen",
+                    "ru": "Показывать время работы",
+                    "pt": "Mostrar tempo de atividade",
+                    "nl": "Uptime tonen",
+                    "fr": "Afficher le temps de fonctionnement",
+                    "it": "Mostra tempo di attività",
+                    "es": "Mostrar tiempo de actividad",
+                    "pl": "Pokaż czas pracy",
+                    "uk": "Показувати час роботи",
+                    "zh-cn": "显示运行时间"
+                }
+            },
+            "showDetails": {
+                "type": "checkbox",
+                "default": true,
+                "label": {
+                    "en": "Show CPU and RAM",
+                    "de": "CPU und RAM anzeigen",
+                    "ru": "Показать CPU и RAM",
+                    "pt": "Mostrar CPU e RAM",
+                    "nl": "CPU en RAM tonen",
+                    "fr": "Afficher CPU et RAM",
+                    "it": "Mostra CPU e RAM",
+                    "es": "Mostrar CPU y RAM",
+                    "pl": "Pokaż CPU i RAM",
+                    "uk": "Показати CPU і RAM",
+                    "zh-cn": "显示 CPU 和内存"
+                }
+            },
+            "showControls": {
+                "type": "checkbox",
+                "default": true,
+                "label": {
+                    "en": "Show controls",
+                    "de": "Steuerung anzeigen",
+                    "ru": "Показать управление",
+                    "pt": "Mostrar controlos",
+                    "nl": "Bediening tonen",
+                    "fr": "Afficher les commandes",
+                    "it": "Mostra i comandi",
+                    "es": "Mostrar controles",
+                    "pl": "Pokaż sterowanie",
+                    "uk": "Показати керування",
+                    "zh-cn": "显示控制按钮"
+                },
+                "help": {
+                    "en": "If disabled, the widget only displays the state",
+                    "de": "Ist das deaktiviert, zeigt das Widget nur den Zustand an",
+                    "ru": "Если отключено, виджет только показывает состояние",
+                    "pt": "Se desativado, o widget apenas mostra o estado",
+                    "nl": "Indien uitgeschakeld toont de widget alleen de status",
+                    "fr": "Si désactivé, le widget affiche uniquement l'état",
+                    "it": "Se disattivato, il widget mostra solo lo stato",
+                    "es": "Si se desactiva, el widget solo muestra el estado",
+                    "pl": "Po wyłączeniu widżet pokazuje tylko stan",
+                    "uk": "Якщо вимкнено, віджет лише показує стан",
+                    "zh-cn": "禁用后，小部件仅显示状态"
+                }
+            },
+            "stopCommand": {
+                "type": "select",
+                "default": "shutdown",
+                "hidden": "data.showControls === false",
+                "label": {
+                    "en": "Stop button",
+                    "de": "Stopp-Taste",
+                    "ru": "Кнопка остановки",
+                    "pt": "Botão de parar",
+                    "nl": "Stopknop",
+                    "fr": "Bouton d'arrêt",
+                    "it": "Pulsante di arresto",
+                    "es": "Botón de detener",
+                    "pl": "Przycisk zatrzymania",
+                    "uk": "Кнопка зупинки",
+                    "zh-cn": "停止按钮"
+                },
+                "options": [
+                    {
+                        "value": "shutdown",
+                        "label": {
+                            "en": "Shut down cleanly",
+                            "de": "Sauber herunterfahren",
+                            "ru": "Корректно завершить работу",
+                            "pt": "Encerrar corretamente",
+                            "nl": "Correct afsluiten",
+                            "fr": "Éteindre proprement",
+                            "it": "Arresta regolarmente",
+                            "es": "Apagar correctamente",
+                            "pl": "Zamknij prawidłowo",
+                            "uk": "Коректно завершити роботу",
+                            "zh-cn": "正常关机"
+                        }
+                    },
+                    {
+                        "value": "stop",
+                        "label": {
+                            "en": "Power off immediately",
+                            "de": "Sofort ausschalten",
+                            "ru": "Немедленно отключить",
+                            "pt": "Desligar de imediato",
+                            "nl": "Direct uitschakelen",
+                            "fr": "Couper immédiatement",
+                            "it": "Spegni subito",
+                            "es": "Apagar de inmediato",
+                            "pl": "Wyłącz natychmiast",
+                            "uk": "Негайно вимкнути",
+                            "zh-cn": "立即断电"
+                        }
+                    }
+                ]
+            },
+            "askConfirmation": {
+                "type": "checkbox",
+                "default": true,
+                "hidden": "data.showControls === false",
+                "label": {
+                    "en": "Ask before stopping",
+                    "de": "Vor dem Stoppen nachfragen",
+                    "ru": "Спрашивать перед остановкой",
+                    "pt": "Perguntar antes de parar",
+                    "nl": "Vragen voor het stoppen",
+                    "fr": "Demander avant l'arrêt",
+                    "it": "Chiedi prima dell'arresto",
+                    "es": "Preguntar antes de detener",
+                    "pl": "Pytaj przed zatrzymaniem",
+                    "uk": "Запитувати перед зупинкою",
+                    "zh-cn": "停止前询问"
+                }
+            }
+        }
+    }
+}

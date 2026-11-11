@@ -139,3 +139,14 @@ Das zweite Widget des Satzes zeigt einen Proxmox-Node: Zustand, Laufzeit, CPU un
 - Während die Paketliste aktualisiert wird, zeigt die Taste „Wird aktualisiert“. Das kann bis zu zwei Minuten dauern.
 - Installiert werden die Updates weiter in der Proxmox-Oberfläche, über die API ist das nicht möglich.
 - Laufzeit, Symbol, Icon, Bild und „Ohne Karte“ funktionieren wie beim Widget für VMs und Container.
+
+## Widgets für devices und Web-Komponenten
+
+Die beiden Widgets gibt es auch für den Adapter devices und als Web-Komponenten:
+
+- **devices:** „Proxmox-VM oder -Container“ und „Proxmox-Node“ im Satz „Proxmox“. Die Größe 1x1 ist eine Kachel mit dem Zustand und einer Taste, 2x0.5 eine Zeile, 2x1 eine Karte mit CPU und RAM.
+- **Web-Komponenten:** `<iob-proxmox-machine>` und `<iob-proxmox-node>` für Aura und jede andere Oberfläche, die Web-Komponenten anzeigt. Sie passen sich der Größe ihres Rahmens an: Ein kleiner zeigt eine Kachel, ein breiter eine Karte mit CPU und RAM. devices bietet statt ihrer die eigenen Widgets an.
+
+In devices wählst du zuerst die Instanz und dann die VM, den Container oder den Node aus der Liste. Die Liste liefert die Instanz, sie muss dafür laufen. Bei den Web-Komponenten wählst du im Objektbaum den Kanal aus, zum Beispiel `proxmox.0.lxc_web` oder `proxmox.0.node_pve`. Die übrigen Einstellungen sind dieselben wie bei den vis-2-Widgets. In devices kann ein Widget, das die Zugriffsrechte nur zum Lesen freigeben, keine Befehle senden. Die Rückfrage vor dem Stoppen ist kein Zugriffsschutz.
+
+Erscheinen die neuen Widgets nach einem Update des Adapters nicht, hilft `iobroker upload proxmox`.

@@ -18,6 +18,7 @@ import type {
     ProxmoxNodeConfig,
 } from './lib/types';
 import * as _vms from './lib/vms';
+import { type ChannelOption, getChannelOptions, MACHINE_CHANNEL_TYPES, NODE_CHANNEL_TYPES } from './lib/widgets';
 
 const ADAPTER_NAME = 'proxmox';
 
@@ -713,6 +714,23 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
     private async onMessage(msg: ioBroker.Message): Promise<void> {
         if (!msg || !msg.command) {
+            return;
+        }
+
+        // the drop-down lists of the devices widgets (selectSendTo)
+        if (msg.command === 'getMachines' || msg.command === 'getNodes') {
+            if (msg.callback) {
+                let list: ChannelOption[] = [];
+                try {
+                    list = await getChannelOptions(
+                        this,
+                        msg.command === 'getNodes' ? NODE_CHANNEL_TYPES : MACHINE_CHANNEL_TYPES,
+                    );
+                } catch (err) {
+                    this.log.warn(`Cannot read the list for ${msg.command}: ${(err as Error).message}`);
+                }
+                this.sendTo(msg.from, msg.command, list, msg.callback);
+            }
             return;
         }
 
