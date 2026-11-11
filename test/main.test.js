@@ -1609,6 +1609,9 @@ describe('Verfügbare Updates der Nodes', () => {
         assert.equal(refreshed, 'pve');
         assert.equal(reads(), 1);
         assert.equal(inst._states['proxmox.0.node_pve.updates.count'].val, 1);
+        // Das Widget wartet auf die Bestätigung
+        const acks = (inst._calls['setStateAsync'] || []).filter(c => c[0] === 'proxmox.0.node_pve.updates.refresh');
+        assert.deepEqual(acks.map(c => c[1]), [{ val: true, ack: true }]);
     });
 
     it('setzt ein Intervall unter 10 Minuten auf 10 Minuten', async () => {

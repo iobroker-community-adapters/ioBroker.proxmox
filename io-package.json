@@ -190,7 +190,8 @@
         "bundlerType": "module",
         "label": "proxmox_set_label",
         "components": [
-          "ProxmoxMachine"
+          "ProxmoxMachine",
+          "ProxmoxNode"
         ]
       }
     },

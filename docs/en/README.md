@@ -33,3 +33,13 @@ The widget set "Proxmox" contains a widget for one VM or container. Select the m
 - **Show controls:** without this option, the widget only displays the state. Use it if a vis project is reachable by people who should not be able to stop machines. The confirmation is no access protection.
 - **Stop button:** by default it shuts the machine down cleanly. "Power off immediately" uses the Proxmox command `stop`, which can lose unsaved data.
 - After a command, the state updates with the next poll, about 10 seconds later. Until then, the widget shows "In progress".
+
+### Widget "Proxmox node"
+
+The second widget of the set shows a Proxmox node: state, uptime, CPU and RAM, and the available updates. Select the node from the list.
+
+- **Available updates:** "Show and refresh" shows the number of updates and a button that refreshes the package index of the node (like `apt update`). "Show only" shows only the number, "Do not show" hides both. The packages are listed in the tooltip of the indicator.
+- The indicator needs the option **Request available updates** in the adapter, the button also needs the permission `Sys.Modify` of the Proxmox user.
+- While the package index is refreshed, the button shows "Refreshing". This can take up to two minutes.
+- The updates are still installed in the Proxmox web interface, the API cannot do that.
+- Uptime, symbol, icon, image and "Without card" work like in the widget for VMs and containers.

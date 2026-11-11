@@ -190,6 +190,10 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                     if (inst) {
                         await refreshUpdates(this, inst, id.slice(0, -'.updates.refresh'.length), node);
                     }
+                    // Bestätigt den Befehl, wenn er fertig ist. Das Widget wartet darauf.
+                    if (!this.stopping) {
+                        await this.setStateAsync(id, { val: state.val, ack: true });
+                    }
                     return;
                 }
 

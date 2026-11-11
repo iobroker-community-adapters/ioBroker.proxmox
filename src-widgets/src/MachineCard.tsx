@@ -85,7 +85,7 @@ const MIB_PER_GIB = 1024;
  * @param seconds uptime in seconds
  * @returns for example `3 d 4 h`. Empty while the machine does not run. Like `formatUptime` of the adapter.
  */
-function formatUptime(seconds: unknown): string {
+export function formatUptime(seconds: unknown): string {
     if (typeof seconds !== 'number' || seconds <= 0) {
         return '';
     }
@@ -105,7 +105,7 @@ function formatUptime(seconds: unknown): string {
  * @param mib size in MiB
  * @returns for example `4 GiB`
  */
-function formatSize(mib: number): string {
+export function formatSize(mib: number): string {
     return mib < MIB_PER_GIB ? `${mib} MiB` : `${Math.round((mib / MIB_PER_GIB) * 10) / 10} GiB`;
 }
 
@@ -147,7 +147,7 @@ function useMachineStates(socket: Connection, machineId: string): Record<string,
  * @param machineId full ID of the channel
  * @returns the name and the type of the machine. Until it is known, the name is the last part of the ID.
  */
-function useMachine(socket: Connection, machineId: string): { name: string; type: string } {
+export function useMachine(socket: Connection, machineId: string): { name: string; type: string } {
     const [machine, setMachine] = useState({ name: '', type: '' });
 
     useEffect(() => {
@@ -183,7 +183,7 @@ function useMachine(socket: Connection, machineId: string): { name: string; type
  * @param props.percent usage in percent, if known
  * @param props.text the value as text
  */
-function UsageBar({
+export function UsageBar({
     label,
     percent,
     text,

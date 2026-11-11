@@ -35,6 +35,7 @@ Control and use data from your Proxmox VE
 -->
 ### **WORK IN PROGRESS**
 - (bluefox) Added the detection of available package updates of the nodes (`node_<name>.updates`)
+- (bluefox) Added the vis-2 widget "Proxmox node" with the available updates and a button to refresh them
 
 ### 3.0.0 (2026-11-08)
 - (copilot) Adapter requires node.js >= 22.19.0 now

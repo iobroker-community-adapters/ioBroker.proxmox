@@ -39,7 +39,9 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | `src/lib/proxmox.ts` | `ProxmoxUtils`, the HTTP client: login, 5xx retries, failover |
 | `src/lib/nodes.ts` | `createNodes` / `setNodes`, node and disk states |
 | `src/lib/vms.ts` | `createVM` / `setMachines`, VM, LXC and storage states |
-| `src-widgets/src/MachineCard.tsx` | vis-2 widget of a VM or container, uses only its states. `ProxmoxMachineWidget.tsx` declares the settings, `MachineField.tsx` is the machine list in the editor, `MachineIcon.tsx` the symbol, `translations.ts` holds the words |
+| `src/lib/updates.ts` | available package updates of the nodes (`node_<name>.updates.*`): objects, reading, the `updates.refresh` button. `setNodes` reads them only when `isUpdateCheckDue()` in `main.ts` says so, at most every `updateCheckInterval` minutes per instance |
+| `src-widgets/src/MachineCard.tsx` | vis-2 widget of a VM or container, uses only its states. `ProxmoxMachineWidget.tsx` declares the settings, `MachineField.tsx` is the machine (or node) list in the editor, `MachineIcon.tsx` the symbol, `translations.ts` holds the words |
+| `src-widgets/src/NodeCard.tsx` | vis-2 widget of a node with its available updates, settings in `ProxmoxNodeWidget.tsx`. The refresh button waits until the adapter confirms `updates.refresh` with `ack` |
 | `src/lib/DeviceManagement.ts` | Device manager (`@iobroker/dm-utils`), reads the channels in `objects` and the button objects, runs commands through `getButtonAction`. Icons come from `icons.ts` as base64 SVG: the admin only knows a few `fa-*` names and draws a question mark for the others |
 | `src/lib/ceph.ts`, `src/lib/ha.ts` | Ceph and HA trees, generated from whatever the API returns |
 | `src/lib/methods.ts` | helpers: unit conversion, `findState`, `withTimeout`, `withRetry` |
@@ -66,7 +68,7 @@ The integration test aborts with "JS-Controller is already running!" if a js-con
 | Object IDs | Written by |
 | --- | --- |
 | `info.*` | `main.ts`, `vms.ts` (`info.offlineMachines`) |
-| `node_<name>.*` | `nodes.ts` |
+| `node_<name>.*` | `nodes.ts`, `updates.ts` (`updates.*`) |
 | `qemu_<name>.*`, `lxc_<name>.*`, `storage_<name>.*` | `vms.ts` (with `newTreeStructure`: `qemu.<name>.*` etc.) |
 | `ceph.*`, `ha.*` | `ceph.ts`, `ha.ts` |
 

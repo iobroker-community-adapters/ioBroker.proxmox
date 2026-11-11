@@ -129,3 +129,13 @@ Der Widget-Satz „Proxmox“ enthält ein Widget für eine VM oder einen Contai
 - **Steuerung anzeigen:** Ohne diese Option zeigt das Widget nur den Zustand an. Das ist sinnvoll, wenn ein vis-Projekt für Personen erreichbar ist, die keine Maschinen stoppen sollen. Die Rückfrage ist kein Zugriffsschutz.
 - **Stopp-Taste:** Standardmäßig fährt sie die Maschine sauber herunter. „Sofort ausschalten“ nutzt den Proxmox-Befehl `stop`, dabei können nicht gespeicherte Daten verloren gehen.
 - Nach einem Befehl aktualisiert sich der Zustand mit der nächsten Abfrage, also nach etwa 10 Sekunden. Bis dahin zeigt das Widget „Wird ausgeführt“.
+
+### Widget „Proxmox-Node“
+
+Das zweite Widget des Satzes zeigt einen Proxmox-Node: Zustand, Laufzeit, CPU und RAM und die verfügbaren Updates. Wähle den Node aus der Liste aus.
+
+- **Verfügbare Updates:** „Anzeigen und aktualisieren“ zeigt die Anzahl der Updates und eine Taste, die die Paketliste des Nodes aktualisiert (wie `apt update`). „Nur anzeigen“ zeigt nur die Anzahl, „Nicht anzeigen“ blendet beides aus. Die Pakete stehen im Tooltip der Anzeige.
+- Die Anzeige braucht im Adapter die Option **Verfügbare Updates abfragen**, die Taste dazu das Recht `Sys.Modify` des Proxmox-Benutzers.
+- Während die Paketliste aktualisiert wird, zeigt die Taste „Wird aktualisiert“. Das kann bis zu zwei Minuten dauern.
+- Installiert werden die Updates weiter in der Proxmox-Oberfläche, über die API ist das nicht möglich.
+- Laufzeit, Symbol, Icon, Bild und „Ohne Karte“ funktionieren wie beim Widget für VMs und Container.

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150" role="img" aria-label="Proxmox node">
+    <rect x="1" y="1" width="198" height="148" rx="8" fill="#1e1e1e" stroke="#2f2f2f" />
+
+    <rect x="14" y="20" width="84" height="10" rx="5" fill="#d0d0d0" />
+    <rect x="130" y="16" width="56" height="18" rx="9" fill="#2e7d32" />
+    <rect x="140" y="22" width="36" height="6" rx="3" fill="#ffffff" />
+
+    <rect x="14" y="50" width="52" height="7" rx="3.5" fill="#8a8a8a" />
+    <rect x="78" y="50" width="52" height="7" rx="3.5" fill="#8a8a8a" />
+
+    <rect x="14" y="108" width="84" height="26" rx="13" fill="none" stroke="#ed6c02" stroke-width="2" />
+    <path d="M27 114v8h-4l6 6 6-6h-4v-8z" fill="#ed6c02" />
+    <rect x="42" y="118" width="46" height="6" rx="3" fill="#ed6c02" />
+
+    <rect x="114" y="108" width="72" height="26" rx="4" fill="none" stroke="#1976d2" stroke-width="2" />
+    <path d="M131 115a6 6 0 1 0 5 3" fill="none" stroke="#1976d2" stroke-width="2" />
+    <path d="M134 113l3 5-5 1z" fill="#1976d2" />
+    <rect x="144" y="118" width="34" height="6" rx="3" fill="#1976d2" />
+</svg>

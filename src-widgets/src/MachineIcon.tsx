@@ -1,24 +1,27 @@
 /**
- * The symbol of a machine: its status color behind the icon of its type, or the icon or image the user chose.
+ * The symbol of a machine or node: its status color behind the icon of its type, or the icon or image the user chose.
  */
 
 import type React from 'react';
 import { Box } from '@mui/material';
-import { Computer, ViewInAr } from '@mui/icons-material';
+import { Computer, Dns, ViewInAr } from '@mui/icons-material';
 
 const SIZE = 40;
 
 /**
  * @param props properties
- * @param props.type `qemu` or `lxc`
+ * @param props.type `qemu`, `lxc` or `node`
  * @returns the icon of the type
  */
 export function MachineTypeIcon({ type }: { type: string }): React.JSX.Element {
+    if (type === 'node') {
+        return <Dns />;
+    }
     return type === 'lxc' ? <ViewInAr /> : <Computer />;
 }
 
 interface MachineIconProps {
-    /** `qemu` or `lxc`, empty until it is known */
+    /** `qemu`, `lxc` or `node`, empty until it is known */
     type: string;
     /** Background, shows the status */
     color: string;
