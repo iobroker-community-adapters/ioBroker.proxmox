@@ -6,6 +6,7 @@ import * as _methods from './lib/methods';
 import * as _nodes from './lib/nodes';
 import { ProxmoxUtils } from './lib/proxmox';
 import * as translations from './lib/translations';
+import { refreshUpdates } from './lib/updates';
 import type {
     CustomStateType,
     KnownObjects,
@@ -22,6 +23,9 @@ const ADAPTER_NAME = 'proxmox';
 
 /** Abstand der ersten Abfrage zum Start: getNodes() hat die Daten gerade erst abgefragt */
 const FIRST_POLL_DELAY_MS = 1000;
+
+/** Kleinstes Intervall der Update-Prüfung in Minuten */
+const MIN_UPDATE_CHECK_MINUTES = 10;
 
 class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
     /** Die aktuell verarbeitete Instanz. Wird in sendRequest() und getNodes() umgesetzt. */
@@ -43,6 +47,9 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
      */
     public nodeInstanceMap: Record<string, ProxmoxUtils> = {};
     public instanceIds = new Map<ProxmoxUtils, Set<string>>();
+
+    /** Zeitpunkt der letzten Update-Prüfung je Instanz, siehe isUpdateCheckDue() */
+    private lastUpdateCheck = new Map<ProxmoxUtils, number>();
 
     public offlineResourceStatus: OfflineResourceStatus = {
         uptime: 0,
@@ -75,7 +82,7 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
 
     // lib/nodes
     public createNodes: (nodes: ProxmoxNode[]) => Promise<string[] | null> = _nodes.createNodes.bind(this);
-    public setNodes: (nodes: ProxmoxNode[]) => Promise<void> = _nodes.setNodes.bind(this);
+    public setNodes: (nodes: ProxmoxNode[], checkUpdates?: boolean) => Promise<void> = _nodes.setNodes.bind(this);
 
     // lib/vms
     public createVM: () => Promise<string[] | null> = _vms.createVM.bind(this);
@@ -176,6 +183,15 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
             if (obj?.native?.type) {
                 const type = obj.native.type as string;
                 const node = obj.native.node as string;
+
+                // Liegt eine Ebene tiefer als die anderen Node-Buttons, deshalb vor der Auswertung von `command`
+                if (type === 'node' && id.endsWith('.updates.refresh')) {
+                    const inst = this.getButtonInstance(obj.native);
+                    if (inst) {
+                        await refreshUpdates(this, inst, id.slice(0, -'.updates.refresh'.length), node);
+                    }
+                    return;
+                }
 
                 let command = id.split('.')[3];
 
@@ -367,7 +383,11 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                     }
 
                     await this.registerInstanceIds(inst, nodes);
-                    await this.setNodes(nodes);
+                    const checkUpdates = this.isUpdateCheckDue(inst);
+                    await this.setNodes(nodes, checkUpdates);
+                    if (checkUpdates) {
+                        this.lastUpdateCheck.set(inst, Date.now());
+                    }
 
                     if (this.config.requestCephInformation) {
                         await this.setCeph();
@@ -407,6 +427,20 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
                 this.sendRequest();
             }
         }, delay);
+    }
+
+    /**
+     * Die verfügbaren Updates werden nicht in jeder Abfrage gelesen, sondern alle `updateCheckInterval`
+     * Minuten. Die erste Abfrage nach dem Start liest sie immer.
+     *
+     * @param inst - die Proxmox-Instanz
+     */
+    private isUpdateCheckDue(inst: ProxmoxUtils): boolean {
+        if (!this.config.requestUpdateInformation) {
+            return false;
+        }
+        const last = this.lastUpdateCheck.get(inst);
+        return last === undefined || Date.now() - last >= this.config.updateCheckInterval * 60000;
     }
 
     public async getNodes(): Promise<void> {
@@ -618,6 +652,13 @@ class Proxmox extends utils.Adapter implements ProxmoxAdapterContext {
         if (this.config.requestInterval < 5) {
             this.log.info('Intervall configured < 5s, setting to 5s');
             this.config.requestInterval = 5;
+        }
+
+        if (this.config.requestUpdateInformation && !(this.config.updateCheckInterval >= MIN_UPDATE_CHECK_MINUTES)) {
+            this.log.info(
+                `Update check interval configured < ${MIN_UPDATE_CHECK_MINUTES} min, setting to ${MIN_UPDATE_CHECK_MINUTES} min`,
+            );
+            this.config.updateCheckInterval = MIN_UPDATE_CHECK_MINUTES;
         }
 
         this.clusterNodesList = [];

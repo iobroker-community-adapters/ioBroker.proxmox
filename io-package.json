@@ -244,6 +244,8 @@
     "requestCephInformation": false,
     "requestStorageInformation": true,
     "requestStorageInformationBackup": false,
+    "requestUpdateInformation": false,
+    "updateCheckInterval": 60,
     "tableDevices": []
   },
   "instanceObjects": [

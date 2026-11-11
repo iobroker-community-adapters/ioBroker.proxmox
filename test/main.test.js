@@ -1544,3 +1544,76 @@ describe('Einzel-Hosts mit gleichen Namen', () => {
         assert.ok(inst.objects['proxmox.0.node_pve']);
     });
 });
+
+// ─── Verfügbare Updates der Nodes ─────────────────────────────────────────────
+
+describe('Verfügbare Updates der Nodes', () => {
+    const NODES = [{ node: 'pve', type: 'node', status: 'online', cpu: 0.1, maxcpu: 4 }];
+
+    function setup(config = {}) {
+        const inst = makeProxmoxInstance({ requestUpdateInformation: true, updateCheckInterval: 60, ...config });
+        let reads = 0;
+        const mock = useProxmoxMock(inst, makeProxmoxMock({
+            getNodes: async () => NODES,
+            getNodeUpdates: async () => {
+                reads++;
+                return [{ Package: 'pve-manager', OldVersion: '9.0.1', Version: '9.0.2', Origin: 'Proxmox' }];
+            },
+        }));
+        inst.objects['proxmox.0.node_pve'] = { type: 'channel', common: { name: 'pve' }, native: { type: 'node' } };
+        return { inst, mock, reads: () => reads };
+    }
+
+    /** Führt die nächste geplante Abfrage aus */
+    async function poll(inst) {
+        await inst._timers.filter(t => !t.cancelled).at(-1).fn();
+    }
+
+    it('liest die Updates in der ersten Abfrage und danach erst wieder nach dem Intervall', async () => {
+        const { inst, mock, reads } = setup();
+
+        inst.sendRequest(1);
+        await poll(inst);
+        assert.equal(reads(), 1);
+        assert.equal(inst._states['proxmox.0.node_pve.updates.count'].val, 1);
+
+        await poll(inst);
+        assert.equal(reads(), 1, 'innerhalb des Intervalls nicht erneut');
+
+        inst.lastUpdateCheck.set(mock, Date.now() - 61 * 60000);
+        await poll(inst);
+        assert.equal(reads(), 2, 'nach dem Intervall erneut');
+    });
+
+    it('liest ohne die Option keine Updates', async () => {
+        const { inst, reads } = setup({ requestUpdateInformation: false });
+
+        inst.sendRequest(1);
+        await poll(inst);
+
+        assert.equal(reads(), 0);
+    });
+
+    it('Button updates.refresh aktualisiert die Paketliste des Nodes und liest die Updates neu', async () => {
+        const { inst, mock, reads } = setup();
+        let refreshed = '';
+        // Ohne UPID wartet der Button nicht auf die Aufgabe
+        mock.refreshNodeUpdates = async node => {
+            refreshed = node;
+            return { data: undefined };
+        };
+        inst.getForeignObjectAsync = async () => ({ native: { type: 'node', node: 'pve' } });
+
+        await inst.onStateChange('proxmox.0.node_pve.updates.refresh', { val: true, ack: false });
+
+        assert.equal(refreshed, 'pve');
+        assert.equal(reads(), 1);
+        assert.equal(inst._states['proxmox.0.node_pve.updates.count'].val, 1);
+    });
+
+    it('setzt ein Intervall unter 10 Minuten auf 10 Minuten', async () => {
+        const inst = makeProxmoxInstance({ requestUpdateInformation: true, updateCheckInterval: 1 });
+        await inst.initConfig();
+        assert.equal(inst.config.updateCheckInterval, 10);
+    });
+});

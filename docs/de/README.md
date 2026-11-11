@@ -103,6 +103,23 @@ zum Beispiel
   },
 ```
 
+### Verfügbare Updates
+Mit der Option **Verfügbare Updates abfragen** liest der Adapter die verfügbaren Paket-Updates (apt) jedes Nodes, der online ist.
+Das geschieht in der ersten Abfrage nach dem Start und danach im eingestellten Intervall (Standard 60 Minuten, mindestens 10 Minuten).
+
+| State | Beschreibung |
+| --- | --- |
+| `node_<name>.updates.count` | Anzahl der verfügbaren Updates |
+| `node_<name>.updates.list` | Die Updates als JSON, zum Beispiel `[{"package": "pve-manager", "oldVersion": "9.0.1", "version": "9.0.2", "origin": "Proxmox"}]` |
+| `node_<name>.updates.refresh` | Button: aktualisiert die Paketliste des Nodes (wie `apt-get update`) und liest die Updates neu |
+
+Proxmox aktualisiert die Paketliste selbst einmal am Tag. Den Button braucht es nur, wenn neue Updates sofort erscheinen sollen.
+Im Device Manager stehen die Updates in den Details eines Nodes.
+
+Benötigte Rechte des Proxmox-Benutzers auf `/nodes/<name>`: `Sys.Audit` zum Lesen, `Sys.Modify` für den Button.
+
+Erkannt werden nur die Updates des Proxmox-Hosts. Was in einem Container oder einer VM installiert ist, liefert die Proxmox-API nicht.
+
 ## vis-2-Widget
 
 Der Widget-Satz „Proxmox“ enthält ein Widget für eine VM oder einen Container. Wähle die Maschine aus der Liste aus. Das Widget zeigt Zustand, Laufzeit, CPU und RAM und hat Tasten zum Starten und Stoppen.

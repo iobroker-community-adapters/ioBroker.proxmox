@@ -58,6 +58,12 @@ function makeAdapter(overrides = {}) {
         setStateChangedAsync:    async (id, val)  => { states[id] = typeof val === 'object' && val !== null && 'val' in val ? val.val : val; },
         setStateAsync:           async (id, val)  => { states[id] = typeof val === 'object' && val !== null && 'val' in val ? val.val : val; },
         delObjectAsync:          async (id)       => { delete objects[id]; },
+        getForeignObjectAsync:   async (id)       => objects[id] ?? null,
+        delForeignObjectAsync:   async (id)       => {
+            for (const key of Object.keys(objects)) {
+                if (key === id || key.startsWith(`${id}.`)) delete objects[key];
+            }
+        },
         subscribeForeignStates:  () => {},
         restart:                 () => { adapter._restarted = true; },
         _restarted: false,

@@ -33,6 +33,9 @@ Control and use data from your Proxmox VE
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- (bluefox) Added the detection of available package updates of the nodes (`node_<name>.updates`)
+
 ### 3.0.0 (2026-11-08)
 - (copilot) Adapter requires node.js >= 22.19.0 now
 - (bluefox) The adapter was refactored to TypeScript. It can only be installed from npm now, not from GitHub
