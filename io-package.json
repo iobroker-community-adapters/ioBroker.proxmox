@@ -137,6 +137,46 @@
           "agree",
           "cancel"
         ]
+      },
+      {
+        "condition": {
+          "operand": "and",
+          "rules": [
+            "oldVersion<3.0.0",
+            "newVersion>=3.0.0"
+          ]
+        },
+        "title": {
+          "en": "Object IDs changed",
+          "de": "Objekt-IDs geändert",
+          "ru": "Идентификаторы объектов изменены",
+          "pt": "IDs de objetos alterados",
+          "nl": "Object-ID's gewijzigd",
+          "fr": "Identifiants d'objets modifiés",
+          "it": "ID degli oggetti modificati",
+          "es": "IDs de objetos modificados",
+          "pl": "Zmienione identyfikatory obiektów",
+          "uk": "Ідентифікатори об'єктів змінено",
+          "zh-cn": "对象 ID 已更改"
+        },
+        "text": {
+          "en": "Version 3.0.0 changes object IDs: VMs and containers now get the ID <name>_<vmid>, and with individual hosts _<host> is added to the IDs of nodes, VMs and storages. Please adapt scripts, vis views and history settings that use the old IDs. The adapter also requires Node.js >= 22.19.0.",
+          "de": "Version 3.0.0 ändert Objekt-IDs: VMs und Container erhalten die ID <name>_<vmid>, bei einzelnen Hosts wird _<host> an die IDs von Nodes, VMs und Storages angehängt. Bitte Skripte, vis-Views und History-Einstellungen anpassen, die die alten IDs verwenden. Der Adapter benötigt außerdem Node.js >= 22.19.0.",
+          "ru": "Версия 3.0.0 изменяет идентификаторы объектов: виртуальные машины и контейнеры теперь получают ID <name>_<vmid>, а при использовании отдельных хостов к ID узлов, виртуальных машин и хранилищ добавляется _<host>. Пожалуйста, адаптируйте скрипты, vis-представления и настройки истории, которые используют старые ID. Кроме того, адаптеру требуется Node.js >= 22.19.0.",
+          "pt": "A versão 3.0.0 altera os IDs dos objetos: VMs e contentores recebem agora o ID <name>_<vmid> e, com hosts individuais, _<host> é adicionado aos IDs de nós, VMs e armazenamentos. Adapte os scripts, as vistas vis e as definições de histórico que utilizam os IDs antigos. O adaptador também requer Node.js >= 22.19.0.",
+          "nl": "Versie 3.0.0 wijzigt object-ID's: VM's en containers krijgen nu de ID <name>_<vmid>, en bij individuele hosts wordt _<host> toegevoegd aan de ID's van nodes, VM's en opslag. Pas scripts, vis-weergaven en history-instellingen aan die de oude ID's gebruiken. De adapter vereist bovendien Node.js >= 22.19.0.",
+          "fr": "La version 3.0.0 modifie les identifiants d'objets : les VM et les conteneurs reçoivent désormais l'ID <name>_<vmid>, et avec des hôtes individuels, _<host> est ajouté aux ID des nœuds, des VM et des stockages. Veuillez adapter les scripts, les vues vis et les paramètres d'historique qui utilisent les anciens ID. L'adaptateur nécessite également Node.js >= 22.19.0.",
+          "it": "La versione 3.0.0 modifica gli ID degli oggetti: VM e container ora ricevono l'ID <name>_<vmid> e, con host singoli, _<host> viene aggiunto agli ID di nodi, VM e storage. Adattare script, viste vis e impostazioni della cronologia che utilizzano i vecchi ID. L'adattatore richiede inoltre Node.js >= 22.19.0.",
+          "es": "La versión 3.0.0 cambia los IDs de los objetos: las VM y los contenedores reciben ahora el ID <name>_<vmid> y, con hosts individuales, se añade _<host> a los IDs de nodos, VM y almacenamientos. Adapte los scripts, las vistas de vis y los ajustes de historial que utilicen los IDs antiguos. Además, el adaptador requiere Node.js >= 22.19.0.",
+          "pl": "Wersja 3.0.0 zmienia identyfikatory obiektów: maszyny wirtualne i kontenery otrzymują teraz ID <name>_<vmid>, a w przypadku pojedynczych hostów do ID węzłów, maszyn wirtualnych i magazynów dodawane jest _<host>. Dostosuj skrypty, widoki vis i ustawienia historii, które używają starych ID. Adapter wymaga również Node.js >= 22.19.0.",
+          "uk": "Версія 3.0.0 змінює ідентифікатори об'єктів: віртуальні машини та контейнери тепер отримують ID <name>_<vmid>, а для окремих хостів до ID вузлів, віртуальних машин і сховищ додається _<host>. Будь ласка, адаптуйте скрипти, vis-представлення та налаштування історії, які використовують старі ID. Крім того, адаптер потребує Node.js >= 22.19.0.",
+          "zh-cn": "版本 3.0.0 更改了对象 ID：虚拟机和容器现在使用 ID <name>_<vmid>，对于单独的主机，节点、虚拟机和存储的 ID 会添加 _<host>。请调整使用旧 ID 的脚本、vis 视图和历史记录设置。此外，适配器需要 Node.js >= 22.19.0。"
+        },
+        "level": "warn",
+        "buttons": [
+          "agree",
+          "cancel"
+        ]
       }
     ],
     "titleLang": {
