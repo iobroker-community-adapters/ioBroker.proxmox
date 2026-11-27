@@ -1,0 +1,5 @@
+{
+    "private": true,
+    "type": "module",
+    "description": "Code of the widgets shared by src-widgets, src-devices and src-webcomponents. Compiled into each of their bundles"
+}

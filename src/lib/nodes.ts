@@ -1,6 +1,7 @@
 import { formatUptime, getHostSuffix, withTimeout } from './methods';
 import { nodeButtonLabels, stateNames } from './translations';
 import type { ProxmoxAdapterContext, ProxmoxNode } from './types';
+import { createUpdateObjects, removeUpdateObjects, setUpdateStates } from './updates';
 
 /**
  * Setzt Disk-States für einen Node (create oder set).
@@ -144,6 +145,12 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
             native: { node: node.node, type: node.type, host: this.proxmox?.hostId },
         });
 
+        if (this.config.requestUpdateInformation) {
+            await createUpdateObjects(this, sid, { node: node.node, type: node.type, host: this.proxmox?.hostId });
+        } else {
+            await removeUpdateObjects(this, sid);
+        }
+
         await this.extendObjectAsync(`${sid}.status`, {
             type: 'state',
             common: {
@@ -278,8 +285,10 @@ export async function createNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNod
  * setNodes – aktualisiert Node-States im laufenden Betrieb.
  *
  * @param nodes - Nodes aus der Proxmox-API
+ * @param checkUpdates - auch die verfügbaren Updates lesen. Das ist nur alle `updateCheckInterval` Minuten
+ * nötig, Proxmox aktualisiert seine Paketliste selbst nur einmal am Tag.
  */
-export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]): Promise<void> {
+export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[], checkUpdates = false): Promise<void> {
     const knownObjIds = Object.keys(this.objects);
 
     for (const node of nodes) {
@@ -404,6 +413,9 @@ export async function setNodes(this: ProxmoxAdapterContext, nodes: ProxmoxNode[]
                     `setNodes: Disk-Informationen für Node ${node.node} nicht abrufbar: ${(err as Error).message}`,
                 );
             }
+        }
+        if (checkUpdates && node.status === 'online' && this.proxmox) {
+            await setUpdateStates(this, this.proxmox, sid, node.node);
         }
         if (node.status === 'offline') {
             await this.setStateChangedAsync(`${sid}.uptime_text`, { val: '', ack: true });

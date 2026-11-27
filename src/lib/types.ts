@@ -75,6 +75,24 @@ export interface ProxmoxDisk {
 /** GET /nodes/{node}/disks/smart */
 export type ProxmoxDiskSmart = ProxmoxApiResponse<{ text?: string }>;
 
+/** GET /nodes/{node}/apt/update: ein Paket, für das es ein Update gibt */
+export interface ProxmoxAptUpdate {
+    Package: string;
+    Title?: string;
+    OldVersion?: string;
+    Version?: string;
+    Origin?: string;
+    [key: string]: unknown;
+}
+
+/** GET /nodes/{node}/tasks/{upid}/status */
+export interface ProxmoxTaskStatus {
+    /** `running` oder `stopped` */
+    status: string;
+    /** `OK` oder die Fehlermeldung, sobald die Aufgabe beendet ist */
+    exitstatus?: string;
+}
+
 /** GET /cluster/resources */
 export interface ProxmoxClusterResource {
     id: string;

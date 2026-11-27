@@ -31,5 +31,8 @@
     "API Token": "Token API",
     "tokenId": "ID token",
     "tokenSecret": "Segreto del token",
-    "Device manager": "Gestore dispositivi"
+    "Device manager": "Gestore dispositivi",
+    "Request available updates": "Richiedi aggiornamenti disponibili",
+    "Update check interval (minutes)": "Intervallo di controllo aggiornamenti (minuti)",
+    "Package updates of the Proxmox nodes, not of VMs or containers. The refresh button needs the permission Sys.Modify.": "Aggiornamenti dei pacchetti dei nodi Proxmox, non delle VM o dei container. Il pulsante di aggiornamento richiede il permesso Sys.Modify."
 }

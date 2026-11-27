@@ -2,6 +2,7 @@ import { Agent } from 'node:https';
 import axios, { type AxiosResponse } from 'axios';
 import type {
     ProxmoxApiResponse,
+    ProxmoxAptUpdate,
     ProxmoxAuthType,
     ProxmoxBackupEntry,
     ProxmoxClusterResource,
@@ -11,6 +12,7 @@ import type {
     ProxmoxNode,
     ProxmoxNodeConfig,
     ProxmoxNodeStatus,
+    ProxmoxTaskStatus,
     ProxmoxTicket,
     StatusRecord,
 } from './types';
@@ -306,6 +308,42 @@ export class ProxmoxUtils {
 
     public async qemuReboot(node: string, type: string, ID: number): Promise<ProxmoxApiResponse> {
         return this._getData(`/nodes/${node}/${type}/${ID}/status/reboot`, 'post');
+    }
+
+    /**
+     * Verfügbare Paket-Updates eines Nodes. Proxmox liest sie aus seiner Paketliste, die es einmal am Tag
+     * selbst aktualisiert. Braucht das Recht Sys.Audit. Fehler kommen unverändert, mit der HTTP-Antwort.
+     *
+     * @param node - Node-Name
+     */
+    public async getNodeUpdates(node: string): Promise<ProxmoxAptUpdate[]> {
+        const data = await this._getData<ProxmoxAptUpdate[]>(`/nodes/${node}/apt/update`, 'get', null, false, 'node');
+        return Array.isArray(data?.data) ? data.data : [];
+    }
+
+    /**
+     * Startet `apt-get update` auf einem Node. Braucht das Recht Sys.Modify.
+     *
+     * @param node - Node-Name
+     * @returns die UPID der gestarteten Aufgabe in `data`
+     */
+    public async refreshNodeUpdates(node: string): Promise<ProxmoxApiResponse<string>> {
+        return this._getData<string>(`/nodes/${node}/apt/update`, 'post');
+    }
+
+    /**
+     * @param node - Node-Name
+     * @param upid - Kennung der Aufgabe
+     */
+    public async getTaskStatus(node: string, upid: string): Promise<ProxmoxTaskStatus | undefined> {
+        const data = await this._getData<ProxmoxTaskStatus>(
+            `/nodes/${node}/tasks/${encodeURIComponent(upid)}/status`,
+            'get',
+            null,
+            false,
+            'node',
+        );
+        return data?.data;
     }
 
     public async nodeReboot(node: string): Promise<ProxmoxApiResponse> {

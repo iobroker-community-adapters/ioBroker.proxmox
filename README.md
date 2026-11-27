@@ -34,6 +34,9 @@ Control and use data from your Proxmox VE
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+- (bluefox) Added the detection of available package updates of the nodes (`node_<name>.updates`)
+- (bluefox) Added the vis-2 widget "Proxmox node" with the available updates and a button to refresh them
+- (bluefox) Added the widgets "Proxmox VM or container" and "Proxmox node" for the devices adapter and as web components for Aura and other UIs
 - (bluefox) Added a notice about the changed object IDs for users updating from 2.x (#717)
 
 ### 3.0.0 (2026-11-08)
